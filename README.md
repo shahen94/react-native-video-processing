@@ -1,5 +1,4 @@
 #Library is under constructing
-## we're building something very cool :) Be tuned
 
 # react-native-video-editor [![Build Status](https://travis-ci.org/shahen94/react-native-video-editor.svg?branch=master)](https://travis-ci.org/shahen94/react-native-video-editor)
 
@@ -39,6 +38,10 @@
       compile project(':react-native-video-editor')
   	```
 
+##Contributing
+
+1. Please follow the eslint style guide.
+2. Please commit with `$ npm run commit`
 
 ## Usage
 ```javascript

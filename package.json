@@ -1,9 +1,10 @@
 {
   "name": "react-native-video-editor",
+	"version": "0.0.1",
   "description": "Native Video editing for React-Native",
   "main": "index.js",
   "scripts": {
-		"commit": "git-cz",
+		"commit": "git add . && git-cz",
     "test": "jest",
     "semantic-release": "semantic-release pre && npm publish && semantic-release post"
   },
