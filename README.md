@@ -1,3 +1,5 @@
+#Library is under constructing
+## we're building something very cool :) Be tuned 
 
 # react-native-video-editor [![Build Status](https://travis-ci.org/shahen94/react-native-video-editor.svg?branch=master)](https://travis-ci.org/shahen94/react-native-video-editor)
 
