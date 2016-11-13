@@ -1,5 +1,5 @@
 {
-  "name": "react-native-video-editor",
+  "name": "react-native-video-processing",
 	"version": "0.0.1",
   "description": "Native Video editing for React-Native",
   "main": "index.js",
