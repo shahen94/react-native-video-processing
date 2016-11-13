@@ -1,0 +1,53 @@
+{
+  "name": "react-native-video-editor",
+  "version": "0.0.1",
+  "description": "Native Video editing for React-Native",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/shahen94/react-native-video-editor.git"
+  },
+  "keywords": [
+    "react",
+    "react-native",
+    "ios",
+    "android",
+    "video",
+    "edit",
+    "videoedit"
+  ],
+  "author": "Shahen Hovhannisyan <shahen.hovhannisyan.94@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/shahen94/react-native-video-editor/issues"
+  },
+  "jest": {
+    "preset": "jest-react-native"
+  },
+  "homepage": "https://github.com/shahen94/react-native-video-editor#readme",
+  "dependencies": {
+    "babel-preset-es2015": "6.18.0",
+    "babel-preset-react": "6.16.0",
+    "babel-preset-react-native": "1.9.0",
+    "babel-preset-react-native-stage-0": "1.0.1",
+    "lodash": "^4.16.6",
+    "react": "^15.3.2"
+  },
+  "devDependencies": {
+    "babel-eslint": "7.1.0",
+    "babel-jest": "17.0.0",
+    "eslint": "2.7.0",
+    "eslint-config-airbnb": "6.2.0",
+    "eslint-plugin-jsx-a11y": "1.3.0",
+    "eslint-plugin-react": "4.2.3",
+    "eslint-plugin-react-native": "1.1.0",
+    "jest": "17.0.0",
+    "jest-react-native": "17.0.0",
+    "react-native": "^0.37.0",
+    "react-native-create-library": "^1.0.4",
+    "react-test-renderer": "15.3.2"
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "parser": "babel-eslint",
+  "extends": "airbnb",
+  "env": {
+    "browser": false,
+    "node": true,
+    "mocha": true,
+    "es6": true
+  },
+  "globals": {
+    "window": true,
+    "navigator": true
+  },
+  "plugins": [
+    "react",
+    "react-native"
+  ],
+  "rules": {
+    "indent": [2, "tab", {"SwitchCase": 1}],
+    "comma-dangle": 0,
+    "no-console": 1,
+    "react-native/no-unused-styles": 2,
+    "no-return-assign": 0,
+    "react/jsx-boolean-value": 0,
+    "react/jsx-indent-props": [2, "tab"],
+    "no-use-before-define": 0
+  }
+}
