@@ -1,7 +1,7 @@
 
-#import "RNVideoEditor.h"
+#import "RNVideoProcessing.h"
 
-@implementation RNVideoEditor
+@implementation RNVideoProcessing
 
 - (dispatch_queue_t)methodQueue
 {
