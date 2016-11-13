@@ -1,10 +1,10 @@
 {
   "name": "react-native-video-processing",
-	"version": "0.0.1",
+  "version": "0.0.2",
   "description": "Native Video processing/editing for React-Native",
   "main": "index.js",
   "scripts": {
-		"commit": "git add . && git-cz",
+    "commit": "git add . && git-cz",
     "test": "jest",
     "semantic-release": "semantic-release pre && npm publish && semantic-release post"
   },
@@ -18,13 +18,13 @@
     "ios",
     "android",
     "video",
-		"processing",
+    "processing",
     "edit",
     "videoedit"
   ],
-	"czConfig": {
-		"path": "node_modules/cz-conventional-changelog"
-	},
+  "czConfig": {
+    "path": "node_modules/cz-conventional-changelog"
+  },
   "author": "Shahen Hovhannisyan <shahen.hovhannisyan.94@gmail.com>",
   "license": "MIT",
   "bugs": {
