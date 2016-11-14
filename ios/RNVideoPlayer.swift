@@ -13,6 +13,7 @@ class RNVideoPlayer: RCTView {
 
     var source: NSString? {
         set {
+            configure()
         }
         get {
             return nil
@@ -40,6 +41,25 @@ class RNVideoPlayer: RCTView {
         }
         get {
             return nil
+        }
+    }
+    
+    func configure() {
+        let renderView = RenderView(frame: CGRect(x: 0, y: 0, width: 200, height: 200))
+        renderView.backgroundColor = UIColor.green
+        self.addSubview(renderView)
+        let bundleURL = Bundle.main.resourceURL!
+        let movieURL = URL(string: "Simons_Cat.mp4", relativeTo: bundleURL)!
+        let sepiot = SepiaToneFilter()
+        
+        do {
+            movie = try MovieInput(url: movieURL, playAtActualSpeed: true, loop: true)
+            
+            movie --> sepiot --> renderView
+            movie.runBenchmark = true;
+            movie.start()
+        } catch {
+            print("Something went wrong: \(error)")
         }
     }
 }

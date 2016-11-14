@@ -8,8 +8,8 @@
 
 import Foundation
 
-@objc(RNVideoProcessing)
-class RNVideoProcessing: RCTViewManager {
+@objc(RNVideoProcessingManager)
+class RNVideoProcessingManager: RCTViewManager {
     
     @objc override func view() -> UIView! {
         return RNVideoPlayer()
