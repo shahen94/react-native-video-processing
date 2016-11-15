@@ -6,6 +6,7 @@
   "scripts": {
     "commit": "git add . && git-cz",
     "test": "jest",
+    "test:snapshots": "jest -u",
     "semantic-release": "semantic-release pre && npm publish && semantic-release post"
   },
   "repository": {

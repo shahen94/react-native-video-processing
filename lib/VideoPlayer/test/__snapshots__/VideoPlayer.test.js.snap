@@ -1,1 +1,4 @@
-exports[`VideoPlayer Should render correctly 1`] = `<View />`;
+exports[`VideoPlayer Should render correctly 1`] = `
+<VideoPlayer
+  source="somePath" />
+`;
