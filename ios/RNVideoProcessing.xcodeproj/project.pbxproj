@@ -7,6 +7,12 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		24A96C211DDB708700D67F81 /* ICGRulerView.m in Sources */ = {isa = PBXBuildFile; fileRef = 24A96C171DDB708700D67F81 /* ICGRulerView.m */; };
+		24A96C221DDB708700D67F81 /* ICGThumbView.m in Sources */ = {isa = PBXBuildFile; fileRef = 24A96C191DDB708700D67F81 /* ICGThumbView.m */; };
+		24A96C231DDB708700D67F81 /* ICGVideoTrimmerView.m in Sources */ = {isa = PBXBuildFile; fileRef = 24A96C1C1DDB708700D67F81 /* ICGVideoTrimmerView.m */; };
+		24A96C241DDB708700D67F81 /* RNTrimmerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24A96C1E1DDB708700D67F81 /* RNTrimmerView.swift */; };
+		24A96C251DDB708700D67F81 /* RNTrimmerViewBridge.m in Sources */ = {isa = PBXBuildFile; fileRef = 24A96C1F1DDB708700D67F81 /* RNTrimmerViewBridge.m */; };
+		24A96C261DDB708700D67F81 /* RNTrimmerViewManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24A96C201DDB708700D67F81 /* RNTrimmerViewManager.swift */; };
 		24F466881DD9E5C80012172B /* RNVideoProcessingManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24F466871DD9E5C80012172B /* RNVideoProcessingManager.swift */; };
 		24F4668A1DD9E5DB0012172B /* RNVideoProcessingBridge.m in Sources */ = {isa = PBXBuildFile; fileRef = 24F466891DD9E5DB0012172B /* RNVideoProcessingBridge.m */; };
 		24F4668C1DD9E64C0012172B /* RNVideoPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24F4668B1DD9E64C0012172B /* RNVideoPlayer.swift */; };
@@ -48,6 +54,17 @@
 
 /* Begin PBXFileReference section */
 		134814201AA4EA6300B7C361 /* libRNVideoProcessing.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libRNVideoProcessing.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		24A96C161DDB708700D67F81 /* ICGRulerView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ICGRulerView.h; sourceTree = "<group>"; };
+		24A96C171DDB708700D67F81 /* ICGRulerView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ICGRulerView.m; sourceTree = "<group>"; };
+		24A96C181DDB708700D67F81 /* ICGThumbView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ICGThumbView.h; sourceTree = "<group>"; };
+		24A96C191DDB708700D67F81 /* ICGThumbView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ICGThumbView.m; sourceTree = "<group>"; };
+		24A96C1A1DDB708700D67F81 /* ICGVideoTrimmer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ICGVideoTrimmer.h; sourceTree = "<group>"; };
+		24A96C1B1DDB708700D67F81 /* ICGVideoTrimmerView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ICGVideoTrimmerView.h; sourceTree = "<group>"; };
+		24A96C1C1DDB708700D67F81 /* ICGVideoTrimmerView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ICGVideoTrimmerView.m; sourceTree = "<group>"; };
+		24A96C1D1DDB708700D67F81 /* RNTrimmerView-Bridging-Header.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "RNTrimmerView-Bridging-Header.h"; sourceTree = "<group>"; };
+		24A96C1E1DDB708700D67F81 /* RNTrimmerView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RNTrimmerView.swift; sourceTree = "<group>"; };
+		24A96C1F1DDB708700D67F81 /* RNTrimmerViewBridge.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RNTrimmerViewBridge.m; sourceTree = "<group>"; };
+		24A96C201DDB708700D67F81 /* RNTrimmerViewManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RNTrimmerViewManager.swift; sourceTree = "<group>"; };
 		24F466841DD9E5BA0012172B /* RNVideoProcessing-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "RNVideoProcessing-Bridging-Header.h"; sourceTree = "<group>"; };
 		24F466871DD9E5C80012172B /* RNVideoProcessingManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RNVideoProcessingManager.swift; sourceTree = "<group>"; };
 		24F466891DD9E5DB0012172B /* RNVideoProcessingBridge.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RNVideoProcessingBridge.m; sourceTree = "<group>"; };
@@ -84,6 +101,32 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		24A96C141DDB708700D67F81 /* RNTrimmerView */ = {
+			isa = PBXGroup;
+			children = (
+				24A96C151DDB708700D67F81 /* ICGVideoTrimmer */,
+				24A96C1D1DDB708700D67F81 /* RNTrimmerView-Bridging-Header.h */,
+				24A96C1E1DDB708700D67F81 /* RNTrimmerView.swift */,
+				24A96C1F1DDB708700D67F81 /* RNTrimmerViewBridge.m */,
+				24A96C201DDB708700D67F81 /* RNTrimmerViewManager.swift */,
+			);
+			path = RNTrimmerView;
+			sourceTree = "<group>";
+		};
+		24A96C151DDB708700D67F81 /* ICGVideoTrimmer */ = {
+			isa = PBXGroup;
+			children = (
+				24A96C161DDB708700D67F81 /* ICGRulerView.h */,
+				24A96C171DDB708700D67F81 /* ICGRulerView.m */,
+				24A96C181DDB708700D67F81 /* ICGThumbView.h */,
+				24A96C191DDB708700D67F81 /* ICGThumbView.m */,
+				24A96C1A1DDB708700D67F81 /* ICGVideoTrimmer.h */,
+				24A96C1B1DDB708700D67F81 /* ICGVideoTrimmerView.h */,
+				24A96C1C1DDB708700D67F81 /* ICGVideoTrimmerView.m */,
+			);
+			path = ICGVideoTrimmer;
+			sourceTree = "<group>";
+		};
 		24F466971DD9EB8B0012172B /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
@@ -108,6 +151,7 @@
 		58B511D21A9E6C8500147676 = {
 			isa = PBXGroup;
 			children = (
+				24A96C141DDB708700D67F81 /* RNTrimmerView */,
 				24F466CE1DD9F1860012172B /* GPUImage-iOS.xcodeproj */,
 				24F4668B1DD9E64C0012172B /* RNVideoPlayer.swift */,
 				24F466891DD9E5DB0012172B /* RNVideoProcessingBridge.m */,
@@ -198,9 +242,15 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				24A96C251DDB708700D67F81 /* RNTrimmerViewBridge.m in Sources */,
+				24A96C241DDB708700D67F81 /* RNTrimmerView.swift in Sources */,
+				24A96C221DDB708700D67F81 /* ICGThumbView.m in Sources */,
 				24F4668A1DD9E5DB0012172B /* RNVideoProcessingBridge.m in Sources */,
+				24A96C211DDB708700D67F81 /* ICGRulerView.m in Sources */,
 				24F4668C1DD9E64C0012172B /* RNVideoPlayer.swift in Sources */,
 				24F466881DD9E5C80012172B /* RNVideoProcessingManager.swift in Sources */,
+				24A96C261DDB708700D67F81 /* RNTrimmerViewManager.swift in Sources */,
+				24A96C231DDB708700D67F81 /* ICGVideoTrimmerView.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
