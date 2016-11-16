@@ -13,12 +13,24 @@ import AVFoundation
 
 @objc(RNVideoPlayer)
 class RNVideoPlayer: RCTView {
+
+  let processingFilters: VideoProcessingGPUFilters = VideoProcessingGPUFilters()
+  let EVENTS = (
+    SEND_PREVIEWS: "VIDEO_PROCESSING:PREVIEWS"
+  )
+
+  var playerVolume: NSNumber = 0
   var player: AVPlayer! = nil
   var playerCurrentTimeObserver: Any! = nil
   var playerItem: AVPlayerItem! = nil
   var playerLayer: AVPlayerLayer! = nil
   var gpuMovie: GPUImageMovie! = nil
+
+  var phantomGpuMovie: GPUImageMovie! = nil
+  var phantomFilterView: GPUImageView = GPUImageView()
+
   let filterView: GPUImageView = GPUImageView()
+  var bridge: RCTBridge! = nil
 
   var _playerHeight: CGFloat = UIScreen.main.bounds.height / 3
   var _playerWidth: CGFloat = UIScreen.main.bounds.width
@@ -28,12 +40,28 @@ class RNVideoPlayer: RCTView {
 
   let LOG_KEY: String = "VIDEO_PROCESSING"
 
+  init(frame: CGRect, bridge: RCTBridge) {
+    super.init(frame: frame)
+    self.bridge = bridge
+
+    self.startPlayer()
+  }
+
+  required init?(coder aDecoder: NSCoder) {
+    fatalError("init(coder:) has not been implemented")
+  }
+
   deinit {
     if self.playerCurrentTimeObserver != nil {
       self.player.removeTimeObserver(self.playerCurrentTimeObserver)
+      self.player.pause()
+      self.gpuMovie.cancelProcessing()
+      self.player = nil
+      self.gpuMovie = nil
       print("CHANGED: Removing Oberver, that can be a cause of memory leak")
     }
   }
+
   // props
   var playerHeight: NSNumber? {
     set(val) {
@@ -68,7 +96,6 @@ class RNVideoPlayer: RCTView {
           if val != nil {
             self._moviePathSource = val!
           }
-            self.startPlayer()
         }
         get {
             return nil
@@ -83,7 +110,6 @@ class RNVideoPlayer: RCTView {
             if floatVal <= self._playerEndTime && floatVal >= self._playerStartTime {
               player.seek(to: CMTimeMakeWithSeconds(Float64(val!), Int32(NSEC_PER_SEC)))
             }
-            print("CHANGED currentTime \(val)")
           }
         }
         get {
@@ -161,6 +187,46 @@ class RNVideoPlayer: RCTView {
     }
   }
 
+  var volume: NSNumber? {
+    set(val) {
+      let minValue: NSNumber = 0
+
+      if val == nil {
+        return
+      }
+      if (val?.floatValue)! < minValue.floatValue {
+        return
+      }
+      self.playerVolume = val!
+      if player != nil {
+        player.volume = self.playerVolume.floatValue
+      }
+    }
+    get {
+      return nil
+    }
+  }
+
+  func generatePreviewImages() -> Void {
+    let hueFilter = self.processingFilters.getFilterByName(name: "hue")
+    gpuMovie.removeAllTargets()
+    gpuMovie.addTarget(hueFilter)
+    hueFilter?.addTarget(self.filterView)
+    gpuMovie.startProcessing()
+    player.play()
+    hueFilter?.useNextFrameForImageCapture()
+
+    let huePreview = hueFilter?.imageFromCurrentFramebuffer()
+    if huePreview != nil {
+      print("CREATED: Preview: Hue: \(toBase64(image: huePreview!))")
+    }
+  }
+
+  func toBase64(image: UIImage) -> String {
+    let imageData:NSData = UIImagePNGRepresentation(image)! as NSData
+    return imageData.base64EncodedString(options: .lineLength64Characters)
+  }
+
   func convertToCMTime(val: CGFloat) -> CMTime {
     return CMTimeMakeWithSeconds(Float64(val), Int32(NSEC_PER_SEC))
   }
@@ -172,7 +238,6 @@ class RNVideoPlayer: RCTView {
       forInterval: interval,
       queue: nil,
       using: {(_ time: CMTime) -> Void in
-        print("CHANGED [playing] \(time)")
         let currentTime = CGFloat(CMTimeGetSeconds(time))
         if currentTime >= self._playerEndTime {
           self.play = 0
@@ -190,6 +255,7 @@ class RNVideoPlayer: RCTView {
     let movieURL = URL(string: "2.mp4", relativeTo: bundleURL)!
 
     player = AVPlayer()
+    player.volume = Float(self.playerVolume)
     playerItem = AVPlayerItem(url: movieURL)
     player.replaceCurrentItem(with: playerItem)
 
@@ -207,15 +273,30 @@ class RNVideoPlayer: RCTView {
     filterView.frame.size.width = self._playerWidth
     filterView.frame.size.height = self._playerHeight
 
-
-    print(self.frame.size.height)
+    gpuMovie.addTarget(self.filterView)
     self.addSubview(filterView)
     gpuMovie.playAtActualSpeed = true
 
-    let filter = GPUImageSepiaFilter()
-    gpuMovie.addTarget(filter)
-    filter.addTarget(filterView)
-
     self.createPlayerObservers()
   }
+
+  /* @TODO: create Preview images before the next Release
+  func createPhantomGPUView() {
+    phantomGpuMovie = GPUImageMovie(playerItem: self.playerItem)
+    phantomGpuMovie.playAtActualSpeed = true
+
+    let hueFilter = self.processingFilters.getFilterByName(name: "saturation")
+    phantomGpuMovie.addTarget(hueFilter)
+    phantomGpuMovie.startProcessing()
+    hueFilter?.addTarget(phantomFilterView)
+    hueFilter?.useNextFrameForImageCapture()
+    let CGImage = hueFilter?.newCGImageFromCurrentlyProcessedOutput()
+    print("CREATED: CGImage \(CGImage)")
+    if CGImage != nil {
+      print("CREATED: \(UIImage(cgImage: (CGImage?.takeUnretainedValue() )!))")
+    }
+    // let image = UIImage(cgImage: (hueFilter?.newCGImageFromCurrentlyProcessedOutput().takeRetainedValue())!)
+
+  }
+ */
 }
