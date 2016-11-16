@@ -51,17 +51,6 @@ class RNVideoPlayer: RCTView {
     fatalError("init(coder:) has not been implemented")
   }
 
-  deinit {
-    if self.playerCurrentTimeObserver != nil {
-      self.player.removeTimeObserver(self.playerCurrentTimeObserver)
-      self.player.pause()
-      self.gpuMovie.cancelProcessing()
-      self.player = nil
-      self.gpuMovie = nil
-      print("CHANGED: Removing Oberver, that can be a cause of memory leak")
-    }
-  }
-
   // props
   var playerHeight: NSNumber? {
     set(val) {
@@ -264,6 +253,7 @@ class RNVideoPlayer: RCTView {
       print("CHANGED playerEndTime \(self._playerEndTime)")
     }
 
+
     gpuMovie = GPUImageMovie(playerItem: playerItem)
     // gpuMovie.runBenchmark = true
     gpuMovie.playAtActualSpeed = true
@@ -275,11 +265,26 @@ class RNVideoPlayer: RCTView {
 
     gpuMovie.addTarget(self.filterView)
     self.addSubview(filterView)
+    print("SUBS: \(self.subviews)")
     gpuMovie.playAtActualSpeed = true
 
     self.createPlayerObservers()
   }
 
+  override func willMove(toSuperview newSuperview: UIView?) {
+    super.willMove(toSuperview: newSuperview)
+    if newSuperview == nil {
+
+      if self.playerCurrentTimeObserver != nil {
+        self.player.removeTimeObserver(self.playerCurrentTimeObserver)
+      }
+      self.player.pause()
+      self.gpuMovie.cancelProcessing()
+      self.player = nil
+      self.gpuMovie = nil
+      print("CHANGED: Removing Oberver, that can be a cause of memory leak")
+    }
+  }
   /* @TODO: create Preview images before the next Release
   func createPhantomGPUView() {
     phantomGpuMovie = GPUImageMovie(playerItem: self.playerItem)
