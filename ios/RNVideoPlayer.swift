@@ -240,8 +240,7 @@ class RNVideoPlayer: RCTView {
   func startPlayer() {
     self.backgroundColor = UIColor.darkGray
 
-    let bundleURL = Bundle.main.resourceURL!
-    let movieURL = URL(string: "2.mp4", relativeTo: bundleURL)!
+    let movieURL = NSURL(string: _moviePathSource! as String)
 
     player = AVPlayer()
     player.volume = Float(self.playerVolume)

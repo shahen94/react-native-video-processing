@@ -21,6 +21,7 @@
 		24FFDD121DDC7999006040F9 /* RNTrimmerViewBridge.m in Sources */ = {isa = PBXBuildFile; fileRef = 24FFDD0C1DDC7999006040F9 /* RNTrimmerViewBridge.m */; };
 		24FFDD131DDC7999006040F9 /* RNTrimmerViewManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24FFDD0D1DDC7999006040F9 /* RNTrimmerViewManager.swift */; };
 		24FFDD151DDC799E006040F9 /* MobileCoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 24FFDD141DDC799E006040F9 /* MobileCoreServices.framework */; };
+		24FFDD2B1DDCAA88006040F9 /* VideoProcessingGPUFilters.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24FFDD2A1DDCAA88006040F9 /* VideoProcessingGPUFilters.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -59,6 +60,7 @@
 		24FFDD0C1DDC7999006040F9 /* RNTrimmerViewBridge.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RNTrimmerViewBridge.m; sourceTree = "<group>"; };
 		24FFDD0D1DDC7999006040F9 /* RNTrimmerViewManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RNTrimmerViewManager.swift; sourceTree = "<group>"; };
 		24FFDD141DDC799E006040F9 /* MobileCoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MobileCoreServices.framework; path = System/Library/Frameworks/MobileCoreServices.framework; sourceTree = SDKROOT; };
+		24FFDD2A1DDCAA88006040F9 /* VideoProcessingGPUFilters.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VideoProcessingGPUFilters.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -130,6 +132,7 @@
 			children = (
 				24FFDD001DDC7999006040F9 /* RNTrimmerView */,
 				24F4668B1DD9E64C0012172B /* RNVideoPlayer.swift */,
+				24FFDD2A1DDCAA88006040F9 /* VideoProcessingGPUFilters.swift */,
 				24F466891DD9E5DB0012172B /* RNVideoProcessingBridge.m */,
 				24F466871DD9E5C80012172B /* RNVideoProcessingManager.swift */,
 				24F466841DD9E5BA0012172B /* RNVideoProcessing-Bridging-Header.h */,
@@ -196,6 +199,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				24FFDD121DDC7999006040F9 /* RNTrimmerViewBridge.m in Sources */,
+				24FFDD2B1DDCAA88006040F9 /* VideoProcessingGPUFilters.swift in Sources */,
 				24FFDD111DDC7999006040F9 /* RNTrimmerView.swift in Sources */,
 				24FFDD0F1DDC7999006040F9 /* ICGThumbView.m in Sources */,
 				24F4668A1DD9E5DB0012172B /* RNVideoProcessingBridge.m in Sources */,
