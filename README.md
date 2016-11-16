@@ -9,44 +9,54 @@
 
 `$ npm install react-native-video-processing --save`
 
-### Mostly automatic installation
-
-`$ react-native link react-native-video-processing`
+### You can check test just running 
+`$ npm test` or `$ yarn test`
 
 ### Manual installation
 
 
-#### iOS
+#### [iOS] This guide is not completed yet
 
 1. In XCode, in the project navigator, right click `Libraries` ➜ `Add Files to [your project's name]`
 2. Go to `node_modules` ➜ `react-native-video-processing` and add `RNVideoEditor.xcodeproj`
 3. In XCode, in the project navigator, select your project. Add `libRNVideoEditor.a` to your project's `Build Phases` ➜ `Link Binary With Libraries`
 4. Run your project (`Cmd+R`)<
 
-#### Android
+#### Android version is not supported yet
 
-1. Open up `android/app/src/main/java/[...]/MainActivity.java`
-  - Add `import com.shahenlibrary.RNVideoEditorPackage;` to the imports at the top of the file
-  - Add `new RNVideoEditorPackage()` to the list returned by the `getPackages()` method
-2. Append the following lines to `android/settings.gradle`:
-  	```
-  	include ':react-native-video-processing'
-  	project(':react-native-video-processing').projectDir = new File(rootProject.projectDir, 	'../node_modules/react-native-video-processing/android')
-  	```
-3. Insert the following lines inside the dependencies block in `android/app/build.gradle`:
-  	```
-      compile project(':react-native-video-processing')
-  	```
+## Usage
+```javascript
+import React, { Component } from 'react';
+import { View } from 'react-native';
+import { VideoPlayer, Trimmer } from 'react-native-video-processing';
+
+class App extends Component {
+    constructor(...args) {
+        super(...args);
+    }
+    render() {
+        return (
+            <View style={{ flex: 1 }}>
+                <VideoPlayer
+                    startTime={30} // seconds
+                    endTime={120} // seconds
+                    play={true} // default false
+                    source={require('./videoFile.mp4')}
+                    playerWidth={300}
+                    playerHeight={500}
+                    style={{ backgroundColor: 'black' }}
+                />
+                <Trimmer
+                    source={require('./videoFile.mp4')}
+                    onChange={(e) => console.log(e.startTime, e.endTime)}
+                />
+            </View>
+        );
+    }
+}
+```
 
 ##Contributing
 
 1. Please follow the eslint style guide.
 2. Please commit with `$ npm run commit`
-
-## Usage
-```javascript
-import RNVideoEditor from 'react-native-video-processing';
-
-// TODO: What do with the module?
-RNVideoEditor;
-```

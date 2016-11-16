@@ -1,0 +1,8 @@
+exports[`[Trimmer] should be render correctly 1`] = `
+<View
+  height={300}
+  onChange={[Function]}
+  source="someSourceGoeshere"
+  themeColor="blue"
+  width={300} />
+`;
