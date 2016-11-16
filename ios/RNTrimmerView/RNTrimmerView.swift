@@ -63,24 +63,27 @@ class RNTrimmerView: RCTView, ICGVideoTrimmerDelegate {
     if trimmerView != nil {
       self.trimmerView!.frame = rect
       self.trimmerView!.themeColor = self.mThemeColor
-      self.layoutIfNeeded()
-      trimmerView!.resetSubviews()
+      self.trimmerView!.resetSubviews()
+      Timer.scheduledTimer(timeInterval: 0.5, target: self, selector: #selector(self.updateTrimmer), userInfo: nil, repeats: false)
     }
+  }
+
+  func updateTrimmer() {
+    self.trimmerView!.resetSubviews()
   }
 
   func setSource(source: NSString?) {
     if source != nil {
-//      let pathToSource = Bundle.main.path(forResource: source! as String, ofType: "mp4")
-      let pathToSource = Bundle.main.path(forResource: "Simons_Cat", ofType: "mp4")
-      let videoPath = NSURL.init(fileURLWithPath: pathToSource!) as URL
-      self.asset = AVAsset(url: videoPath)
-      
+      let pathToSource = NSURL(string: source! as String)
+      self.asset = AVURLAsset(url: pathToSource as! URL, options: nil)
+
       trimmerView = ICGVideoTrimmerView(frame: rect, asset: self.asset)
       trimmerView!.maxLength = CGFloat(self.asset.duration.seconds)
       trimmerView!.showsRulerView = false
       trimmerView!.hideTracker(true)
       trimmerView!.delegate = self
       self.addSubview(trimmerView!)
+      self.updateView()
     }
   }
 
@@ -94,7 +97,7 @@ class RNTrimmerView: RCTView, ICGVideoTrimmerDelegate {
   }
 
   func onTrimmerPositionChange(startTime: CGFloat, endTime: CGFloat) {
-    if (self.bridge != nil) {
+    if (self.bridge != nil && self.bridge.eventDispatcher() != nil) {
       let event = ["startTime": startTime, "endTime": endTime]
       self.bridge.eventDispatcher().sendAppEvent(withName: "VIDEO_PROCESSING_EVENT_TRIMMER", body: event)
     }

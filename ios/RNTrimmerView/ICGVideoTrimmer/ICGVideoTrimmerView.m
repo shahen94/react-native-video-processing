@@ -320,7 +320,7 @@
         rect.size.width = videoScreen.size.width;
         tmp.frame = rect;
         [self.frameView addSubview:tmp];
-        picWidth = tmp.frame.size.width;
+        picWidth = tmp.frame.size.width / 3;
         CGImageRelease(halfWayImage);
     }
     
