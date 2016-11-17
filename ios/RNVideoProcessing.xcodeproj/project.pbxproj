@@ -22,6 +22,8 @@
 		24FFDD131DDC7999006040F9 /* RNTrimmerViewManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24FFDD0D1DDC7999006040F9 /* RNTrimmerViewManager.swift */; };
 		24FFDD151DDC799E006040F9 /* MobileCoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 24FFDD141DDC799E006040F9 /* MobileCoreServices.framework */; };
 		24FFDD2B1DDCAA88006040F9 /* VideoProcessingGPUFilters.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24FFDD2A1DDCAA88006040F9 /* VideoProcessingGPUFilters.swift */; };
+		24FFDD821DDDC781006040F9 /* RNVideoTrimmer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24FFDD801DDDC781006040F9 /* RNVideoTrimmer.swift */; };
+		24FFDD831DDDC781006040F9 /* RNVideoTrimmerBridge.m in Sources */ = {isa = PBXBuildFile; fileRef = 24FFDD811DDDC781006040F9 /* RNVideoTrimmerBridge.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -61,6 +63,9 @@
 		24FFDD0D1DDC7999006040F9 /* RNTrimmerViewManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RNTrimmerViewManager.swift; sourceTree = "<group>"; };
 		24FFDD141DDC799E006040F9 /* MobileCoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MobileCoreServices.framework; path = System/Library/Frameworks/MobileCoreServices.framework; sourceTree = SDKROOT; };
 		24FFDD2A1DDCAA88006040F9 /* VideoProcessingGPUFilters.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VideoProcessingGPUFilters.swift; sourceTree = "<group>"; };
+		24FFDD7F1DDDC781006040F9 /* RNVideoTrimmer-Bridging-Header.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "RNVideoTrimmer-Bridging-Header.h"; sourceTree = "<group>"; };
+		24FFDD801DDDC781006040F9 /* RNVideoTrimmer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RNVideoTrimmer.swift; sourceTree = "<group>"; };
+		24FFDD811DDDC781006040F9 /* RNVideoTrimmerBridge.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RNVideoTrimmerBridge.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -127,9 +132,20 @@
 			path = ICGVideoTrimmer;
 			sourceTree = "<group>";
 		};
+		24FFDD7E1DDDC781006040F9 /* RNVideoTrimmer */ = {
+			isa = PBXGroup;
+			children = (
+				24FFDD7F1DDDC781006040F9 /* RNVideoTrimmer-Bridging-Header.h */,
+				24FFDD801DDDC781006040F9 /* RNVideoTrimmer.swift */,
+				24FFDD811DDDC781006040F9 /* RNVideoTrimmerBridge.m */,
+			);
+			path = RNVideoTrimmer;
+			sourceTree = "<group>";
+		};
 		58B511D21A9E6C8500147676 = {
 			isa = PBXGroup;
 			children = (
+				24FFDD7E1DDDC781006040F9 /* RNVideoTrimmer */,
 				24FFDD001DDC7999006040F9 /* RNTrimmerView */,
 				24F4668B1DD9E64C0012172B /* RNVideoPlayer.swift */,
 				24FFDD2A1DDCAA88006040F9 /* VideoProcessingGPUFilters.swift */,
@@ -199,11 +215,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				24FFDD121DDC7999006040F9 /* RNTrimmerViewBridge.m in Sources */,
+				24FFDD831DDDC781006040F9 /* RNVideoTrimmerBridge.m in Sources */,
 				24FFDD2B1DDCAA88006040F9 /* VideoProcessingGPUFilters.swift in Sources */,
 				24FFDD111DDC7999006040F9 /* RNTrimmerView.swift in Sources */,
 				24FFDD0F1DDC7999006040F9 /* ICGThumbView.m in Sources */,
 				24F4668A1DD9E5DB0012172B /* RNVideoProcessingBridge.m in Sources */,
 				24FFDD0E1DDC7999006040F9 /* ICGRulerView.m in Sources */,
+				24FFDD821DDDC781006040F9 /* RNVideoTrimmer.swift in Sources */,
 				24F4668C1DD9E64C0012172B /* RNVideoPlayer.swift in Sources */,
 				24F466881DD9E5C80012172B /* RNVideoProcessingManager.swift in Sources */,
 				24FFDD131DDC7999006040F9 /* RNTrimmerViewManager.swift in Sources */,
