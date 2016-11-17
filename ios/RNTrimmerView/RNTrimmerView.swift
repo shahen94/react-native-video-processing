@@ -82,6 +82,7 @@ class RNTrimmerView: RCTView, ICGVideoTrimmerDelegate {
       trimmerView!.showsRulerView = false
       trimmerView!.hideTracker(true)
       trimmerView!.delegate = self
+      trimmerView!.trackerColor = UIColor.clear
       self.addSubview(trimmerView!)
       self.updateView()
     }
