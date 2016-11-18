@@ -1,14 +1,3 @@
-#Library is under constructing
-
-# react-native-video-processing
-
-[![Build Status](https://travis-ci.org/shahen94/react-native-video-processing.svg?branch=master)](https://travis-ci.org/shahen94/react-native-video-processing) [![semantic-release](https://img.shields.io/badge/%20%20%F0%9F%93%A6%F0%9F%9A%80-semantic--release-e10079.svg?style=plastic)](https://github.com/semantic-release/semantic-release) [![npm version](https://badge.fury.io/js/react-native-video-processing.svg)](https://badge.fury.io/js/react-native-video-processing)
-
-
-## Getting started
-
-`$ npm install react-native-video-processing --save`
-
 ### You can check test just running 
 `$ npm test` or `$ yarn test`
 
@@ -18,9 +7,9 @@
 #### [iOS]
 
 1. In Xcode, click the "Add Files to <your-project-name>".
-2. Go to `node_modules` ➜ `react-native-video-processing` and add `RNVideoProcessing` directory.
-3. Make sure `RNVideoProcessing` is "under" the "top-level" and then remove `GPUImage.xcodeproj` from `RNVideoProcessing` directory.
-4. Add GPUImage.xcodeproj from `node_modules/react-native-video-processing/RNVideoProcessing` directory to your project and make sure it is "under" the "top-level":
+2. Go to `node_modules` ➜ `react-native-video-processing/ios` and add `RNVideoProcessing` directory.
+3. Make sure `RNVideoProcessing` is "under" the "top-level".
+4. Add GPUImage.xcodeproj from `node_modules/react-native-video-processing/ios/GPUImage/framework` directory to your project and make sure it is "under" the "top-level":
 
     ![Project Structure](readme_assets/project-structure.png)
 
