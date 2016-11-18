@@ -15,12 +15,29 @@
 ### Manual installation
 
 
-#### [iOS] This guide is not completed yet
+#### [iOS]
 
-1. In XCode, in the project navigator, right click `Libraries` ➜ `Add Files to [your project's name]`
-2. Go to `node_modules` ➜ `react-native-video-processing` and add `RNVideoEditor.xcodeproj`
-3. In XCode, in the project navigator, select your project. Add `libRNVideoEditor.a` to your project's `Build Phases` ➜ `Link Binary With Libraries`
-4. Run your project (`Cmd+R`)<
+1. In Xcode, click the "Add Files to <your-project-name>".
+2. Go to `node_modules` ➜ `react-native-video-processing` and add `RNVideoProcessing` directory.
+3. Make sure `RNVideoProcessing` is "under" the "top-level" and then remove `GPUImage.xcodeproj` from `RNVideoProcessing` directory.
+4. Add GPUImage.xcodeproj from `node_modules/react-native-video-processing/RNVideoProcessing` directory to your project and make sure it is "under" the "top-level":
+
+    ![Project Structure](readme_assets/project-structure.png)
+
+5. In XCode, in the project navigator, select your project.
+
+   Add
+    - CoreMedia
+    - CoreVideo
+    - OpenGLES
+    - AVFoundation
+    - QuartzCore
+    - GPUImage
+    - MobileCoreServices
+
+    to your project's `Build Phases` ➜ `Link Binary With Libraries`.
+6. import `RNVideoProcessing.h` into your `project_name-bridging-header.h`.
+4. Clean and Run your project.
 
 #### Android version is not supported yet
 
@@ -34,10 +51,18 @@ class App extends Component {
     constructor(...args) {
         super(...args);
     }
+
+    trimVideo() {
+        this.videoPlayerRef.trim(require('./videoFile.mp4'), startTime, endTime)
+            .then((newSource) => console.log(newSource))
+            .catch(console.warn)
+    }
+
     render() {
         return (
             <View style={{ flex: 1 }}>
                 <VideoPlayer
+                    ref={ref => this.videoPlayerRef = ref}
                     startTime={30} // seconds
                     endTime={120} // seconds
                     play={true} // default false
@@ -48,6 +73,9 @@ class App extends Component {
                 />
                 <Trimmer
                     source={require('./videoFile.mp4')}
+                    height={100}
+                    width={300}
+                    themeColor={'white'}
                     onChange={(e) => console.log(e.startTime, e.endTime)}
                 />
             </View>
