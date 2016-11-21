@@ -35,6 +35,7 @@ class RNVideoPlayer: RCTView {
   var _moviePathSource: NSString = ""
   var _playerStartTime: CGFloat = 0
   var _playerEndTime: CGFloat = 0
+  var _replay: Bool = false
 
   let LOG_KEY: String = "VIDEO_PROCESSING"
 
@@ -178,6 +179,17 @@ class RNVideoPlayer: RCTView {
     }
   }
 
+  var replay: NSNumber? {
+    set(val) {
+      if val != nil  {
+        self._replay = RCTConvert.bool(val!)
+      }
+    }
+    get {
+      return nil
+    }
+  }
+
   var volume: NSNumber? {
     set(val) {
       let minValue: NSNumber = 0
@@ -231,12 +243,21 @@ class RNVideoPlayer: RCTView {
       using: {(_ time: CMTime) -> Void in
         let currentTime = CGFloat(CMTimeGetSeconds(time))
         if currentTime >= self._playerEndTime {
+          if self._replay {
+            return self.replayMovie()
+          }
           self.play = 0
         }
       }
     )
   }
 
+  func replayMovie() {
+    if player != nil {
+      self.player.seek(to: convertToCMTime(val: self._playerStartTime))
+      self.player.play()
+    }
+  }
 
   // start player
   func startPlayer() {

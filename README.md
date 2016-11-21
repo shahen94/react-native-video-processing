@@ -9,7 +9,7 @@
 1. In Xcode, click the "Add Files to <your-project-name>".
 2. Go to `node_modules` ➜ `react-native-video-processing/ios` and add `RNVideoProcessing` directory.
 3. Make sure `RNVideoProcessing` is "under" the "top-level".
-4. Add GPUImage.xcodeproj from `node_modules/react-native-video-processing/ios/GPUImage/framework` directory to your project and make sure it is "under" the "top-level":
+4. Add `GPUImage.xcodeproj` from `node_modules/react-native-video-processing/ios/GPUImage/framework` directory to your project and make sure it is "under" the "top-level":
 
     ![Project Structure](readme_assets/project-structure.png)
 
@@ -25,8 +25,8 @@
     - MobileCoreServices
 
     to your project's `Build Phases` ➜ `Link Binary With Libraries`.
-6. import `RNVideoProcessing.h` into your `project_name-bridging-header.h`.
-4. Clean and Run your project.
+6. Import `RNVideoProcessing.h` into your `project_name-bridging-header.h`.
+7. Clean and Run your project.
 
 #### Android version is not supported yet
 
@@ -44,7 +44,13 @@ class App extends Component {
     trimVideo() {
         this.videoPlayerRef.trim(require('./videoFile.mp4'), startTime, endTime)
             .then((newSource) => console.log(newSource))
-            .catch(console.warn)
+            .catch(console.warn);
+    }
+
+    getPreviewImageForSecond(second) {
+        this.videoPlayerRef.getPreviewForSecond(require('./videoFile.mp4'), second)
+        .then((base64String) => console.log('This is BASE64 of image', base64String))
+        .catch(console.wart);
     }
 
     render() {

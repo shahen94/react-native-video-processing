@@ -8,7 +8,7 @@ import AVFoundation
 
 @objc(RNVideoTrimmer)
 class RNVideoTrimmer: NSObject {
-  
+
   @objc func trim(_ source: String, startTime: Float, endTime: Float, callback: @escaping RCTResponseSenderBlock) {
 
     let manager = FileManager.default
@@ -18,13 +18,7 @@ class RNVideoTrimmer: NSObject {
         return
     }
 
-    var sourceURL: URL
-    if source.contains("assets-library") {
-        sourceURL = NSURL(string: source) as! URL
-    } else {
-        let bundleUrl = Bundle.main.resourceURL!
-        sourceURL = URL(string: source, relativeTo: bundleUrl)!
-    }
+    let sourceURL = getSourceURL(source: source)
     let asset = AVAsset(url: sourceURL as URL)
 
     var outputURL = documentDirectory.appendingPathComponent("output")
@@ -70,6 +64,32 @@ class RNVideoTrimmer: NSObject {
     }
   }
 
+  @objc func getPreviewImageAtPosition(_ source: String, atTime: Float = 0, callback: RCTResponseSenderBlock) {
+    let sourceURL = getSourceURL(source: source)
+    let asset = AVAsset(url: sourceURL)
+
+    let imageGenerator = AVAssetImageGenerator(asset: asset)
+    imageGenerator.appliesPreferredTrackTransform = true
+    var second = atTime
+    if atTime > Float(asset.duration.seconds) || atTime < 0 {
+      second = 0
+    }
+    let timestamp = CMTime(seconds: Double(second), preferredTimescale: 60)
+    do {
+      let imageRef = try imageGenerator.copyCGImage(at: timestamp, actualTime: nil)
+      let image = UIImage(cgImage: imageRef)
+      let imgData = UIImagePNGRepresentation(image)
+      let base64string = imgData?.base64EncodedString(options: Data.Base64EncodingOptions.init(rawValue: 0))
+      if base64string != nil {
+        callback( [NSNull(), base64string!] )
+      } else {
+        callback( ["Unable to convert to base64)", NSNull()]  )
+      }
+    } catch {
+      callback( ["Failed to convert base64: \(error.localizedDescription)", NSNull()] )
+    }
+  }
+
   func randomString() -> String {
     let rand = 2 + Int(arc4random()) % 20
     let charSet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
@@ -79,5 +99,16 @@ class RNVideoTrimmer: NSObject {
         s.append(c[Int(arc4random()) % c.count])
     }
     return s
+  }
+
+  func getSourceURL(source: String) -> URL {
+    var sourceURL: URL
+    if source.contains("assets-library") {
+      sourceURL = NSURL(string: source) as! URL
+    } else {
+      let bundleUrl = Bundle.main.resourceURL!
+      sourceURL = URL(string: source, relativeTo: bundleUrl)!
+    }
+    return sourceURL
   }
 }
