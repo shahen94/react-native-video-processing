@@ -18,13 +18,19 @@ class RNVideoTrimmer: NSObject {
         return
     }
 
-    let sourceURL = NSURL(string: source)
-    let asset = AVAsset(url: sourceURL as! URL)
+    var sourceURL: URL
+    if source.contains("assets-library") {
+        sourceURL = NSURL(string: source) as! URL
+    } else {
+        let bundleUrl = Bundle.main.resourceURL!
+        sourceURL = URL(string: source, relativeTo: bundleUrl)!
+    }
+    let asset = AVAsset(url: sourceURL as URL)
 
     var outputURL = documentDirectory.appendingPathComponent("output")
     do {
       try manager.createDirectory(at: outputURL, withIntermediateDirectories: true, attributes: nil)
-      let name = "RNTrimmer-Temp-Video"
+      let name = randomString()
       outputURL = outputURL.appendingPathComponent("\(name).mp4")
     } catch {
       callback([error.localizedDescription, NSNull()])
@@ -62,5 +68,16 @@ class RNVideoTrimmer: NSObject {
       default: break
       }
     }
+  }
+
+  func randomString() -> String {
+    let rand = 2 + Int(arc4random()) % 20
+    let charSet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+    var c = charSet.characters.map { String($0) }
+    var s:String = "RNTrimmer-Temp-Video"
+    for _ in (1...rand) {
+        s.append(c[Int(arc4random()) % c.count])
+    }
+    return s
   }
 }

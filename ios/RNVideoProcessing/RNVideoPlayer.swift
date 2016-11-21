@@ -240,11 +240,11 @@ class RNVideoPlayer: RCTView {
   func startPlayer() {
     self.backgroundColor = UIColor.darkGray
 
-    let movieURL = NSURL(string: _moviePathSource! as String)
+    let movieURL = NSURL(string: _moviePathSource as String)
 
     player = AVPlayer()
     player.volume = Float(self.playerVolume)
-    playerItem = AVPlayerItem(url: movieURL)
+    playerItem = AVPlayerItem(url: movieURL as! URL)
     player.replaceCurrentItem(with: playerItem)
 
     if _playerEndTime == 0 {
