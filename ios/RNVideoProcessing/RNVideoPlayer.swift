@@ -7,9 +7,7 @@
 //
 
 import Foundation
-import GPUImage
 import AVFoundation
-//import AVKit
 
 @objc(RNVideoPlayer)
 class RNVideoPlayer: RCTView {
@@ -43,8 +41,6 @@ class RNVideoPlayer: RCTView {
   init(frame: CGRect, bridge: RCTBridge) {
     super.init(frame: frame)
     self.bridge = bridge
-
-    self.startPlayer()
   }
 
   required init?(coder aDecoder: NSCoder) {
@@ -84,6 +80,7 @@ class RNVideoPlayer: RCTView {
         set(val) {
           if val != nil {
             self._moviePathSource = val!
+            self.startPlayer()
           }
         }
         get {
@@ -94,7 +91,7 @@ class RNVideoPlayer: RCTView {
   // props
     var currentTime: NSNumber? {
         set(val) {
-          if val != nil {
+          if val != nil && player != nil {
             let floatVal = val as! CGFloat
             if floatVal <= self._playerEndTime && floatVal >= self._playerStartTime {
               player.seek(to: CMTimeMakeWithSeconds(Float64(val!), Int32(NSEC_PER_SEC)))
@@ -119,11 +116,14 @@ class RNVideoPlayer: RCTView {
           if self._playerStartTime > currentTime {
             shouldBeCurrentTime = self._playerStartTime
           }
-          player.seek(
-            to: convertToCMTime(val: shouldBeCurrentTime),
-            toleranceBefore: convertToCMTime(val: self._playerStartTime),
-            toleranceAfter: convertToCMTime(val: self._playerEndTime)
-          )
+
+          if player != nil {
+            player.seek(
+              to: convertToCMTime(val: shouldBeCurrentTime),
+              toleranceBefore: convertToCMTime(val: self._playerStartTime),
+              toleranceAfter: convertToCMTime(val: self._playerEndTime)
+            )
+          }
           print("CHANGED startTime \(val)")
         }
         get {
@@ -145,11 +145,13 @@ class RNVideoPlayer: RCTView {
             shouldBeCurrentTime = self._playerStartTime
           }
 
-          player.seek(
-            to: convertToCMTime(val: shouldBeCurrentTime),
-            toleranceBefore: convertToCMTime(val: self._playerStartTime),
-            toleranceAfter: convertToCMTime(val: self._playerEndTime)
-          )
+          if player != nil {
+            player.seek(
+              to: convertToCMTime(val: shouldBeCurrentTime),
+              toleranceBefore: convertToCMTime(val: self._playerStartTime),
+              toleranceAfter: convertToCMTime(val: self._playerEndTime)
+            )
+          }
           print("CHANGED endTime \(val)")
         }
         get {
@@ -159,7 +161,7 @@ class RNVideoPlayer: RCTView {
 
   var play: NSNumber? {
     set(val) {
-      if val == nil {
+      if val == nil || player == nil {
         return
       }
       print("CHANGED play \(val)")
@@ -277,11 +279,13 @@ class RNVideoPlayer: RCTView {
       if self.playerCurrentTimeObserver != nil {
         self.player.removeTimeObserver(self.playerCurrentTimeObserver)
       }
-      self.player.pause()
-      self.gpuMovie.cancelProcessing()
-      self.player = nil
-      self.gpuMovie = nil
-      print("CHANGED: Removing Oberver, that can be a cause of memory leak")
+      if player != nil {
+        self.player.pause()
+        self.gpuMovie.cancelProcessing()
+        self.player = nil
+        self.gpuMovie = nil
+        print("CHANGED: Removing Oberver, that can be a cause of memory leak")
+      }
     }
   }
   /* @TODO: create Preview images before the next Release
