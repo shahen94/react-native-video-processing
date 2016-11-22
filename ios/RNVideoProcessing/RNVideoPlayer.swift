@@ -95,7 +95,7 @@ class RNVideoPlayer: RCTView {
           if val != nil && player != nil {
             let floatVal = val as! CGFloat
             if floatVal <= self._playerEndTime && floatVal >= self._playerStartTime {
-              player.seek(to: CMTimeMakeWithSeconds(Float64(val!), Int32(NSEC_PER_SEC)))
+              self.player.seek(to: convertToCMTime(val: floatVal))
             }
           }
         }
@@ -242,6 +242,7 @@ class RNVideoPlayer: RCTView {
       queue: nil,
       using: {(_ time: CMTime) -> Void in
         let currentTime = CGFloat(CMTimeGetSeconds(time))
+        self.onVideoCurrentTimeChange(currentTime: currentTime)
         if currentTime >= self._playerEndTime {
           if self._replay {
             return self.replayMovie()
@@ -256,6 +257,13 @@ class RNVideoPlayer: RCTView {
     if player != nil {
       self.player.seek(to: convertToCMTime(val: self._playerStartTime))
       self.player.play()
+    }
+  }
+
+  func onVideoCurrentTimeChange(currentTime: CGFloat) {
+    if (self.bridge != nil && self.bridge.eventDispatcher() != nil) {
+      let event = ["currentTime": currentTime]
+      self.bridge.eventDispatcher().sendAppEvent(withName: "VIDEO_PROCESSING_EVENT_CURRENT_TIME", body: event)
     }
   }
 

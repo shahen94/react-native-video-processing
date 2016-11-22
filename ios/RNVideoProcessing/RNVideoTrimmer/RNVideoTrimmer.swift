@@ -64,6 +64,15 @@ class RNVideoTrimmer: NSObject {
     }
   }
 
+  @objc func getAssetInfo(_ source: String, callback: RCTResponseSenderBlock) {
+    let sourceURL = getSourceURL(source: source)
+    let asset = AVAsset(url: sourceURL)
+    let assetInfo = [
+      "duration" : asset.duration.seconds
+    ]
+    callback( [NSNull(), assetInfo] )
+  }
+
   @objc func getPreviewImageAtPosition(_ source: String, atTime: Float = 0, callback: RCTResponseSenderBlock) {
     let sourceURL = getSourceURL(source: source)
     let asset = AVAsset(url: sourceURL)
