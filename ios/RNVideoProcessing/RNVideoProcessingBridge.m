@@ -19,5 +19,6 @@ RCT_EXPORT_VIEW_PROPERTY(playerHeight, NSNumber)
 RCT_EXPORT_VIEW_PROPERTY(play, NSNumber)
 RCT_EXPORT_VIEW_PROPERTY(replay, NSNumber)
 RCT_EXPORT_VIEW_PROPERTY(volume, NSNumber)
+RCT_EXPORT_VIEW_PROPERTY(onChange, RCTBubblingEventBlock)
 
 @end

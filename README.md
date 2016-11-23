@@ -50,7 +50,13 @@ class App extends Component {
     getPreviewImageForSecond(second) {
         this.videoPlayerRef.getPreviewForSecond(require('./videoFile.mp4'), second)
         .then((base64String) => console.log('This is BASE64 of image', base64String))
-        .catch(console.wart);
+        .catch(console.warn);
+    }
+
+    getVideoInfo() {
+        this.videoPlayerRef.getVideoInfo(require('./videoFile.mp4'))
+        .then((info) => console.log(info))
+        .catch(console.warn);
     }
 
     render() {
@@ -65,6 +71,7 @@ class App extends Component {
                     playerWidth={300}
                     playerHeight={500}
                     style={{ backgroundColor: 'black' }}
+                    onChange={(event) => console.log(event)}
                 />
                 <Trimmer
                     source={require('./videoFile.mp4')}

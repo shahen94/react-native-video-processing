@@ -14,6 +14,7 @@ class RNTrimmerView: RCTView, ICGVideoTrimmerDelegate {
   var rect: CGRect = CGRect.zero
   var mThemeColor = UIColor.clear
   var bridge: RCTBridge!
+  var onChange: RCTBubblingEventBlock?
 
   var source: NSString? {
     set {
@@ -98,9 +99,9 @@ class RNTrimmerView: RCTView, ICGVideoTrimmerDelegate {
   }
 
   func onTrimmerPositionChange(startTime: CGFloat, endTime: CGFloat) {
-    if (self.bridge != nil && self.bridge.eventDispatcher() != nil) {
+    if self.onChange != nil {
       let event = ["startTime": startTime, "endTime": endTime]
-      self.bridge.eventDispatcher().sendAppEvent(withName: "VIDEO_PROCESSING_EVENT_TRIMMER", body: event)
+      self.onChange!(event)
     }
   }
 

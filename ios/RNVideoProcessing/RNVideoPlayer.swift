@@ -35,6 +35,7 @@ class RNVideoPlayer: RCTView {
   var _playerStartTime: CGFloat = 0
   var _playerEndTime: CGFloat = 0
   var _replay: Bool = false
+  var onChange: RCTBubblingEventBlock?
 
   let LOG_KEY: String = "VIDEO_PROCESSING"
 
@@ -258,9 +259,9 @@ class RNVideoPlayer: RCTView {
   }
 
   func onVideoCurrentTimeChange(currentTime: CGFloat) {
-    if (self.bridge != nil && self.bridge.eventDispatcher() != nil) {
+    if self.onChange != nil {
       let event = ["currentTime": currentTime]
-      self.bridge.eventDispatcher().sendAppEvent(withName: "VIDEO_PROCESSING_EVENT_CURRENT_TIME", body: event)
+      self.onChange!(event)
     }
   }
 
@@ -293,7 +294,6 @@ class RNVideoPlayer: RCTView {
 
     gpuMovie.addTarget(self.filterView)
     self.addSubview(filterView)
-    print("SUBS: \(self.subviews)")
     gpuMovie.playAtActualSpeed = true
 
     self.createPlayerObservers()
