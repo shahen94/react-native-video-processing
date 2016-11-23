@@ -21,7 +21,6 @@ class RNVideoPlayer: RCTView {
   var player: AVPlayer! = nil
   var playerCurrentTimeObserver: Any! = nil
   var playerItem: AVPlayerItem! = nil
-  var playerLayer: AVPlayerLayer! = nil
   var gpuMovie: GPUImageMovie! = nil
 
   var phantomGpuMovie: GPUImageMovie! = nil
@@ -167,10 +166,8 @@ class RNVideoPlayer: RCTView {
       }
       print("CHANGED play \(val)")
       if val == 1 && player.rate == 0.0 {
-        gpuMovie.startProcessing()
         player.play()
       } else if val == 0 && player.rate != 0.0 {
-        gpuMovie.cancelProcessing()
         player.pause()
       }
     }
@@ -287,6 +284,7 @@ class RNVideoPlayer: RCTView {
     gpuMovie = GPUImageMovie(playerItem: playerItem)
     // gpuMovie.runBenchmark = true
     gpuMovie.playAtActualSpeed = true
+    gpuMovie.startProcessing()
 
     filterView.frame = self.frame
 
