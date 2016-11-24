@@ -35,6 +35,7 @@ class RNVideoPlayer: RCTView {
   var _playerStartTime: CGFloat = 0
   var _playerEndTime: CGFloat = 0
   var _replay: Bool = false
+  var _rotate: Bool = false
   var onChange: RCTBubblingEventBlock?
 
   let LOG_KEY: String = "VIDEO_PROCESSING"
@@ -181,6 +182,30 @@ class RNVideoPlayer: RCTView {
     set(val) {
       if val != nil  {
         self._replay = RCTConvert.bool(val!)
+      }
+    }
+    get {
+      return nil
+    }
+  }
+
+  var rotate: NSNumber? {
+    set(val) {
+      if val != nil {
+        if RCTConvert.bool(val!) != self._rotate {
+          self._rotate = RCTConvert.bool(val!)
+          var rotationAngle: CGFloat = 0
+          if self._rotate {
+            filterView.frame.size.width = self._playerHeight
+            filterView.frame.size.height = self._playerWidth
+            rotationAngle = CGFloat(M_PI_2)
+          } else {
+            filterView.frame.size.width = self._playerWidth
+            filterView.frame.size.height = self._playerHeight
+          }
+          self.filterView.transform = CGAffineTransform(rotationAngle: rotationAngle)
+          self.layoutIfNeeded()
+        }
       }
     }
     get {

@@ -67,11 +67,13 @@ class App extends Component {
                     startTime={30} // seconds
                     endTime={120} // seconds
                     play={true} // default false
+                    replay={true} // should player play video again if it's ended
+                    rotate={true} // use this prop to rotate video if it captured in landscape mode
                     source={require('./videoFile.mp4')}
                     playerWidth={300}
                     playerHeight={500}
                     style={{ backgroundColor: 'black' }}
-                    onChange={(event) => console.log(event)}
+                    onChange={({ nativeEvent }) => console.log({ nativeEvent })}
                 />
                 <Trimmer
                     source={require('./videoFile.mp4')}
