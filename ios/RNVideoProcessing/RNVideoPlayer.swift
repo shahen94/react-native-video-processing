@@ -13,9 +13,6 @@ import AVFoundation
 class RNVideoPlayer: RCTView {
 
   let processingFilters: VideoProcessingGPUFilters = VideoProcessingGPUFilters()
-  let EVENTS = (
-    SEND_PREVIEWS: "VIDEO_PROCESSING:PREVIEWS"
-  )
 
   var playerVolume: NSNumber = 0
   var player: AVPlayer! = nil
@@ -54,6 +51,7 @@ class RNVideoPlayer: RCTView {
     set(val) {
       if val != nil {
         self._playerHeight = val as! CGFloat
+        self.frame.size.height = self._playerHeight
         filterView.frame.size.height = self._playerHeight
         print("CHANGED HEIGHT \(val)")
       }
@@ -67,6 +65,7 @@ class RNVideoPlayer: RCTView {
     set(val) {
       if val != nil {
         self._playerWidth = val as! CGFloat
+        self.frame.size.width = self._playerWidth
         filterView.frame.size.width = self._playerWidth
         print("CHANGED WIDTH \(val)")
       }
@@ -192,20 +191,18 @@ class RNVideoPlayer: RCTView {
   var rotate: NSNumber? {
     set(val) {
       if val != nil {
-        if RCTConvert.bool(val!) != self._rotate {
-          self._rotate = RCTConvert.bool(val!)
-          var rotationAngle: CGFloat = 0
-          if self._rotate {
-            filterView.frame.size.width = self._playerHeight
-            filterView.frame.size.height = self._playerWidth
-            rotationAngle = CGFloat(M_PI_2)
-          } else {
-            filterView.frame.size.width = self._playerWidth
-            filterView.frame.size.height = self._playerHeight
-          }
-          self.filterView.transform = CGAffineTransform(rotationAngle: rotationAngle)
-          self.layoutIfNeeded()
+        self._rotate = RCTConvert.bool(val!)
+        var rotationAngle: CGFloat = 0
+        if self._rotate {
+          filterView.frame.size.width = self._playerHeight
+          filterView.frame.size.height = self._playerWidth
+          rotationAngle = CGFloat(M_PI_2)
+        } else {
+          filterView.frame.size.width = self._playerWidth
+          filterView.frame.size.height = self._playerHeight
         }
+        self.filterView.transform = CGAffineTransform(rotationAngle: rotationAngle)
+        self.layoutIfNeeded()
       }
     }
     get {
@@ -306,16 +303,12 @@ class RNVideoPlayer: RCTView {
       print("CHANGED playerEndTime \(self._playerEndTime)")
     }
 
-
     gpuMovie = GPUImageMovie(playerItem: playerItem)
     // gpuMovie.runBenchmark = true
     gpuMovie.playAtActualSpeed = true
     gpuMovie.startProcessing()
 
     filterView.frame = self.frame
-
-    filterView.frame.size.width = self._playerWidth
-    filterView.frame.size.height = self._playerHeight
 
     gpuMovie.addTarget(self.filterView)
     self.addSubview(filterView)
