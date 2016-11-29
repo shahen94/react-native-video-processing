@@ -15,6 +15,8 @@ class RNTrimmerView: RCTView, ICGVideoTrimmerDelegate {
   var mThemeColor = UIColor.clear
   var bridge: RCTBridge!
   var onChange: RCTBubblingEventBlock?
+  var _minLength: CGFloat? = nil
+  var _maxLength: CGFloat? = nil
 
   var source: NSString? {
     set {
@@ -59,11 +61,39 @@ class RNTrimmerView: RCTView, ICGVideoTrimmerDelegate {
     }
   }
 
+  var maxLength: NSNumber? {
+    set {
+      if newValue != nil {
+        self._maxLength = RCTConvert.cgFloat(newValue!)
+        self.updateView()
+      }
+    }
+    get {
+      return nil
+    }
+  }
+
+  var minLength: NSNumber? {
+    set {
+      if newValue != nil {
+        self._minLength = RCTConvert.cgFloat(newValue!)
+        self.updateView()
+      }
+    }
+    get {
+      return nil
+    }
+  }
+
   func updateView() {
     self.frame = rect
     if trimmerView != nil {
-      self.trimmerView!.frame = rect
-      self.trimmerView!.themeColor = self.mThemeColor
+      trimmerView!.frame = rect
+      trimmerView!.themeColor = self.mThemeColor
+      trimmerView!.maxLength = _maxLength == nil ? CGFloat(self.asset.duration.seconds) : _maxLength!
+      if _minLength != nil {
+        trimmerView!.minLength = _minLength!
+      }
       self.trimmerView!.resetSubviews()
       Timer.scheduledTimer(timeInterval: 0.5, target: self, selector: #selector(self.updateTrimmer), userInfo: nil, repeats: false)
     }
@@ -79,7 +109,6 @@ class RNTrimmerView: RCTView, ICGVideoTrimmerDelegate {
       self.asset = AVURLAsset(url: pathToSource as! URL, options: nil)
 
       trimmerView = ICGVideoTrimmerView(frame: rect, asset: self.asset)
-      trimmerView!.maxLength = CGFloat(self.asset.duration.seconds)
       trimmerView!.showsRulerView = false
       trimmerView!.hideTracker(true)
       trimmerView!.delegate = self
