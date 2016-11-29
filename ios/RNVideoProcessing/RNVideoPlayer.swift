@@ -114,7 +114,15 @@ class RNVideoPlayer: RCTView {
           if val == nil {
             return
           }
-          self._playerStartTime = val as! CGFloat
+          let convertedValue = val as! CGFloat
+
+          self._playerStartTime = convertedValue
+
+          if convertedValue < 0 {
+            print("WARNING: startTime is a negative number: \(val)")
+            self._playerStartTime = 0.0
+          }
+
           let currentTime = CGFloat(CMTimeGetSeconds(player.currentTime()))
           var shouldBeCurrentTime: CGFloat = currentTime;
 
@@ -142,7 +150,15 @@ class RNVideoPlayer: RCTView {
           if val == nil {
             return
           }
-          self._playerEndTime = val as! CGFloat
+          let convertedValue = val as! CGFloat
+
+          self._playerEndTime = convertedValue
+
+          if convertedValue < 0.0 {
+            print("WARNING: endTime is a negative number: \(val)")
+            self._playerEndTime = CGFloat(CMTimeGetSeconds((player.currentItem?.asset.duration)!))
+          }
+
           let currentTime = CGFloat(CMTimeGetSeconds(player.currentTime()))
           var shouldBeCurrentTime: CGFloat = currentTime;
 
