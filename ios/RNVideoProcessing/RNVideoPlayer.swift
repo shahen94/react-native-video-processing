@@ -97,7 +97,9 @@ class RNVideoPlayer: RCTView {
     var currentTime: NSNumber? {
         set(val) {
           if val != nil && player != nil {
-            let floatVal = val as! CGFloat
+            let convertedValue = val as! CGFloat
+            let floatVal = convertedValue >= 0 ? convertedValue : self._playerStartTime
+            print("CHANGED: currentTime \(floatVal)")
             if floatVal <= self._playerEndTime && floatVal >= self._playerStartTime {
               self.player.seek(to: convertToCMTime(val: floatVal))
             }
