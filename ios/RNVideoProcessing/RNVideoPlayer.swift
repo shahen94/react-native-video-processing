@@ -81,6 +81,10 @@ class RNVideoPlayer: RCTView {
         set(val) {
           if val != nil {
             self._moviePathSource = val!
+            print("CHANGED source \(val)")
+            if self.gpuMovie != nil {
+              self.gpuMovie.endProcessing()
+            }
             self.startPlayer()
           }
         }
@@ -298,10 +302,8 @@ class RNVideoPlayer: RCTView {
     playerItem = AVPlayerItem(url: movieURL as! URL)
     player.replaceCurrentItem(with: playerItem)
 
-    if _playerEndTime == 0 {
-      self._playerEndTime = CGFloat(CMTimeGetSeconds((player.currentItem?.asset.duration)!))
-      print("CHANGED playerEndTime \(self._playerEndTime)")
-    }
+    self._playerEndTime = CGFloat(CMTimeGetSeconds((player.currentItem?.asset.duration)!))
+    print("CHANGED playerEndTime \(self._playerEndTime)")
 
     gpuMovie = GPUImageMovie(playerItem: playerItem)
     // gpuMovie.runBenchmark = true
