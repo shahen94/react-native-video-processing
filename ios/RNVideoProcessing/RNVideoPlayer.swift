@@ -81,6 +81,10 @@ class RNVideoPlayer: RCTView {
         set(val) {
           if val != nil {
             self._moviePathSource = val!
+            print("CHANGED source \(val)")
+            if self.gpuMovie != nil {
+              self.gpuMovie.endProcessing()
+            }
             self.startPlayer()
           }
         }
@@ -93,7 +97,9 @@ class RNVideoPlayer: RCTView {
     var currentTime: NSNumber? {
         set(val) {
           if val != nil && player != nil {
-            let floatVal = val as! CGFloat
+            let convertedValue = val as! CGFloat
+            let floatVal = convertedValue >= 0 ? convertedValue : self._playerStartTime
+            print("CHANGED: currentTime \(floatVal)")
             if floatVal <= self._playerEndTime && floatVal >= self._playerStartTime {
               self.player.seek(to: convertToCMTime(val: floatVal))
             }
@@ -110,7 +116,15 @@ class RNVideoPlayer: RCTView {
           if val == nil {
             return
           }
-          self._playerStartTime = val as! CGFloat
+          let convertedValue = val as! CGFloat
+
+          self._playerStartTime = convertedValue
+
+          if convertedValue < 0 {
+            print("WARNING: startTime is a negative number: \(val)")
+            self._playerStartTime = 0.0
+          }
+
           let currentTime = CGFloat(CMTimeGetSeconds(player.currentTime()))
           var shouldBeCurrentTime: CGFloat = currentTime;
 
@@ -138,7 +152,15 @@ class RNVideoPlayer: RCTView {
           if val == nil {
             return
           }
-          self._playerEndTime = val as! CGFloat
+          let convertedValue = val as! CGFloat
+
+          self._playerEndTime = convertedValue
+
+          if convertedValue < 0.0 {
+            print("WARNING: endTime is a negative number: \(val)")
+            self._playerEndTime = CGFloat(CMTimeGetSeconds((player.currentItem?.asset.duration)!))
+          }
+
           let currentTime = CGFloat(CMTimeGetSeconds(player.currentTime()))
           var shouldBeCurrentTime: CGFloat = currentTime;
 
@@ -298,10 +320,8 @@ class RNVideoPlayer: RCTView {
     playerItem = AVPlayerItem(url: movieURL as! URL)
     player.replaceCurrentItem(with: playerItem)
 
-    if _playerEndTime == 0 {
-      self._playerEndTime = CGFloat(CMTimeGetSeconds((player.currentItem?.asset.duration)!))
-      print("CHANGED playerEndTime \(self._playerEndTime)")
-    }
+    self._playerEndTime = CGFloat(CMTimeGetSeconds((player.currentItem?.asset.duration)!))
+    print("CHANGED playerEndTime \(self._playerEndTime)")
 
     gpuMovie = GPUImageMovie(playerItem: playerItem)
     // gpuMovie.runBenchmark = true
