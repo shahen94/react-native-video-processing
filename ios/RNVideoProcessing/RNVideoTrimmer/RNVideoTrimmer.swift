@@ -78,6 +78,7 @@ class RNVideoTrimmer: NSObject {
     let asset = AVAsset(url: sourceURL)
 
     let imageGenerator = AVAssetImageGenerator(asset: asset)
+    imageGenerator.maximumSize = CGSize(width: 1080, height: 1080)
     imageGenerator.appliesPreferredTrackTransform = true
     var second = atTime
     if atTime > Float(asset.duration.seconds) || atTime < 0 {
