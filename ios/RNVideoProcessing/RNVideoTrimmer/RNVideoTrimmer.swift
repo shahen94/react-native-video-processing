@@ -73,18 +73,27 @@ class RNVideoTrimmer: NSObject {
     callback( [NSNull(), assetInfo] )
   }
 
-  @objc func getPreviewImageAtPosition(_ source: String, atTime: Float = 0, callback: RCTResponseSenderBlock) {
+  @objc func getPreviewImageAtPosition(_ source: String, atTime: Float = 0, maximumSize: NSDictionary, callback: RCTResponseSenderBlock) {
     let sourceURL = getSourceURL(source: source)
     let asset = AVAsset(url: sourceURL)
 
+    var width: CGFloat = 1080
+    if let _width = maximumSize.object(forKey: "width") as? CGFloat {
+        width = _width
+    }
+    var height: CGFloat = 1080
+    if let _height = maximumSize.object(forKey: "height") as? CGFloat {
+        height = _height
+    }
+
     let imageGenerator = AVAssetImageGenerator(asset: asset)
-    imageGenerator.maximumSize = CGSize(width: 1080, height: 1080)
+    imageGenerator.maximumSize = CGSize(width: width, height: height)
     imageGenerator.appliesPreferredTrackTransform = true
     var second = atTime
     if atTime > Float(asset.duration.seconds) || atTime < 0 {
       second = 0
     }
-    let timestamp = CMTime(seconds: Double(second), preferredTimescale: 60)
+    let timestamp = CMTime(seconds: Double(second), preferredTimescale: 600)
     do {
       let imageRef = try imageGenerator.copyCGImage(at: timestamp, actualTime: nil)
       let image = UIImage(cgImage: imageRef)

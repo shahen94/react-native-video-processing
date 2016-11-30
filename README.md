@@ -52,7 +52,8 @@ class App extends Component {
     }
 
     getPreviewImageForSecond(second) {
-        this.videoPlayerRef.getPreviewForSecond(require('./videoFile.mp4'), second)
+        const maximumSize = { width: 640, height: 1024 }; // default is { width: 1080, height: 1080 }
+        this.videoPlayerRef.getPreviewForSecond(require('./videoFile.mp4'), second, maximumSize)
         .then((base64String) => console.log('This is BASE64 of image', base64String))
         .catch(console.warn);
     }
