@@ -101,7 +101,7 @@ class RNVideoPlayer: RCTView {
             let floatVal = convertedValue >= 0 ? convertedValue : self._playerStartTime
             print("CHANGED: currentTime \(floatVal)")
             if floatVal <= self._playerEndTime && floatVal >= self._playerStartTime {
-              self.player.seek(to: convertToCMTime(val: floatVal))
+              self.player.seek(to: convertToCMTime(val: floatVal), toleranceBefore: kCMTimeZero, toleranceAfter: kCMTimeZero)
             }
           }
         }
