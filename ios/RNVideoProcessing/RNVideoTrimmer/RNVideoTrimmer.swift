@@ -182,7 +182,11 @@ class RNVideoTrimmer: NSObject {
             useQuality = AVAssetExportPreset1920x1080
 
         case QUALITY_ENUM.QUALITY_3840x2160.rawValue:
-            useQuality = AVAssetExportPreset3840x2160
+            if #available(iOS 9.0, *) {
+                useQuality = AVAssetExportPreset3840x2160
+            } else {
+                useQuality = AVAssetExportPresetPassthrough
+            }
 
         default:
             useQuality = AVAssetExportPresetPassthrough

@@ -46,7 +46,12 @@ class App extends Component {
     }
 
     trimVideo() {
-        this.videoPlayerRef.trim(require('./videoFile.mp4'), startTime, endTime)
+        const options = {
+            startTime: 0,
+            endTime: 15,
+            quality: VideoPlayer.Constants.quality.QUALITY_1280x720
+        };
+        this.videoPlayerRef.trim(require('./videoFile.mp4'), options)
             .then((newSource) => console.log(newSource))
             .catch(console.warn);
     }
