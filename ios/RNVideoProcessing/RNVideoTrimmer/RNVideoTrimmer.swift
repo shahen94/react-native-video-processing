@@ -92,9 +92,14 @@ class RNVideoTrimmer: NSObject {
     @objc func getAssetInfo(_ source: String, callback: RCTResponseSenderBlock) {
         let sourceURL = getSourceURL(source: source)
         let asset = AVAsset(url: sourceURL)
-        let assetInfo = [
+        let assetInfo: [String: Any] = [
             "duration" : asset.duration.seconds
         ]
+        if let track = asset.tracks(withMediaType: AVMediaTypeVideo).first {
+            let naturalSize = track.naturalSize
+            let size = ["width": naturalSize.width, "height": naturalSize.height]
+            assetInfo["size"] = size
+        }
         callback( [NSNull(), assetInfo] )
     }
 
