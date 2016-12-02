@@ -7,9 +7,15 @@ import Foundation
 import AVFoundation
 
 enum QUALITY_ENUM: String {
-    case LOW = "low"
-    case MEDIUM = "medium"
-    case HIGHT = "hight"
+    case QUALITY_LOW = "low"
+    case QUALITY_MEDIUM = "medium"
+    case QUALITY_HIGHEST = "highest"
+    case QUALITY_640x480 = "640x480"
+    case QUALITY_960x540 = "960x540"
+    case QUALITY_1280x720 = "1280x720"
+    case QUALITY_1920x1080 = "1920x1080"
+    case QUALITY_3840x2160 = "3840x2160"
+    case QUALITY_PASS_THROUGH = "passthrough"
 }
 
 @objc(RNVideoTrimmer)
@@ -46,25 +52,13 @@ class RNVideoTrimmer: NSObject {
             print(error)
         }
 
-        print("compatible \(AVAssetExportSession.exportPresets(compatibleWith: asset)) ")
         //Remove existing file
         _ = try? manager.removeItem(at: outputURL)
 
-        var useQuality: String! = nil
+        let useQuality = getQualityForAsset(quality: quality, asset: asset)
 
-        print("RNVideoTrimmer: \(quality)")
+        print("RNVideoTrimmer passed quality: \(quality). useQuality: \(useQuality)")
 
-        switch quality {
-        case QUALITY_ENUM.HIGHT.rawValue:
-            useQuality = AVAssetExportPreset1280x720
-        case QUALITY_ENUM.MEDIUM.rawValue:
-            useQuality = AVAssetExportPresetMediumQuality
-        case QUALITY_ENUM.LOW.rawValue:
-            useQuality = AVAssetExportPresetLowQuality
-        default:
-            useQuality = AVAssetExportPresetPassthrough
-        }
-        print("RNVideoTrimmer useQuality \(useQuality)")
         guard let exportSession = AVAssetExportSession(asset: asset, presetName: useQuality)
             else {
                 callback(["Error creating AVAssetExportSession", NSNull()])
@@ -83,13 +77,13 @@ class RNVideoTrimmer: NSObject {
             case .completed:
                 callback( [NSNull(), outputURL.absoluteString] )
                 UISaveVideoAtPathToSavedPhotosAlbum(outputURL.relativePath, self, nil, nil)
-
+                
             case .failed:
                 callback( ["Failed: \(exportSession.error?.localizedDescription)", NSNull()] )
-
+                
             case .cancelled:
                 callback( ["Cancelled: \(exportSession.error?.localizedDescription)", NSNull()] )
-
+                
             default: break
             }
         }
@@ -160,5 +154,44 @@ class RNVideoTrimmer: NSObject {
             sourceURL = URL(string: source, relativeTo: bundleUrl)!
         }
         return sourceURL
+    }
+
+    func getQualityForAsset(quality: String, asset: AVAsset) -> String {
+        var useQuality: String
+
+        switch quality {
+        case QUALITY_ENUM.QUALITY_LOW.rawValue:
+            useQuality = AVAssetExportPresetLowQuality
+
+        case QUALITY_ENUM.QUALITY_MEDIUM.rawValue:
+            useQuality = AVAssetExportPresetMediumQuality
+
+        case QUALITY_ENUM.QUALITY_HIGHEST.rawValue:
+            useQuality = AVAssetExportPresetHighestQuality
+
+        case QUALITY_ENUM.QUALITY_640x480.rawValue:
+            useQuality = AVAssetExportPreset640x480
+
+        case QUALITY_ENUM.QUALITY_960x540.rawValue:
+            useQuality = AVAssetExportPreset960x540
+
+        case QUALITY_ENUM.QUALITY_1280x720.rawValue:
+            useQuality = AVAssetExportPreset1280x720
+
+        case QUALITY_ENUM.QUALITY_1920x1080.rawValue:
+            useQuality = AVAssetExportPreset1920x1080
+
+        case QUALITY_ENUM.QUALITY_3840x2160.rawValue:
+            useQuality = AVAssetExportPreset3840x2160
+
+        default:
+            useQuality = AVAssetExportPresetPassthrough
+        }
+
+        let compatiblePresets = AVAssetExportSession.exportPresets(compatibleWith: asset)
+        if !compatiblePresets.contains(useQuality) {
+            useQuality = AVAssetExportPresetPassthrough
+        }
+        return useQuality
     }
 }
