@@ -66,6 +66,7 @@ class RNVideoTrimmer: NSObject {
         }
         exportSession.outputURL = NSURL.fileURL(withPath: outputURL.path)
         exportSession.outputFileType = AVFileTypeMPEG4
+        exportSession.shouldOptimizeForNetworkUse = true
 
         let startTime = CMTime(seconds: Double(sTime!), preferredTimescale: 1000)
         let endTime = CMTime(seconds: Double(eTime!), preferredTimescale: 1000)
