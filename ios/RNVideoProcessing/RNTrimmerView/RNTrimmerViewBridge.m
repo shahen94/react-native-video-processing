@@ -17,5 +17,7 @@ RCT_EXPORT_VIEW_PROPERTY(themeColor, NSString)
 RCT_EXPORT_VIEW_PROPERTY(onChange, RCTBubblingEventBlock)
 RCT_EXPORT_VIEW_PROPERTY(minLength, NSNumber)
 RCT_EXPORT_VIEW_PROPERTY(maxLength, NSNumber)
+RCT_EXPORT_VIEW_PROPERTY(currentTime, NSNumber)
+RCT_EXPORT_VIEW_PROPERTY(trackerColor, NSString)
 
 @end
