@@ -17,13 +17,14 @@ class RNTrimmerView: RCTView, ICGVideoTrimmerDelegate {
   var onChange: RCTBubblingEventBlock?
   var _minLength: CGFloat? = nil
   var _maxLength: CGFloat? = nil
+  var _trackerColor: UIColor = UIColor.clear
 
   var source: NSString? {
     set {
       setSource(source: newValue)
     }
     get {
-      
+
       return nil
     }
   }
@@ -85,11 +86,46 @@ class RNTrimmerView: RCTView, ICGVideoTrimmerDelegate {
     }
   }
 
+  var currentTime: NSNumber? {
+    set {
+      print("CHANGED: [TrimmerView]: currentTime: \(newValue)")
+      if newValue != nil && self.trimmerView != nil {
+        let convertedValue = newValue as! CGFloat
+        self.trimmerView?.seek(toTime: convertedValue)
+//        self.trimmerView
+      }
+    }
+    get {
+      return nil
+    }
+  }
+
+  var trackerColor: NSString? {
+    set {
+      if newValue == nil {
+        return
+      }
+      if self.trimmerView == nil {
+        return
+      }
+      let color = NumberFormatter().number(from: newValue! as String)
+      let formattedColor = RCTConvert.uiColor(color)
+      if formattedColor != nil {
+        self._trackerColor = formattedColor!
+        self.updateView()
+      }
+    }
+    get {
+      return nil
+    }
+  }
+
   func updateView() {
     self.frame = rect
     if trimmerView != nil {
       trimmerView!.frame = rect
       trimmerView!.themeColor = self.mThemeColor
+      trimmerView!.trackerColor = self._trackerColor
       trimmerView!.maxLength = _maxLength == nil ? CGFloat(self.asset.duration.seconds) : _maxLength!
       if _minLength != nil {
         trimmerView!.minLength = _minLength!
@@ -110,9 +146,9 @@ class RNTrimmerView: RCTView, ICGVideoTrimmerDelegate {
 
       trimmerView = ICGVideoTrimmerView(frame: rect, asset: self.asset)
       trimmerView!.showsRulerView = false
-      trimmerView!.hideTracker(true)
+      trimmerView!.hideTracker(false)
       trimmerView!.delegate = self
-      trimmerView!.trackerColor = UIColor.clear
+       trimmerView!.trackerColor = self._trackerColor
       self.addSubview(trimmerView!)
       self.updateView()
     }
