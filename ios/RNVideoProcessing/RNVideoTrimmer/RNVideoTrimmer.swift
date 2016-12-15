@@ -141,14 +141,13 @@ class RNVideoTrimmer: NSObject {
     }
 
     func randomString() -> String {
-        let rand = 2 + Int(arc4random()) % 20
-        let charSet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-        var c = charSet.characters.map { String($0) }
-        var s:String = "RNTrimmer-Temp-Video"
-        for _ in (1...rand) {
-            s.append(c[Int(arc4random()) % c.count])
+        let letters: NSString = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+        let randomString: NSMutableString = NSMutableString(capacity: 20)
+        let s:String = "RNTrimmer-Temp-Video"
+        for _ in 0...19 {
+            randomString.appendFormat("%C", letters.character(at: Int(arc4random_uniform(UInt32(letters.length)))))
         }
-        return s
+        return s.appending(randomString as String)
     }
 
     func getSourceURL(source: String) -> URL {
