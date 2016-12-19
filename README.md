@@ -74,11 +74,11 @@ class App extends Component {
             <View style={{ flex: 1 }}>
                 <VideoPlayer
                     ref={ref => this.videoPlayerRef = ref}
-                    startTime={30} // seconds
-                    endTime={120} // seconds
-                    play={true} // default false
-                    replay={true} // should player play video again if it's ended
-                    rotate={true} // use this prop to rotate video if it captured in landscape mode
+                    startTime={30}  // seconds
+                    endTime={120}   // seconds
+                    play={true}     // default false
+                    replay={true}   // should player play video again if it's ended
+                    rotate={true}   // use this prop to rotate video if it captured in landscape mode
                     source={require('./videoFile.mp4')}
                     playerWidth={300}
                     playerHeight={500}
@@ -89,7 +89,9 @@ class App extends Component {
                     source={require('./videoFile.mp4')}
                     height={100}
                     width={300}
+                    currentTime={this.video.currentTime} // use this prop to set tracker position
                     themeColor={'white'}
+                    trackerColor={'green'}
                     onChange={(e) => console.log(e.startTime, e.endTime)}
                 />
             </View>

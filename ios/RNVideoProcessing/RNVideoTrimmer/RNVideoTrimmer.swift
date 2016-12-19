@@ -98,7 +98,12 @@ class RNVideoTrimmer: NSObject {
         ]
         if let track = asset.tracks(withMediaType: AVMediaTypeVideo).first {
             let naturalSize = track.naturalSize
-            let size = ["width": naturalSize.width, "height": naturalSize.height]
+            let t = track.preferredTransform
+            let isPortrait = t.a == 0 && abs(t.b) == 1 && t.d == 0
+            let size = [
+              "width": isPortrait ? naturalSize.height : naturalSize.width,
+              "height": isPortrait ? naturalSize.width : naturalSize.height
+            ]
             assetInfo["size"] = size
         }
         callback( [NSNull(), assetInfo] )
