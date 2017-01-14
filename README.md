@@ -32,7 +32,7 @@
 6. Import `RNVideoProcessing.h` into your `project_name-bridging-header.h`.
 7. Clean and Run your project.
 
-#### Android version is not supported yet
+#### Android version is under development, stay tuned :)
 
 ## Usage
 ```javascript
