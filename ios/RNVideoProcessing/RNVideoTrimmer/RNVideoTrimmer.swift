@@ -99,6 +99,7 @@ class RNVideoTrimmer: NSObject {
         var height = options.object(forKey: "height") as? Float
         let bitrateMultiplier = options.object(forKey: "bitrateMultiplier") as? Float ?? 1
         let saveToCameraRoll = options.object(forKey: "saveToCameraRoll") as? Bool ?? false
+        let minimumBitrate = options.object(forKey: "minimumBitrate") as? Float
         
         let manager = FileManager.default
         guard let documentDirectory = try? manager.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
@@ -119,6 +120,10 @@ class RNVideoTrimmer: NSObject {
         let bps = videoTrack.estimatedDataRate
         width = width ?? Float(abs(naturalSize.width))
         height = height ?? Float(abs(naturalSize.height))
+        var averageBitrate = bps / bitrateMultiplier
+        if minimumBitrate != nil && averageBitrate < minimumBitrate! {
+            averageBitrate = minimumBitrate!
+        }
         
         var outputURL = documentDirectory.appendingPathComponent("output")
         do {
@@ -146,7 +151,7 @@ class RNVideoTrimmer: NSObject {
             AVVideoWidthKey: NSNumber.init(value: width!),
             AVVideoHeightKey: NSNumber.init(value: height!),
             AVVideoCompressionPropertiesKey: [
-                AVVideoAverageBitRateKey: NSNumber.init(value: bps / bitrateMultiplier),
+                AVVideoAverageBitRateKey: NSNumber.init(value: averageBitrate),
                 AVVideoProfileLevelKey: AVVideoProfileLevelH264High40
             ]
         ]

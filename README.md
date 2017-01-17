@@ -63,6 +63,7 @@ class App extends Component {
             endTime: 1280,
             bitrateMultiplier: 3,
             saveToCameraRoll: true // default is false
+            minimumBitrate: 300000
         };
         this.videoPlayerRef.compress(require('./videoFile.mp4'), options)
             .then((newSource) => console.log(newSource))
