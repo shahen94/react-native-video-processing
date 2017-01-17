@@ -19,6 +19,7 @@
 		246271C31DDEF8AA003781DB /* RNVideoTrimmer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 246271B71DDEF8AA003781DB /* RNVideoTrimmer.swift */; };
 		246271C41DDEF8AA003781DB /* RNVideoTrimmerBridge.m in Sources */ = {isa = PBXBuildFile; fileRef = 246271B81DDEF8AA003781DB /* RNVideoTrimmerBridge.m */; };
 		246271C51DDEF8AA003781DB /* VideoProcessingGPUFilters.swift in Sources */ = {isa = PBXBuildFile; fileRef = 246271B91DDEF8AA003781DB /* VideoProcessingGPUFilters.swift */; };
+		24F055861E2E4AAD009E0196 /* SDAVAssetExportSession.m in Sources */ = {isa = PBXBuildFile; fileRef = 24F055851E2E4AAD009E0196 /* SDAVAssetExportSession.m */; };
 		24F466D81DD9F1CB0012172B /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 24F466981DD9EB8B0012172B /* AVFoundation.framework */; };
 		24F466D91DD9F1CB0012172B /* CoreMedia.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 24F4669A1DD9EB9B0012172B /* CoreMedia.framework */; };
 		24F466DA1DD9F1CB0012172B /* CoreVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 24F4669B1DD9EB9B0012172B /* CoreVideo.framework */; };
@@ -61,6 +62,8 @@
 		246271B81DDEF8AA003781DB /* RNVideoTrimmerBridge.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RNVideoTrimmerBridge.m; sourceTree = "<group>"; };
 		246271B91DDEF8AA003781DB /* VideoProcessingGPUFilters.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VideoProcessingGPUFilters.swift; sourceTree = "<group>"; };
 		246271CD1DDEF8C6003781DB /* RNVideoProcessing.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RNVideoProcessing.h; sourceTree = "<group>"; };
+		24F055841E2E4AA2009E0196 /* SDAVAssetExportSession.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDAVAssetExportSession.h; sourceTree = "<group>"; };
+		24F055851E2E4AAD009E0196 /* SDAVAssetExportSession.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SDAVAssetExportSession.m; sourceTree = "<group>"; };
 		24F466981DD9EB8B0012172B /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
 		24F4669A1DD9EB9B0012172B /* CoreMedia.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMedia.framework; path = System/Library/Frameworks/CoreMedia.framework; sourceTree = SDKROOT; };
 		24F4669B1DD9EB9B0012172B /* CoreVideo.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreVideo.framework; path = System/Library/Frameworks/CoreVideo.framework; sourceTree = SDKROOT; };
@@ -138,11 +141,21 @@
 		246271B51DDEF8AA003781DB /* RNVideoTrimmer */ = {
 			isa = PBXGroup;
 			children = (
+				24F055831E2E4A92009E0196 /* SDAVAssetExportSession */,
 				246271B61DDEF8AA003781DB /* RNVideoTrimmer-Bridging-Header.h */,
 				246271B71DDEF8AA003781DB /* RNVideoTrimmer.swift */,
 				246271B81DDEF8AA003781DB /* RNVideoTrimmerBridge.m */,
 			);
 			path = RNVideoTrimmer;
+			sourceTree = "<group>";
+		};
+		24F055831E2E4A92009E0196 /* SDAVAssetExportSession */ = {
+			isa = PBXGroup;
+			children = (
+				24F055841E2E4AA2009E0196 /* SDAVAssetExportSession.h */,
+				24F055851E2E4AAD009E0196 /* SDAVAssetExportSession.m */,
+			);
+			name = SDAVAssetExportSession;
 			sourceTree = "<group>";
 		};
 		24F466971DD9EB8B0012172B /* Frameworks */ = {
@@ -227,6 +240,7 @@
 				246271BA1DDEF8AA003781DB /* ICGRulerView.m in Sources */,
 				246271C41DDEF8AA003781DB /* RNVideoTrimmerBridge.m in Sources */,
 				246271BF1DDEF8AA003781DB /* RNTrimmerViewManager.swift in Sources */,
+				24F055861E2E4AAD009E0196 /* SDAVAssetExportSession.m in Sources */,
 				246271C01DDEF8AA003781DB /* RNVideoPlayer.swift in Sources */,
 				246271BE1DDEF8AA003781DB /* RNTrimmerViewBridge.m in Sources */,
 				246271BD1DDEF8AA003781DB /* RNTrimmerView.swift in Sources */,

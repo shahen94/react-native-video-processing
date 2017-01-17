@@ -49,9 +49,22 @@ class App extends Component {
         const options = {
             startTime: 0,
             endTime: 15,
-            quality: VideoPlayer.Constants.quality.QUALITY_1280x720
+            quality: VideoPlayer.Constants.quality.QUALITY_1280x720,
+            saveToCameraRoll: true // default is false
         };
         this.videoPlayerRef.trim(require('./videoFile.mp4'), options)
+            .then((newSource) => console.log(newSource))
+            .catch(console.warn);
+    }
+
+    compressVideo() {
+        const options = {
+            width: 720,
+            endTime: 1280,
+            bitrateMultiplier: 3,
+            saveToCameraRoll: true // default is false
+        };
+        this.videoPlayerRef.compress(require('./videoFile.mp4'), options)
             .then((newSource) => console.log(newSource))
             .catch(console.warn);
     }
