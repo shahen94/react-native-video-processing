@@ -121,8 +121,13 @@ class RNVideoTrimmer: NSObject {
         width = width ?? Float(abs(naturalSize.width))
         height = height ?? Float(abs(naturalSize.height))
         var averageBitrate = bps / bitrateMultiplier
-        if minimumBitrate != nil && averageBitrate < minimumBitrate! {
-            averageBitrate = minimumBitrate!
+        if minimumBitrate != nil {
+            if averageBitrate < minimumBitrate! {
+                averageBitrate = minimumBitrate!
+            }
+            if bps < minimumBitrate! {
+                averageBitrate = bps
+            }
         }
         
         var outputURL = documentDirectory.appendingPathComponent("output")
@@ -152,12 +157,12 @@ class RNVideoTrimmer: NSObject {
             AVVideoHeightKey: NSNumber.init(value: height!),
             AVVideoCompressionPropertiesKey: [
                 AVVideoAverageBitRateKey: NSNumber.init(value: averageBitrate),
-                AVVideoProfileLevelKey: AVVideoProfileLevelH264High40
+                AVVideoProfileLevelKey: AVVideoProfileLevelH264HighAutoLevel
             ]
         ]
         compressionEncoder?.audioSettings = [
             AVFormatIDKey: kAudioFormatMPEG4AAC,
-            AVNumberOfChannelsKey: 2,
+            AVNumberOfChannelsKey: 1,
             AVSampleRateKey: 44100,
             AVEncoderBitRateKey: 128000
         ]
