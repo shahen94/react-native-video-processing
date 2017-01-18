@@ -114,8 +114,6 @@ class App extends Component {
 }
 ```
 
-![dec-18-2016 17-59-39](https://cloud.githubusercontent.com/assets/13334788/21293985/3ae2af7a-c54c-11e6-8ae8-ddfc2db009f9.gif)
-
 ##Contributing
 
 1. Please follow the eslint style guide.
