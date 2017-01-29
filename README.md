@@ -41,10 +41,6 @@ import { View } from 'react-native';
 import { VideoPlayer, Trimmer } from 'react-native-video-processing';
 
 class App extends Component {
-    constructor(...args) {
-        super(...args);
-    }
-
     trimVideo() {
         const options = {
             startTime: 0,
