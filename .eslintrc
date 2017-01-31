@@ -16,6 +16,16 @@
     "react-native"
   ],
   "rules": {
+    "react/sort-comp": [2,
+      {
+        "order": [
+          "static-methods",
+          "lifecycle", // not sure u need this?
+          "everything-else",
+          "render",
+        ]
+      }
+    ],
     "react/jsx-boolean-value": 0,
     "react/jsx-indent-props": [2, "tab"],
     "react-native/no-unused-styles": 2,
