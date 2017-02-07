@@ -24,9 +24,8 @@ class RNVideoPlayer: RCTView {
   var phantomFilterView: GPUImageView = GPUImageView()
 
   let filterView: GPUImageView = GPUImageView()
-  var bridge: RCTBridge! = nil
 
-  var _playerHeight: CGFloat = UIScreen.main.bounds.height / 3
+  var _playerHeight: CGFloat = UIScreen.main.bounds.width * 4 / 3
   var _playerWidth: CGFloat = UIScreen.main.bounds.width
   var _moviePathSource: NSString = ""
   var _playerStartTime: CGFloat = 0
@@ -37,22 +36,13 @@ class RNVideoPlayer: RCTView {
 
   let LOG_KEY: String = "VIDEO_PROCESSING"
 
-  init(frame: CGRect, bridge: RCTBridge) {
-    super.init(frame: frame)
-    self.bridge = bridge
-  }
-
-  required init?(coder aDecoder: NSCoder) {
-    fatalError("init(coder:) has not been implemented")
-  }
-
   // props
   var playerHeight: NSNumber? {
     set(val) {
       if val != nil {
         self._playerHeight = val as! CGFloat
         self.frame.size.height = self._playerHeight
-        filterView.frame.size.height = self._playerHeight
+        self.rotate = self._rotate ? 1 : 0
         print("CHANGED HEIGHT \(val)")
       }
     }
@@ -66,7 +56,7 @@ class RNVideoPlayer: RCTView {
       if val != nil {
         self._playerWidth = val as! CGFloat
         self.frame.size.width = self._playerWidth
-        filterView.frame.size.width = self._playerWidth
+        self.rotate = self._rotate ? 1 : 0
         print("CHANGED WIDTH \(val)")
       }
     }
@@ -218,11 +208,16 @@ class RNVideoPlayer: RCTView {
         if self._rotate {
           filterView.frame.size.width = self._playerHeight
           filterView.frame.size.height = self._playerWidth
+          filterView.bounds.size.width = self._playerHeight
+          filterView.bounds.size.height = self._playerWidth
           rotationAngle = CGFloat(M_PI_2)
         } else {
           filterView.frame.size.width = self._playerWidth
           filterView.frame.size.height = self._playerHeight
+          filterView.bounds.size.width = self._playerWidth
+          filterView.bounds.size.height = self._playerHeight
         }
+        filterView.frame.origin = CGPoint.zero
         self.filterView.transform = CGAffineTransform(rotationAngle: rotationAngle)
         self.layoutIfNeeded()
       }
@@ -328,8 +323,6 @@ class RNVideoPlayer: RCTView {
     gpuMovie.playAtActualSpeed = true
     gpuMovie.startProcessing()
 
-    filterView.frame = self.frame
-
     gpuMovie.addTarget(self.filterView)
     self.addSubview(filterView)
     gpuMovie.playAtActualSpeed = true
@@ -349,7 +342,7 @@ class RNVideoPlayer: RCTView {
         self.gpuMovie.cancelProcessing()
         self.player = nil
         self.gpuMovie = nil
-        print("CHANGED: Removing Oberver, that can be a cause of memory leak")
+        print("CHANGED: Removing Observer, that can be a cause of memory leak")
       }
     }
   }

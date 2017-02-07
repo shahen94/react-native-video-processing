@@ -12,6 +12,6 @@ import Foundation
 class RNVideoProcessingManager: RCTViewManager {
 
     @objc override func view() -> UIView! {
-        return RNVideoPlayer(frame: CGRect.zero, bridge: self.bridge)
+        return RNVideoPlayer()
     }
 }
