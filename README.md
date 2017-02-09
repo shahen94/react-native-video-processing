@@ -110,6 +110,9 @@ class App extends Component {
 }
 ```
 
+### How to setup Library
+[![Setup](https://img.youtube.com/vi/HRjgeT6NQJM/0.jpg)](https://youtu.be/HRjgeT6NQJM)
+
 ##Contributing
 
 1. Please follow the eslint style guide.
