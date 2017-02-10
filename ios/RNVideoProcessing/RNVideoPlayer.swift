@@ -8,6 +8,7 @@
 
 import Foundation
 import AVFoundation
+import GPUImage
 
 @objc(RNVideoPlayer)
 class RNVideoPlayer: RCTView {
