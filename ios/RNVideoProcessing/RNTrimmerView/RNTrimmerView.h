@@ -7,8 +7,8 @@
 #define RNTrimmerView_h
 
 #import "ICGVideoTrimmer.h"
-#import "RCTViewManager.h"
-#import "RCTConvert.h"
-#import "RCTBridge.h"
+#import "React/RCTViewManager.h"
+#import "React/RCTConvert.h"
+#import "React/RCTBridge.h"
 
 #endif /* RNTrimmerView_h */
