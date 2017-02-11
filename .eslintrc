@@ -16,13 +16,23 @@
     "react-native"
   ],
   "rules": {
+    "react/sort-comp": [2,
+      {
+        "order": [
+          "static-methods",
+          "lifecycle", // not sure u need this?
+          "everything-else",
+          "render",
+        ]
+      }
+    ],
+    "react/jsx-boolean-value": 0,
+    "react/jsx-indent-props": [2, "tab"],
+    "react-native/no-unused-styles": 2,
     "indent": [2, "tab", {"SwitchCase": 1}],
     "comma-dangle": 0,
     "no-console": 1,
-    "react-native/no-unused-styles": 2,
     "no-return-assign": 0,
-    "react/jsx-boolean-value": 0,
-    "react/jsx-indent-props": [2, "tab"],
     "no-use-before-define": 0
   }
 }
