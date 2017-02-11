@@ -7,7 +7,7 @@
 
 ### Manual installation
 
-**Note: Currently we're not supporting RN 0.4x**
+**Note: For RN 0.4x use 1.0 version, For RN 0.3x use  minor 
 
 #### [iOS]
 
