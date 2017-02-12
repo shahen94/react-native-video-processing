@@ -83,39 +83,39 @@ class RNVideoTrimmer: NSObject {
                 }
 
             case .failed:
-                callback( ["Failed: \(exportSession.error?.localizedDescription)", NSNull()] )
-                
+                callback( ["Failed: \(exportSession.error)", NSNull()] )
+
             case .cancelled:
-                callback( ["Cancelled: \(exportSession.error?.localizedDescription)", NSNull()] )
-                
+                callback( ["Cancelled: \(exportSession.error)", NSNull()] )
+
             default: break
             }
         }
     }
 
     @objc func compress(_ source: String, options: NSDictionary, callback: @escaping RCTResponseSenderBlock) {
-        
+
         var width = options.object(forKey: "width") as? Float
         var height = options.object(forKey: "height") as? Float
         let bitrateMultiplier = options.object(forKey: "bitrateMultiplier") as? Float ?? 1
         let saveToCameraRoll = options.object(forKey: "saveToCameraRoll") as? Bool ?? false
         let minimumBitrate = options.object(forKey: "minimumBitrate") as? Float
-        
+
         let manager = FileManager.default
         guard let documentDirectory = try? manager.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
             else {
                 callback(["Error creating FileManager", NSNull()])
                 return
         }
-        
+
         let sourceURL = getSourceURL(source: source)
         let asset = AVAsset(url: sourceURL as URL)
-        
+
         guard let videoTrack = asset.tracks(withMediaType: AVMediaTypeVideo).first else  {
             callback(["Error getting track info", NSNull()])
             return
         }
-        
+
         let naturalSize = videoTrack.naturalSize.applying(videoTrack.preferredTransform)
         let bps = videoTrack.estimatedDataRate
         width = width ?? Float(abs(naturalSize.width))
@@ -129,7 +129,7 @@ class RNVideoTrimmer: NSObject {
                 averageBitrate = bps
             }
         }
-        
+
         var outputURL = documentDirectory.appendingPathComponent("output")
         do {
             try manager.createDirectory(at: outputURL, withIntermediateDirectories: true, attributes: nil)
@@ -139,10 +139,10 @@ class RNVideoTrimmer: NSObject {
             callback([error.localizedDescription, NSNull()])
             print(error)
         }
-        
+
         //Remove existing file
         _ = try? manager.removeItem(at: outputURL)
-        
+
         let compressionEncoder = SDAVAssetExportSession(asset: asset)
         if compressionEncoder == nil {
             callback(["Error creating AVAssetExportSession", NSNull()])
@@ -174,11 +174,11 @@ class RNVideoTrimmer: NSObject {
                     UISaveVideoAtPathToSavedPhotosAlbum(outputURL.relativePath, self, nil, nil)
                 }
             case .failed:
-                callback( ["Failed: \(compressionEncoder!.error?.localizedDescription)", NSNull()] )
-                
+                callback( ["Failed: \(compressionEncoder!.error)", NSNull()] )
+
             case .cancelled:
-                callback( ["Cancelled: \(compressionEncoder!.error?.localizedDescription)", NSNull()] )
-                
+                callback( ["Cancelled: \(compressionEncoder!.error)", NSNull()] )
+
             default: break
             }
         })
