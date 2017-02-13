@@ -27,6 +27,7 @@ class RNVideoTrimmer: NSObject {
         var eTime = options.object(forKey: "endTime") as? Float
         let quality = ((options.object(forKey: "quality") as? String) != nil) ? options.object(forKey: "quality") as! String : ""
         let saveToCameraRoll = options.object(forKey: "saveToCameraRoll") as? Bool ?? false
+        let saveWithCurrentDate = options.object(forKey: "saveWithCurrentDate") as? Bool ?? false
 
         let manager = FileManager.default
         guard let documentDirectory = try? manager.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
@@ -69,6 +70,14 @@ class RNVideoTrimmer: NSObject {
         exportSession.outputFileType = AVFileTypeMPEG4
         exportSession.shouldOptimizeForNetworkUse = true
 
+        if saveToCameraRoll && saveWithCurrentDate {
+          let metaItem = AVMutableMetadataItem()
+          metaItem.key = AVMetadataCommonKeyCreationDate as (NSCopying & NSObjectProtocol)?
+          metaItem.keySpace = AVMetadataKeySpaceCommon
+          metaItem.value = NSDate() as (NSCopying & NSObjectProtocol)?
+          exportSession.metadata = [metaItem]
+        }
+
         let startTime = CMTime(seconds: Double(sTime!), preferredTimescale: 1000)
         let endTime = CMTime(seconds: Double(eTime!), preferredTimescale: 1000)
         let timeRange = CMTimeRange(start: startTime, end: endTime)
@@ -100,6 +109,7 @@ class RNVideoTrimmer: NSObject {
         let bitrateMultiplier = options.object(forKey: "bitrateMultiplier") as? Float ?? 1
         let saveToCameraRoll = options.object(forKey: "saveToCameraRoll") as? Bool ?? false
         let minimumBitrate = options.object(forKey: "minimumBitrate") as? Float
+        let saveWithCurrentDate = options.object(forKey: "saveWithCurrentDate") as? Bool ?? false
 
         let manager = FileManager.default
         guard let documentDirectory = try? manager.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
@@ -151,6 +161,13 @@ class RNVideoTrimmer: NSObject {
         compressionEncoder!.outputFileType = AVFileTypeMPEG4
         compressionEncoder!.outputURL = NSURL.fileURL(withPath: outputURL.path)
         compressionEncoder!.shouldOptimizeForNetworkUse = true
+        if saveToCameraRoll && saveWithCurrentDate {
+          let metaItem = AVMutableMetadataItem()
+          metaItem.key = AVMetadataCommonKeyCreationDate as (NSCopying & NSObjectProtocol)?
+          metaItem.keySpace = AVMetadataKeySpaceCommon
+          metaItem.value = NSDate() as (NSCopying & NSObjectProtocol)?
+          compressionEncoder!.metadata = [metaItem]
+        }
         compressionEncoder?.videoSettings = [
             AVVideoCodecKey: AVVideoCodecH264,
             AVVideoWidthKey: NSNumber.init(value: width!),
