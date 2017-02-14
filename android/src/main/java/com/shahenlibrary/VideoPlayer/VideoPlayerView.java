@@ -33,6 +33,8 @@ public class VideoPlayerView extends ScalableVideoView implements
     private Runnable progressRunnable = null;
     private Handler progressUpdateHandler = new Handler();
     private int progressUpdateHandlerDelay = 1000;
+    private int videoStartAt = 0;
+    private int videoEndAt;
 
 
     public VideoPlayerView(ThemedReactContext ctx) {
@@ -50,6 +52,12 @@ public class VideoPlayerView extends ScalableVideoView implements
                     Log.d(LOG_TAG, "run: Send event");
                     WritableMap event = Arguments.createMap();
                     event.putDouble(Events.CURRENT_TIME, mMediaPlayer.getCurrentPosition() / 1000.0);
+                    if (mMediaPlayer.getCurrentPosition() >= videoEndAt) {
+                        mMediaPlayer.seekTo(videoStartAt);
+                        if (!mMediaPlayer.isLooping()) {
+                            pause();
+                        }
+                    }
                     eventEmitter.receiveEvent(getId(), EventsEnum.EVENT_PROGRESS.toString(), event);
                 }
 
@@ -75,7 +83,7 @@ public class VideoPlayerView extends ScalableVideoView implements
         mMediaPlayer.setOnInfoListener(this);
     }
 
-    public void setSrc(final String uriString) {
+    public void setSource(final String uriString) {
         if (mediaSource != null && mediaSource.equals(uriString)) {
             return;
         }
@@ -144,6 +152,10 @@ public class VideoPlayerView extends ScalableVideoView implements
         seekTo((int) seekTime);
     }
 
+    public void setProgressUpdateHandlerDelay(int delay) {
+        this.progressUpdateHandlerDelay = delay;
+    }
+
     @Override
     public boolean onError(MediaPlayer mp, int what, int extra) {
         return false;
@@ -172,7 +184,8 @@ public class VideoPlayerView extends ScalableVideoView implements
 
     @Override
     public void onPrepared(MediaPlayer mp) {
-
+        videoEndAt = mp.getDuration();
+        Log.d(LOG_TAG, "onPrepared: " + videoEndAt);
     }
 
     @Override

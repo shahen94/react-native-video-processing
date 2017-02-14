@@ -14,11 +14,12 @@ import javax.annotation.Nullable;
 
 public class VideoPlayerViewManager extends SimpleViewManager<VideoPlayerView> {
     private static final String REACT_PACKAGE = "RNVideoProcessing";
-    private final String SET_SOURCE = "src";
+    private final String SET_SOURCE = "source";
     private final String SET_PLAY = "play";
     private final String SET_REPLAY = "replay";
     private final String SET_VOLUME = "volume";
-    private final String SET_CURRENT_TIME = "seek";
+    private final String SET_CURRENT_TIME = "currentTime";
+    private final String SET_PROGRESS_DELAY = "progressEventDelay";
 
     @Override
     public String getName() {
@@ -49,7 +50,7 @@ public class VideoPlayerViewManager extends SimpleViewManager<VideoPlayerView> {
 
     @ReactProp(name = SET_SOURCE)
     public void setSource(final VideoPlayerView player, String source) {
-        player.setSrc(source);
+        player.setSource(source);
     }
 
     @ReactProp(name = SET_PLAY, defaultBoolean = true)
@@ -64,15 +65,20 @@ public class VideoPlayerViewManager extends SimpleViewManager<VideoPlayerView> {
         player.setLooping(replay);
     }
 
-    @ReactProp(name = SET_VOLUME, defaultInt = 10)
+    @ReactProp(name = SET_VOLUME, defaultFloat = 10f)
     public void setVolume(final VideoPlayerView player, float volume) {
         Log.d(VideoPlayerViewManager.REACT_PACKAGE, "set volume: " + String.valueOf(volume));
         player.setMediaVolume(volume);
     }
 
-    @ReactProp(name = SET_CURRENT_TIME, defaultInt = 0)
+    @ReactProp(name = SET_CURRENT_TIME, defaultFloat = 0f)
     public void setCurrentTime(final VideoPlayerView player, float seekTime) {
         Log.d(VideoPlayerViewManager.REACT_PACKAGE, "set current time: " + String.valueOf(seekTime) );
         player.setCurrentTime(seekTime);
+    }
+
+    @ReactProp(name = SET_PROGRESS_DELAY, defaultInt = 1000)
+    public void setProgressDelay(final VideoPlayerView player, int delay) {
+        player.setProgressUpdateHandlerDelay(delay);
     }
 }
