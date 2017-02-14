@@ -3,18 +3,23 @@ package com.shahenlibrary.VideoPlayer;
 import android.graphics.Matrix;
 import android.media.MediaPlayer;
 import android.net.Uri;
+import android.os.Handler;
+import android.support.annotation.Nullable;
 import android.util.Log;
 import android.widget.MediaController;
 
+import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.LifecycleEventListener;
+import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.uimanager.ThemedReactContext;
 import com.facebook.react.uimanager.events.RCTEventEmitter;
 import com.yqritc.scalablevideoview.ScalableVideoView;
 import com.yqritc.scalablevideoview.ScaleManager;
 import com.yqritc.scalablevideoview.Size;
+import com.shahenlibrary.Events.Events;
+import com.shahenlibrary.Events.EventsEnum;
 
 import java.io.IOException;
-import java.util.Objects;
 
 public class VideoPlayerView extends ScalableVideoView implements
         MediaPlayer.OnPreparedListener, MediaPlayer.OnErrorListener, MediaPlayer.OnBufferingUpdateListener,
@@ -23,17 +28,36 @@ public class VideoPlayerView extends ScalableVideoView implements
     private ThemedReactContext themedReactContext;
     private RCTEventEmitter eventEmitter;
     private String mediaSource;
-    private String mediaType;
-    private boolean playerPlaying = false;
+    private boolean playerPlaying = true;
     private String LOG_TAG = "RNVideoProcessing";
+    private Runnable progressRunnable = null;
+    private Handler progressUpdateHandler = new Handler();
+    private int progressUpdateHandlerDelay = 1000;
+
 
     public VideoPlayerView(ThemedReactContext ctx) {
         super(ctx);
-        Log.d(LOG_TAG, "constructed");
         themedReactContext = ctx;
         eventEmitter = themedReactContext.getJSModule(RCTEventEmitter.class);
         themedReactContext.addLifecycleEventListener(this);
+        setSurfaceTextureListener(this);
         initPlayerIfNeeded();
+
+        progressRunnable = new Runnable() {
+            @Override
+            public void run() {
+                if (mMediaPlayer.isPlaying()) {
+                    Log.d(LOG_TAG, "run: Send event");
+                    WritableMap event = Arguments.createMap();
+                    event.putDouble(Events.CURRENT_TIME, mMediaPlayer.getCurrentPosition() / 1000.0);
+                    eventEmitter.receiveEvent(getId(), EventsEnum.EVENT_PROGRESS.toString(), event);
+                }
+
+                progressUpdateHandler.postDelayed(progressRunnable, progressUpdateHandlerDelay);
+            }
+        };
+
+        progressUpdateHandler.post(progressRunnable);
     }
 
     private void initPlayerIfNeeded() {
@@ -56,7 +80,6 @@ public class VideoPlayerView extends ScalableVideoView implements
             return;
         }
         reset();
-        invalidate();
 
         mediaSource = uriString;
         Log.d(LOG_TAG, "set source: " + mediaSource);
@@ -73,7 +96,6 @@ public class VideoPlayerView extends ScalableVideoView implements
             prepare(this);
 
             if (playerPlaying && !mMediaPlayer.isPlaying()) {
-                Log.d(LOG_TAG, "ERGI ARA");
                 start();
             }
 
@@ -99,6 +121,27 @@ public class VideoPlayerView extends ScalableVideoView implements
             pause();
             Log.d(LOG_TAG, "setPlay: PAUSE");
         }
+    }
+
+    public void setMediaVolume(float volume) {
+        if (volume < 0) {
+            return;
+        }
+        setVolume(volume, volume);
+    }
+
+    public void setCurrentTime(float currentTime) {
+        float seekTime = currentTime * 1000;
+        if (mMediaPlayer == null) {
+            Log.d(LOG_TAG, "MEDIA PLAYER IS NULL");
+            return;
+        }
+        int duration = getDuration();
+        if (currentTime > duration || currentTime < 0) {
+            seekTime = 0;
+        }
+        Log.d(LOG_TAG, "set seek to " + String.valueOf((int) seekTime));
+        seekTo((int) seekTime);
     }
 
     @Override
@@ -185,5 +228,14 @@ public class VideoPlayerView extends ScalableVideoView implements
     @Override
     public int getAudioSessionId() {
         return 0;
+    }
+
+    public void cleanup() {
+        if (mMediaPlayer == null) {
+            return;
+        }
+        mMediaPlayer.stop();
+        mMediaPlayer.release();
+        mMediaPlayer = null;
     }
 }
