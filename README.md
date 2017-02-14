@@ -8,7 +8,8 @@
 ### Manual installation
 
 **Note: For RN 0.4x use 1.0 version, For RN 0.3x use  0.16**
-
+#### [Android]
+Android version is under development, you can follow the development process on `android` branch
 #### [iOS]
 
 1. In Xcode, click the "Add Files to <your-project-name>".
@@ -32,8 +33,6 @@
     to your project's `Build Phases` ➜ `Link Binary With Libraries`.
 6. Import `RNVideoProcessing.h` into your `project_name-bridging-header.h`.
 7. Clean and Run your project.
-
-#### Android version is under development, stay tuned :)
 
 ## Usage
 ```javascript
