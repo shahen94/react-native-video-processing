@@ -1,9 +1,12 @@
 package com.shahenlibrary.VideoPlayer;
 
+import android.graphics.Bitmap;
 import android.graphics.Matrix;
+import android.media.MediaMetadataRetriever;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Handler;
+import android.util.Base64;
 import android.util.Log;
 import android.widget.MediaController;
 
@@ -19,6 +22,7 @@ import com.yqritc.scalablevideoview.Size;
 import com.shahenlibrary.Events.Events;
 import com.shahenlibrary.Events.EventsEnum;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 public class VideoPlayerView extends ScalableVideoView implements
@@ -32,6 +36,7 @@ public class VideoPlayerView extends ScalableVideoView implements
     private String LOG_TAG = "RNVideoProcessing";
     private Runnable progressRunnable = null;
     private Handler progressUpdateHandler = new Handler();
+    private MediaMetadataRetriever metadataRetriever = new MediaMetadataRetriever();
     private int progressUpdateHandlerDelay = 1000;
     private int videoStartAt = 0;
     private int videoEndAt = -1;
@@ -104,8 +109,10 @@ public class VideoPlayerView extends ScalableVideoView implements
             if (uriString.startsWith("content://")) {
                 Uri parsedUri = Uri.parse(mediaSource);
                 setDataSource(themedReactContext, parsedUri);
+                metadataRetriever.setDataSource(themedReactContext, parsedUri);
             } else {
                 setDataSource(mediaSource);
+                metadataRetriever.setDataSource(mediaSource);
             }
             prepare(this);
 
@@ -212,7 +219,20 @@ public class VideoPlayerView extends ScalableVideoView implements
         event.putInt(Events.WIDTH, videoWidth);
         event.putInt(Events.HEIGHT, videoHeight);
 
-        eventEmitter.receiveEvent(getId(), EventsEnum.EVENT_GET_INFO.toString(), event);
+        eventEmitter.receiveEvent(getId(), EventsEnum.EVENT_GET_PREVIEW_IMAGE.toString(), event);
+    }
+
+    public void getFrame(float sec) {
+        Bitmap bmp = metadataRetriever.getFrameAtTime((long) (sec * 1000000));
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        bmp.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream);
+        byte[] byteArray = byteArrayOutputStream .toByteArray();
+        String encoded = Base64.encodeToString(byteArray, Base64.DEFAULT);
+
+        WritableMap event = Arguments.createMap();
+        event.putString("image", encoded);
+
+        eventEmitter.receiveEvent(getId(), EventsEnum.EVENT_GET_PREVIEW_IMAGE.toString(), event);
     }
 
     @Override

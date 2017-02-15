@@ -31,6 +31,7 @@ public class VideoPlayerViewManager extends SimpleViewManager<VideoPlayerView> {
     private final int COMMAND_GET_INFO = 1;
     private final int COMMAND_TRIM_MEDIA = 2;
     private final int COMMAND_COMPRESS_MEDIA = 3;
+    private final int COMMAND_GET_PREVIEW_IMAGE = 4;
 
     @Override
     public String getName() {
@@ -71,15 +72,26 @@ public class VideoPlayerViewManager extends SimpleViewManager<VideoPlayerView> {
                 COMMAND_GET_INFO,
 
                 Events.TRIM_MEDIA,
-                COMMAND_TRIM_MEDIA
+                COMMAND_TRIM_MEDIA,
+
+                Events.GET_PREVIEW_IMAGE,
+                COMMAND_GET_PREVIEW_IMAGE
         );
     }
 
     @Override
     public void receiveCommand(VideoPlayerView root, int commandId, @Nullable ReadableArray args) {
+        assert args != null;
+        Log.d(VideoPlayerViewManager.REACT_PACKAGE, "receiveCommand: " + args.toString());
+        Log.d(VideoPlayerViewManager.REACT_PACKAGE, "receiveCommand: commandId" + String.valueOf(commandId));
         switch (commandId) {
             case COMMAND_GET_INFO:
                 root.sendMediaInfo();
+                break;
+            case COMMAND_GET_PREVIEW_IMAGE:
+                float sec = (float) args.getDouble(0);
+                Log.d(VideoPlayerViewManager.REACT_PACKAGE, "receiveCommand: Get Preview image for sec: " + sec);
+                root.getFrame(sec);
                 break;
             default:
                 Log.d(VideoPlayerViewManager.REACT_PACKAGE, "receiveCommand: Wrong command received");
@@ -130,10 +142,5 @@ public class VideoPlayerViewManager extends SimpleViewManager<VideoPlayerView> {
     public void setVideoStartTime(final VideoPlayerView player, int startTime) {
         Log.d(VideoPlayerViewManager.REACT_PACKAGE, "setVideoStartTime: " + String.valueOf(startTime));
         player.setVideoStartAt(startTime);
-    }
-
-    @ReactMethod
-    public void getMediaInfo(Promise promise) {
-        promise.resolve(10);
     }
 }
