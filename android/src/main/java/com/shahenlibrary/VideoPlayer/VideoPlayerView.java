@@ -4,7 +4,6 @@ import android.graphics.Matrix;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Handler;
-import android.support.annotation.Nullable;
 import android.util.Log;
 import android.widget.MediaController;
 
@@ -12,6 +11,7 @@ import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.LifecycleEventListener;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.uimanager.ThemedReactContext;
+import com.facebook.react.uimanager.events.Event;
 import com.facebook.react.uimanager.events.RCTEventEmitter;
 import com.yqritc.scalablevideoview.ScalableVideoView;
 import com.yqritc.scalablevideoview.ScaleManager;
@@ -34,7 +34,7 @@ public class VideoPlayerView extends ScalableVideoView implements
     private Handler progressUpdateHandler = new Handler();
     private int progressUpdateHandlerDelay = 1000;
     private int videoStartAt = 0;
-    private int videoEndAt;
+    private int videoEndAt = -1;
 
 
     public VideoPlayerView(ThemedReactContext ctx) {
@@ -48,13 +48,15 @@ public class VideoPlayerView extends ScalableVideoView implements
         progressRunnable = new Runnable() {
             @Override
             public void run() {
-                if (mMediaPlayer.isPlaying()) {
+                if (mMediaPlayer != null && mMediaPlayer.isPlaying()) {
                     Log.d(LOG_TAG, "run: Send event");
                     WritableMap event = Arguments.createMap();
                     event.putDouble(Events.CURRENT_TIME, mMediaPlayer.getCurrentPosition() / 1000.0);
-                    if (mMediaPlayer.getCurrentPosition() >= videoEndAt) {
+                    if (mMediaPlayer.getCurrentPosition() >= videoEndAt && videoEndAt != -1) {
+                        Log.d(LOG_TAG, "run: End time reached");
                         mMediaPlayer.seekTo(videoStartAt);
                         if (!mMediaPlayer.isLooping()) {
+                            Log.d(LOG_TAG, "run: Set loop");
                             pause();
                         }
                     }
@@ -87,6 +89,10 @@ public class VideoPlayerView extends ScalableVideoView implements
         if (mediaSource != null && mediaSource.equals(uriString)) {
             return;
         }
+        if (mMediaPlayer == null) {
+            Log.d(LOG_TAG, "setSource: Media player is null");
+            return;
+        }
         reset();
 
         mediaSource = uriString;
@@ -104,6 +110,7 @@ public class VideoPlayerView extends ScalableVideoView implements
             prepare(this);
 
             if (playerPlaying && !mMediaPlayer.isPlaying()) {
+                Log.d(LOG_TAG, "setSource: Start video at once");
                 start();
             }
 
@@ -135,6 +142,9 @@ public class VideoPlayerView extends ScalableVideoView implements
         if (volume < 0) {
             return;
         }
+        if (mMediaPlayer == null) {
+            return;
+        }
         setVolume(volume, volume);
     }
 
@@ -152,8 +162,57 @@ public class VideoPlayerView extends ScalableVideoView implements
         seekTo((int) seekTime);
     }
 
+    public void setVideoEndAt(int endAt) {
+        videoEndAt = endAt;
+        if (mMediaPlayer == null) {
+            return;
+        }
+        if (endAt > mMediaPlayer.getDuration() * 1000) {
+            videoEndAt = mMediaPlayer.getDuration() * 1000;
+        }
+        if (mMediaPlayer.getCurrentPosition() * 1000 > videoEndAt) {
+            mMediaPlayer.seekTo(videoStartAt);
+        }
+    }
+
+    public void cleanup() {
+        if (mMediaPlayer == null) {
+            return;
+        }
+        mMediaPlayer.stop();
+        mMediaPlayer.release();
+        mMediaPlayer = null;
+    }
+
+    public void setVideoStartAt(int startAt) {
+        videoStartAt = startAt;
+        if (mMediaPlayer == null) {
+            return;
+        }
+        if (mMediaPlayer.getDuration() * 1000 < videoStartAt) {
+            mMediaPlayer.seekTo(videoStartAt);
+        }
+    }
+
     public void setProgressUpdateHandlerDelay(int delay) {
         this.progressUpdateHandlerDelay = delay;
+    }
+
+    public void sendMediaInfo() {
+        if (mMediaPlayer == null) {
+            Log.d(LOG_TAG, "sendMediaInfo: media Player is null");
+            return;
+        }
+        int videoWidth = getVideoWidth();
+        int videoHeight = getVideoHeight();
+
+        WritableMap event = Arguments.createMap();
+
+        event.putInt(Events.DURATION, mMediaPlayer.getDuration() / 1000);
+        event.putInt(Events.WIDTH, videoWidth);
+        event.putInt(Events.HEIGHT, videoHeight);
+
+        eventEmitter.receiveEvent(getId(), EventsEnum.EVENT_GET_INFO.toString(), event);
     }
 
     @Override
@@ -184,7 +243,7 @@ public class VideoPlayerView extends ScalableVideoView implements
 
     @Override
     public void onPrepared(MediaPlayer mp) {
-        videoEndAt = mp.getDuration();
+        videoEndAt = mp.getDuration() * 1000;
         Log.d(LOG_TAG, "onPrepared: " + videoEndAt);
     }
 
@@ -241,14 +300,5 @@ public class VideoPlayerView extends ScalableVideoView implements
     @Override
     public int getAudioSessionId() {
         return 0;
-    }
-
-    public void cleanup() {
-        if (mMediaPlayer == null) {
-            return;
-        }
-        mMediaPlayer.stop();
-        mMediaPlayer.release();
-        mMediaPlayer = null;
     }
 }

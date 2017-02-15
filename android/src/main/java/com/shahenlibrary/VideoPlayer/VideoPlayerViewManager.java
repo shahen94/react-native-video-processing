@@ -2,11 +2,16 @@ package com.shahenlibrary.VideoPlayer;
 
 import android.util.Log;
 
+import com.facebook.react.bridge.Promise;
+import com.facebook.react.bridge.ReactMethod;
+import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.common.MapBuilder;
+import com.facebook.react.uimanager.IllegalViewOperationException;
 import com.facebook.react.uimanager.annotations.ReactProp;
 import com.facebook.react.uimanager.SimpleViewManager;
 import com.facebook.react.uimanager.ThemedReactContext;
 import com.shahenlibrary.Events.EventsEnum;
+import com.shahenlibrary.Events.Events;
 
 import java.util.Map;
 
@@ -20,6 +25,12 @@ public class VideoPlayerViewManager extends SimpleViewManager<VideoPlayerView> {
     private final String SET_VOLUME = "volume";
     private final String SET_CURRENT_TIME = "currentTime";
     private final String SET_PROGRESS_DELAY = "progressEventDelay";
+    private final String SET_VIDEO_END_TIME = "endTime";
+    private final String SET_VIDEO_START_TIME = "startTime";
+
+    private final int COMMAND_GET_INFO = 1;
+    private final int COMMAND_TRIM_MEDIA = 2;
+    private final int COMMAND_COMPRESS_MEDIA = 3;
 
     @Override
     public String getName() {
@@ -46,6 +57,33 @@ public class VideoPlayerViewManager extends SimpleViewManager<VideoPlayerView> {
         }
         Log.d(VideoPlayerViewManager.REACT_PACKAGE, builder.toString());
         return builder.build();
+    }
+
+    @Nullable
+    @Override
+    public Map<String, Integer> getCommandsMap() {
+        Log.d(VideoPlayerViewManager.REACT_PACKAGE, "getCommandsMap");
+        return MapBuilder.of(
+                Events.COMPRESS_MEDIA,
+                COMMAND_COMPRESS_MEDIA,
+
+                Events.GET_MEDIA_INFO,
+                COMMAND_GET_INFO,
+
+                Events.TRIM_MEDIA,
+                COMMAND_TRIM_MEDIA
+        );
+    }
+
+    @Override
+    public void receiveCommand(VideoPlayerView root, int commandId, @Nullable ReadableArray args) {
+        switch (commandId) {
+            case COMMAND_GET_INFO:
+                root.sendMediaInfo();
+                break;
+            default:
+                Log.d(VideoPlayerViewManager.REACT_PACKAGE, "receiveCommand: Wrong command received");
+        }
     }
 
     @ReactProp(name = SET_SOURCE)
@@ -80,5 +118,22 @@ public class VideoPlayerViewManager extends SimpleViewManager<VideoPlayerView> {
     @ReactProp(name = SET_PROGRESS_DELAY, defaultInt = 1000)
     public void setProgressDelay(final VideoPlayerView player, int delay) {
         player.setProgressUpdateHandlerDelay(delay);
+    }
+
+    @ReactProp(name = SET_VIDEO_END_TIME)
+    public void setVideoEndTime(final VideoPlayerView player, int endTime) {
+        Log.d(VideoPlayerViewManager.REACT_PACKAGE, "setVideoEndTime: " + String.valueOf(endTime));
+        player.setVideoEndAt(endTime);
+    }
+
+    @ReactProp(name = SET_VIDEO_START_TIME)
+    public void setVideoStartTime(final VideoPlayerView player, int startTime) {
+        Log.d(VideoPlayerViewManager.REACT_PACKAGE, "setVideoStartTime: " + String.valueOf(startTime));
+        player.setVideoStartAt(startTime);
+    }
+
+    @ReactMethod
+    public void getMediaInfo(Promise promise) {
+        promise.resolve(10);
     }
 }
