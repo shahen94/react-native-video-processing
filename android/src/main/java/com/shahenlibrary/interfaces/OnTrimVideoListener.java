@@ -21,24 +21,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.shahenlibrary;
 
-import com.facebook.react.bridge.ReactApplicationContext;
-import com.facebook.react.bridge.ReactContextBaseJavaModule;
-import com.facebook.react.bridge.ReactMethod;
-import com.facebook.react.bridge.Callback;
+package com.shahenlibrary.interfaces;
 
-public class RNVideoProcessingModule extends ReactContextBaseJavaModule {
 
-  private final ReactApplicationContext reactContext;
+import android.net.Uri;
 
-  public RNVideoProcessingModule(ReactApplicationContext reactContext) {
-    super(reactContext);
-    this.reactContext = reactContext;
-  }
+public interface OnTrimVideoListener {
+    void onError(final String message);
+    void onTrimStarted();
+    void getResult(final Uri uri);
+    void cancelAction();
 
-  @Override
-  public String getName() {
-    return "RNVideoProcessing";
-  }
 }

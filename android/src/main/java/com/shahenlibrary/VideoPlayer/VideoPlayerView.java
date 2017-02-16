@@ -1,3 +1,26 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) 2017 Shahen Hovhannisyan.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package com.shahenlibrary.VideoPlayer;
 
 import android.graphics.Bitmap;
@@ -16,6 +39,8 @@ import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.uimanager.ThemedReactContext;
 import com.facebook.react.uimanager.events.Event;
 import com.facebook.react.uimanager.events.RCTEventEmitter;
+import com.shahenlibrary.interfaces.OnTrimVideoListener;
+import com.shahenlibrary.utils.VideoEdit;
 import com.yqritc.scalablevideoview.ScalableVideoView;
 import com.yqritc.scalablevideoview.ScaleManager;
 import com.yqritc.scalablevideoview.Size;
@@ -23,6 +48,7 @@ import com.shahenlibrary.Events.Events;
 import com.shahenlibrary.Events.EventsEnum;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 
 public class VideoPlayerView extends ScalableVideoView implements
@@ -49,7 +75,6 @@ public class VideoPlayerView extends ScalableVideoView implements
         themedReactContext.addLifecycleEventListener(this);
         setSurfaceTextureListener(this);
         initPlayerIfNeeded();
-
         progressRunnable = new Runnable() {
             @Override
             public void run() {
@@ -233,6 +258,58 @@ public class VideoPlayerView extends ScalableVideoView implements
         event.putString("image", encoded);
 
         eventEmitter.receiveEvent(getId(), EventsEnum.EVENT_GET_PREVIEW_IMAGE.toString(), event);
+    }
+
+    public void trimMedia(int startMs, int endMs) {
+        OnTrimVideoListener trimVideoListener = new OnTrimVideoListener() {
+            @Override
+            public void onError(String message) {
+                Log.d(LOG_TAG, "Trimmed onError: " + message);
+                WritableMap event = Arguments.createMap();
+                event.putString(Events.ERROR_TRIM, message);
+
+                eventEmitter.receiveEvent(getId(), EventsEnum.EVENT_GET_TRIMMED_SOURCE.toString(), event);
+            }
+
+            @Override
+            public void onTrimStarted() {
+                Log.d(LOG_TAG, "Trimmed onTrimStarted");
+            }
+
+            @Override
+            public void getResult(Uri uri) {
+                Log.d(LOG_TAG, "getResult: " + uri.toString());
+                WritableMap event = Arguments.createMap();
+                event.putString("source", uri.toString());
+                eventEmitter.receiveEvent(getId(), EventsEnum.EVENT_GET_TRIMMED_SOURCE.toString(), event);
+            }
+
+            @Override
+            public void cancelAction() {
+                Log.d(LOG_TAG, "Trimmed cancelAction");
+            }
+        };
+
+        Log.d(LOG_TAG, "trimMedia at : startAt -> " + startMs + " : endAt -> " + endMs);
+        File mediaFile = new File(mediaSource);
+        long startTrimFromPos = startMs * 1000;
+        long endTrimFromPos = startMs * 1000;
+        String[] dPath = mediaSource.split("/");
+        StringBuilder builder = new StringBuilder();
+        for (int i = 0; i < dPath.length; ++i) {
+            if (i == dPath.length - 1) {
+                continue;
+            }
+            builder.append(dPath[i]);
+            builder.append(File.separator);
+        }
+        String path = builder.toString();
+        try {
+            VideoEdit.startTrim(mediaFile, path, startTrimFromPos, endTrimFromPos, trimVideoListener);
+        } catch (IOException e) {
+            e.printStackTrace();
+            Log.d(LOG_TAG, "trimMedia: error -> " + e.toString());
+        }
     }
 
     @Override

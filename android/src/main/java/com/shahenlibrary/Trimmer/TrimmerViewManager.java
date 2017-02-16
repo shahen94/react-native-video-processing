@@ -21,24 +21,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.shahenlibrary;
+package com.shahenlibrary.Trimmer;
 
-import com.facebook.react.bridge.ReactApplicationContext;
-import com.facebook.react.bridge.ReactContextBaseJavaModule;
-import com.facebook.react.bridge.ReactMethod;
-import com.facebook.react.bridge.Callback;
+import android.support.annotation.NonNull;
+import android.util.Log;
 
-public class RNVideoProcessingModule extends ReactContextBaseJavaModule {
+import com.facebook.react.uimanager.SimpleViewManager;
+import com.facebook.react.uimanager.ThemedReactContext;
+import com.facebook.react.uimanager.annotations.ReactProp;
 
-  private final ReactApplicationContext reactContext;
+public class TrimmerViewManager extends SimpleViewManager<TrimmerView> {
+    public static final String REACT_PACKAGE = "RNVideoTrimmer";
+    private final String SET_SOURCE = "source";
 
-  public RNVideoProcessingModule(ReactApplicationContext reactContext) {
-    super(reactContext);
-    this.reactContext = reactContext;
-  }
+    @Override
+    public String getName() {
+        return REACT_PACKAGE;
+    }
 
-  @Override
-  public String getName() {
-    return "RNVideoProcessing";
-  }
+    @Override
+    protected TrimmerView createViewInstance(ThemedReactContext reactContext) {
+        return new TrimmerView(reactContext);
+    }
+
+    @ReactProp(name = SET_SOURCE)
+    public void setSource(TrimmerView view, @NonNull String source) {
+        Log.d(REACT_PACKAGE, "setSource: " + source);
+        view.setSource(source);
+    }
 }

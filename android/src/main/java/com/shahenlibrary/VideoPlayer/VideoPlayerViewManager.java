@@ -1,3 +1,26 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) 2017 Shahen Hovhannisyan.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package com.shahenlibrary.VideoPlayer;
 
 import android.util.Log;
@@ -87,6 +110,12 @@ public class VideoPlayerViewManager extends SimpleViewManager<VideoPlayerView> {
         switch (commandId) {
             case COMMAND_GET_INFO:
                 root.sendMediaInfo();
+                break;
+            case COMMAND_TRIM_MEDIA:
+                int startAt = args.getInt(0);
+                int endAt = args.getInt(1);
+                root.trimMedia(startAt, endAt);
+                // TODO
                 break;
             case COMMAND_GET_PREVIEW_IMAGE:
                 float sec = (float) args.getDouble(0);

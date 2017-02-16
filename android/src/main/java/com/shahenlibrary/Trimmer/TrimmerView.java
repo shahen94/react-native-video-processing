@@ -21,24 +21,39 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.shahenlibrary;
 
-import com.facebook.react.bridge.ReactApplicationContext;
-import com.facebook.react.bridge.ReactContextBaseJavaModule;
-import com.facebook.react.bridge.ReactMethod;
-import com.facebook.react.bridge.Callback;
+package com.shahenlibrary.Trimmer;
 
-public class RNVideoProcessingModule extends ReactContextBaseJavaModule {
 
-  private final ReactApplicationContext reactContext;
+import android.content.Context;
+import android.net.Uri;
+import android.support.annotation.NonNull;
+import android.util.AttributeSet;
+import android.util.Log;
+import android.view.View;
 
-  public RNVideoProcessingModule(ReactApplicationContext reactContext) {
-    super(reactContext);
-    this.reactContext = reactContext;
-  }
+import com.facebook.react.uimanager.ThemedReactContext;
 
-  @Override
-  public String getName() {
-    return "RNVideoProcessing";
-  }
+
+public class TrimmerView extends View {
+
+    private ThemedReactContext reactContext;
+    private String source;
+
+    public TrimmerView(ThemedReactContext ctx) {
+        super(ctx, null);
+        reactContext = ctx;
+    }
+
+    public TrimmerView(@NonNull Context context, AttributeSet attrs) {
+        super(context, attrs);
+    }
+
+    public TrimmerView(@NonNull Context context, AttributeSet attrs, int defStyleAttr) {
+        super(context, attrs, defStyleAttr);
+    }
+
+    public void setSource(String src) {
+        // @TODO
+    }
 }

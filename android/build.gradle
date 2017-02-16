@@ -22,5 +22,7 @@ android {
 dependencies {
     compile 'com.facebook.react:react-native:0.20.+'
     compile 'com.yqritc:android-scalablevideoview:1.0.4'
+    compile 'com.googlecode.mp4parser:isoparser:1.1.20'
+
 }
   
