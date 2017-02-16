@@ -1,6 +1,6 @@
-
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="com.shahenlibrary">
-
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.shahenlibrary">
+    <uses-sdk tools:overrideLibrary="net.ypresto.androidtranscoder" />
 </manifest>
   

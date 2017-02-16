@@ -21,24 +21,40 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.shahenlibrary;
+package com.shahenlibrary.Trimmer;
 
+import android.support.annotation.NonNull;
+import android.util.Log;
+
+import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
-import com.facebook.react.bridge.Callback;
 
-public class RNVideoProcessingModule extends ReactContextBaseJavaModule {
+public class TrimmerManager extends ReactContextBaseJavaModule {
+    public static final String REACT_PACKAGE = "RNTrimmerManager";
 
-  private final ReactApplicationContext reactContext;
+    private final ReactApplicationContext reactContext;
 
-  public RNVideoProcessingModule(ReactApplicationContext reactContext) {
-    super(reactContext);
-    this.reactContext = reactContext;
-  }
+    public TrimmerManager(ReactApplicationContext reactContext) {
+        super(reactContext);
+        this.reactContext = reactContext;
+    }
 
-  @Override
-  public String getName() {
-    return "RNVideoProcessing";
-  }
+    @Override
+    public String getName() {
+        return REACT_PACKAGE;
+    }
+
+    @ReactMethod
+    public void getPreviewImages(String path, Promise promise) {
+        Log.d(REACT_PACKAGE, "getPreviewImages: " + path);
+        Trimmer.getPreviewImages(path, promise);
+    }
+
+    @ReactMethod
+    public void getVideoInfo(String path, Promise promise) {
+        Log.d(REACT_PACKAGE, "getVideoInfo: " + path);
+        Trimmer.getVideoInfo(path, promise);
+    }
 }

@@ -32,13 +32,15 @@ import com.facebook.react.bridge.NativeModule;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.uimanager.ViewManager;
 import com.facebook.react.bridge.JavaScriptModule;
-import com.shahenlibrary.Trimmer.TrimmerViewManager;
+import com.shahenlibrary.Trimmer.TrimmerManager;
 import com.shahenlibrary.VideoPlayer.VideoPlayerViewManager;
 
 public class RNVideoProcessingPackage implements ReactPackage {
     @Override
     public List<NativeModule> createNativeModules(ReactApplicationContext reactContext) {
-      return Arrays.<NativeModule>asList(new RNVideoProcessingModule(reactContext));
+      return Arrays.<NativeModule>asList(
+              new TrimmerManager(reactContext)
+      );
     }
 
     @Override
@@ -49,8 +51,7 @@ public class RNVideoProcessingPackage implements ReactPackage {
     @Override
     public List<ViewManager> createViewManagers(ReactApplicationContext reactContext) {
       return Arrays.<ViewManager>asList(
-          new VideoPlayerViewManager(),
-          new TrimmerViewManager()
+          new VideoPlayerViewManager()
       );
     }
 }

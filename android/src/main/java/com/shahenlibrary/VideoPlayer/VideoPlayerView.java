@@ -29,6 +29,7 @@ import android.media.MediaMetadataRetriever;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Handler;
+import android.support.annotation.Nullable;
 import android.util.Base64;
 import android.util.Log;
 import android.widget.MediaController;
@@ -37,7 +38,6 @@ import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.LifecycleEventListener;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.uimanager.ThemedReactContext;
-import com.facebook.react.uimanager.events.Event;
 import com.facebook.react.uimanager.events.RCTEventEmitter;
 import com.shahenlibrary.interfaces.OnTrimVideoListener;
 import com.shahenlibrary.utils.VideoEdit;
@@ -244,7 +244,7 @@ public class VideoPlayerView extends ScalableVideoView implements
         event.putInt(Events.WIDTH, videoWidth);
         event.putInt(Events.HEIGHT, videoHeight);
 
-        eventEmitter.receiveEvent(getId(), EventsEnum.EVENT_GET_PREVIEW_IMAGE.toString(), event);
+        eventEmitter.receiveEvent(getId(), EventsEnum.EVENT_GET_INFO.toString(), event);
     }
 
     public void getFrame(float sec) {
@@ -260,7 +260,7 @@ public class VideoPlayerView extends ScalableVideoView implements
         eventEmitter.receiveEvent(getId(), EventsEnum.EVENT_GET_PREVIEW_IMAGE.toString(), event);
     }
 
-    public void trimMedia(int startMs, int endMs) {
+    public void trimMedia(@Nullable int startMs, int endMs) {
         OnTrimVideoListener trimVideoListener = new OnTrimVideoListener() {
             @Override
             public void onError(String message) {
@@ -293,7 +293,7 @@ public class VideoPlayerView extends ScalableVideoView implements
         Log.d(LOG_TAG, "trimMedia at : startAt -> " + startMs + " : endAt -> " + endMs);
         File mediaFile = new File(mediaSource);
         long startTrimFromPos = startMs * 1000;
-        long endTrimFromPos = startMs * 1000;
+        long endTrimFromPos = endMs * 1000;
         String[] dPath = mediaSource.split("/");
         StringBuilder builder = new StringBuilder();
         for (int i = 0; i < dPath.length; ++i) {
