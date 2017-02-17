@@ -2,6 +2,10 @@
 
  [![Build Status](https://travis-ci.org/shahen94/react-native-video-processing.svg?branch=master)](https://travis-ci.org/shahen94/react-native-video-processing) [![semantic-release](https://img.shields.io/badge/%20%20%F0%9F%93%A6%F0%9F%9A%80-semantic--release-e10079.svg?style=plastic)](https://github.com/semantic-release/semantic-release) [![npm version](https://badge.fury.io/js/react-native-video-processing.svg)](https://badge.fury.io/js/react-native-video-processing) ![npm package](https://img.shields.io/npm/dm/react-native-video-processing.svg)
 
+### Getting Started
+```sh
+npm install react-native-video-processing --save
+```
 ### You can check test just running
 `$ npm test` or `$ yarn test`
 
@@ -9,7 +13,9 @@
 
 **Note: For RN 0.4x use 1.0 version, For RN 0.3x use  0.16**
 #### [Android]
-Android version is under development, you can follow the development process on `android` branch
+```sh
+$ react-native link react-native-video-processing
+```
 #### [iOS]
 
 1. In Xcode, click the "Add Files to <your-project-name>".
