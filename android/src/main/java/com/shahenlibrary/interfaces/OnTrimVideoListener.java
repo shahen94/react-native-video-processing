@@ -21,37 +21,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.shahenlibrary;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+package com.shahenlibrary.interfaces;
 
-import com.facebook.react.ReactPackage;
-import com.facebook.react.bridge.NativeModule;
-import com.facebook.react.bridge.ReactApplicationContext;
-import com.facebook.react.uimanager.ViewManager;
-import com.facebook.react.bridge.JavaScriptModule;
-import com.shahenlibrary.Trimmer.TrimmerManager;
-import com.shahenlibrary.VideoPlayer.VideoPlayerViewManager;
 
-public class RNVideoProcessingPackage implements ReactPackage {
-    @Override
-    public List<NativeModule> createNativeModules(ReactApplicationContext reactContext) {
-      return Arrays.<NativeModule>asList(
-              new TrimmerManager(reactContext)
-      );
-    }
+import android.net.Uri;
 
-    @Override
-    public List<Class<? extends JavaScriptModule>> createJSModules() {
-      return Collections.emptyList();
-    }
+public interface OnTrimVideoListener {
+    void onError(final String message);
+    void onTrimStarted();
+    void getResult(final Uri uri);
+    void cancelAction();
 
-    @Override
-    public List<ViewManager> createViewManagers(ReactApplicationContext reactContext) {
-      return Arrays.<ViewManager>asList(
-          new VideoPlayerViewManager()
-      );
-    }
 }

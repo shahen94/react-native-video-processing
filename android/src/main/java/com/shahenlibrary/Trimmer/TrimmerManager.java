@@ -21,37 +21,40 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.shahenlibrary;
+package com.shahenlibrary.Trimmer;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import android.support.annotation.NonNull;
+import android.util.Log;
 
-import com.facebook.react.ReactPackage;
-import com.facebook.react.bridge.NativeModule;
+import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
-import com.facebook.react.uimanager.ViewManager;
-import com.facebook.react.bridge.JavaScriptModule;
-import com.shahenlibrary.Trimmer.TrimmerManager;
-import com.shahenlibrary.VideoPlayer.VideoPlayerViewManager;
+import com.facebook.react.bridge.ReactContextBaseJavaModule;
+import com.facebook.react.bridge.ReactMethod;
 
-public class RNVideoProcessingPackage implements ReactPackage {
-    @Override
-    public List<NativeModule> createNativeModules(ReactApplicationContext reactContext) {
-      return Arrays.<NativeModule>asList(
-              new TrimmerManager(reactContext)
-      );
+public class TrimmerManager extends ReactContextBaseJavaModule {
+    public static final String REACT_PACKAGE = "RNTrimmerManager";
+
+    private final ReactApplicationContext reactContext;
+
+    public TrimmerManager(ReactApplicationContext reactContext) {
+        super(reactContext);
+        this.reactContext = reactContext;
     }
 
     @Override
-    public List<Class<? extends JavaScriptModule>> createJSModules() {
-      return Collections.emptyList();
+    public String getName() {
+        return REACT_PACKAGE;
     }
 
-    @Override
-    public List<ViewManager> createViewManagers(ReactApplicationContext reactContext) {
-      return Arrays.<ViewManager>asList(
-          new VideoPlayerViewManager()
-      );
+    @ReactMethod
+    public void getPreviewImages(String path, Promise promise) {
+        Log.d(REACT_PACKAGE, "getPreviewImages: " + path);
+        Trimmer.getPreviewImages(path, promise);
+    }
+
+    @ReactMethod
+    public void getVideoInfo(String path, Promise promise) {
+        Log.d(REACT_PACKAGE, "getVideoInfo: " + path);
+        Trimmer.getVideoInfo(path, promise);
     }
 }
