@@ -51,15 +51,16 @@ class App extends Component {
         const options = {
             startTime: 0,
             endTime: 15,
-            quality: VideoPlayer.Constants.quality.QUALITY_1280x720,
-            saveToCameraRoll: true, // default is false
-            saveWithCurrentDate: true, // default is false
+            quality: VideoPlayer.Constants.quality.QUALITY_1280x720, // iOS only
+            saveToCameraRoll: true, // default is false // iOS only
+            saveWithCurrentDate: true, // default is false // iOS only
         };
-        this.videoPlayerRef.trim(require('./videoFile.mp4'), options)
+        this.videoPlayerRef.trim(options)
             .then((newSource) => console.log(newSource))
             .catch(console.warn);
     }
 
+    // iOS only
     compressVideo() {
         const options = {
             width: 720,
@@ -69,20 +70,20 @@ class App extends Component {
             saveWithCurrentDate: true, // default is false
             minimumBitrate: 300000
         };
-        this.videoPlayerRef.compress(require('./videoFile.mp4'), options)
+        this.videoPlayerRef.compress(options)
             .then((newSource) => console.log(newSource))
             .catch(console.warn);
     }
 
     getPreviewImageForSecond(second) {
-        const maximumSize = { width: 640, height: 1024 }; // default is { width: 1080, height: 1080 }
-        this.videoPlayerRef.getPreviewForSecond(require('./videoFile.mp4'), second, maximumSize)
+        const maximumSize = { width: 640, height: 1024 }; // default is { width: 1080, height: 1080 } iOS only
+        this.videoPlayerRef.getPreviewForSecond(second, maximumSize) // maximumSize is iOS only
         .then((base64String) => console.log('This is BASE64 of image', base64String))
         .catch(console.warn);
     }
 
     getVideoInfo() {
-        this.videoPlayerRef.getVideoInfo(require('./videoFile.mp4'))
+        this.videoPlayerRef.getVideoInfo()
         .then((info) => console.log(info))
         .catch(console.warn);
     }
@@ -96,20 +97,20 @@ class App extends Component {
                     endTime={120}   // seconds
                     play={true}     // default false
                     replay={true}   // should player play video again if it's ended
-                    rotate={true}   // use this prop to rotate video if it captured in landscape mode
-                    source={require('./videoFile.mp4')}
-                    playerWidth={300}
-                    playerHeight={500}
+                    rotate={true}   // use this prop to rotate video if it captured in landscape mode iOS only
+                    source={{ uri: 'file:///sdcard/DCIM/....' }}
+                    playerWidth={300} // iOS only
+                    playerHeight={500} // iOS only
                     style={{ backgroundColor: 'black' }}
-                    onChange={({ nativeEvent }) => console.log({ nativeEvent })}
+                    onChange={({ nativeEvent }) => console.log({ nativeEvent })} // get Current time on every second
                 />
                 <Trimmer
-                    source={require('./videoFile.mp4')}
+                    source={{ uri: 'file:///sdcard/DCIM/....' }}
                     height={100}
                     width={300}
-                    currentTime={this.video.currentTime} // use this prop to set tracker position
-                    themeColor={'white'}
-                    trackerColor={'green'}
+                    currentTime={this.video.currentTime} // use this prop to set tracker position iOS only
+                    themeColor={'white'} // iOS only
+                    trackerColor={'green'} // iOS only
                     onChange={(e) => console.log(e.startTime, e.endTime)}
                 />
             </View>

@@ -27,66 +27,82 @@ package com.shahenlibrary.Trimmer;
 import android.annotation.TargetApi;
 import android.graphics.Bitmap;
 import android.media.MediaMetadataRetriever;
+import android.net.Uri;
 import android.os.Build;
 import android.util.Base64;
 
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.Promise;
+import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.uimanager.events.Event;
 import com.shahenlibrary.Events.Events;
+import com.shahenlibrary.utils.VideoEdit;
 
 import java.io.ByteArrayOutputStream;
 
+import wseemann.media.FFmpegMediaMetadataRetriever;
+
 public class Trimmer {
 
-    public static void getPreviewImages(String path, Promise promise) {
-        MediaMetadataRetriever retriever = new MediaMetadataRetriever();
-        retriever.setDataSource(path);
-
-        WritableArray images = Arguments.createArray();
-        int duration = Integer.parseInt(retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION));
-        int width = Integer.parseInt(retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH));
-        int height = Integer.parseInt(retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT));
-
-        int aspectRatio = Math.round(width / height);
-        int resizeWidth = 200;
-        int resizeHeight = resizeWidth / aspectRatio;
-
-        for (int i = 0; i < duration; i += duration / 10) {
-            Bitmap currBmp = Bitmap.createScaledBitmap(retriever.getFrameAtTime(i * 1000), resizeWidth, resizeHeight, false);
-            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-            currBmp.compress(Bitmap.CompressFormat.PNG, 90, byteArrayOutputStream);
-            byte[] byteArray = byteArrayOutputStream .toByteArray();
-            String encoded = "data:image/png;base64," + Base64.encodeToString(byteArray, Base64.DEFAULT);
-            images.pushString(encoded);
-        }
-
-        WritableMap event = Arguments.createMap();
-
-        event.putArray("images", images);
-
-        promise.resolve(event);
-        retriever.release();
+  public static void getPreviewImages(String path, Promise promise, ReactApplicationContext ctx) {
+    FFmpegMediaMetadataRetriever retriever = new FFmpegMediaMetadataRetriever();
+    if (VideoEdit.shouldUseURI(path)) {
+      retriever.setDataSource(ctx, Uri.parse(path));
+    } else {
+      retriever.setDataSource(path);
     }
 
-    @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
-    public static void getVideoInfo(String path, Promise promise) {
-        MediaMetadataRetriever mmr = new MediaMetadataRetriever();
-        mmr.setDataSource(path);
+    WritableArray images = Arguments.createArray();
+    int duration = Integer.parseInt(retriever.extractMetadata(FFmpegMediaMetadataRetriever.METADATA_KEY_DURATION));
+    int width = Integer.parseInt(retriever.extractMetadata(FFmpegMediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH));
+    int height = Integer.parseInt(retriever.extractMetadata(FFmpegMediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT));
 
-        int duration = Integer.parseInt(mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION));
-        int width = Integer.parseInt(mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH));
-        int height = Integer.parseInt(mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT));
-        int orientation = Integer.parseInt(mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_ROTATION));
+    int aspectRatio = Math.round(width / height);
+    int resizeWidth = 200;
+    int resizeHeight = resizeWidth / aspectRatio;
 
-        WritableMap event = Arguments.createMap();
-        event.putInt(Events.DURATION, duration);
-        event.putInt(Events.WIDTH, width);
-        event.putInt(Events.HEIGHT, height);
-        event.putInt(Events.ORIENTATION, orientation);
-
-        promise.resolve(event);
+    for (int i = 0; i < duration; i += duration / 10) {
+      Bitmap currBmp = Bitmap.createScaledBitmap(retriever.getFrameAtTime(i * 1000), resizeWidth, resizeHeight, false);
+      ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+      currBmp.compress(Bitmap.CompressFormat.PNG, 90, byteArrayOutputStream);
+      byte[] byteArray = byteArrayOutputStream .toByteArray();
+      String encoded = "data:image/png;base64," + Base64.encodeToString(byteArray, Base64.DEFAULT);
+      images.pushString(encoded);
     }
+
+    WritableMap event = Arguments.createMap();
+
+    event.putArray("images", images);
+
+    promise.resolve(event);
+    retriever.release();
+  }
+
+  @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
+  public static void getVideoInfo(String path, Promise promise, ReactApplicationContext ctx) {
+    FFmpegMediaMetadataRetriever mmr = new FFmpegMediaMetadataRetriever();
+
+    if (VideoEdit.shouldUseURI(path)) {
+      mmr.setDataSource(ctx, Uri.parse(path));
+    } else {
+      mmr.setDataSource(path);
+    }
+
+    int duration = Integer.parseInt(mmr.extractMetadata(FFmpegMediaMetadataRetriever.METADATA_KEY_DURATION));
+    int width = Integer.parseInt(mmr.extractMetadata(FFmpegMediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH));
+    int height = Integer.parseInt(mmr.extractMetadata(FFmpegMediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT));
+    int orientation = Integer.parseInt(mmr.extractMetadata(FFmpegMediaMetadataRetriever.METADATA_KEY_VIDEO_ROTATION));
+
+    WritableMap event = Arguments.createMap();
+    event.putInt(Events.DURATION, duration);
+    event.putInt(Events.WIDTH, width);
+    event.putInt(Events.HEIGHT, height);
+    event.putInt(Events.ORIENTATION, orientation);
+
+    promise.resolve(event);
+
+    mmr.release();
+  }
 }
