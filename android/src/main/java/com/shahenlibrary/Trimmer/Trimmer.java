@@ -26,10 +26,12 @@ package com.shahenlibrary.Trimmer;
 
 import android.annotation.TargetApi;
 import android.graphics.Bitmap;
+import android.graphics.Matrix;
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.Build;
 import android.util.Base64;
+import android.util.Log;
 
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.Promise;
@@ -58,15 +60,37 @@ public class Trimmer {
     int duration = Integer.parseInt(retriever.extractMetadata(FFmpegMediaMetadataRetriever.METADATA_KEY_DURATION));
     int width = Integer.parseInt(retriever.extractMetadata(FFmpegMediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH));
     int height = Integer.parseInt(retriever.extractMetadata(FFmpegMediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT));
+    int orientation = Integer.parseInt(retriever.extractMetadata(FFmpegMediaMetadataRetriever.METADATA_KEY_VIDEO_ROTATION));
 
-    int aspectRatio = Math.round(width / height);
+    float aspectRatio = width / height;
+
     int resizeWidth = 200;
-    int resizeHeight = resizeWidth / aspectRatio;
+    int resizeHeight = Math.round(resizeWidth / aspectRatio);
+
+    float scaleWidth = ((float) resizeWidth) / width;
+    float scaleHeight = ((float) resizeHeight) / height;
+
+    Log.d(TrimmerManager.REACT_PACKAGE, "getPreviewImages: \n\tduration: " + duration +
+      "\n\twidth: " + width +
+      "\n\theight: " + height +
+      "\n\torientation: " + orientation +
+      "\n\taspectRatio: " + aspectRatio +
+      "\n\tresizeWidth: " + resizeWidth +
+      "\n\tresizeHeight: " + resizeHeight
+    );
+
+    Matrix mx = new Matrix();
+
+    mx.postScale(scaleWidth, scaleHeight);
+    mx.postRotate(orientation - 360);
 
     for (int i = 0; i < duration; i += duration / 10) {
-      Bitmap currBmp = Bitmap.createScaledBitmap(retriever.getFrameAtTime(i * 1000), resizeWidth, resizeHeight, false);
+      Bitmap frame = retriever.getFrameAtTime(i * 1000);
+      Bitmap currBmp = Bitmap.createScaledBitmap(frame, resizeWidth, resizeHeight, false);
+
+      Bitmap normalizedBmp = Bitmap.createBitmap(currBmp, 0, 0, resizeWidth, resizeHeight, mx, true);
       ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-      currBmp.compress(Bitmap.CompressFormat.PNG, 90, byteArrayOutputStream);
+      normalizedBmp.compress(Bitmap.CompressFormat.PNG, 90, byteArrayOutputStream);
       byte[] byteArray = byteArrayOutputStream .toByteArray();
       String encoded = "data:image/png;base64," + Base64.encodeToString(byteArray, Base64.DEFAULT);
       images.pushString(encoded);
