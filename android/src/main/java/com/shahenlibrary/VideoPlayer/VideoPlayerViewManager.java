@@ -143,7 +143,7 @@ public class VideoPlayerViewManager extends SimpleViewManager<VideoPlayerView> {
   @ReactProp(name = SET_REPLAY, defaultBoolean = true)
   public void setReplay(final VideoPlayerView player, boolean replay) {
     Log.d(VideoPlayerViewManager.REACT_PACKAGE, "set replay: " + String.valueOf(replay));
-    player.setLooping(replay);
+    player.setRepeat(replay);
   }
 
   @ReactProp(name = SET_VOLUME, defaultFloat = 10f)

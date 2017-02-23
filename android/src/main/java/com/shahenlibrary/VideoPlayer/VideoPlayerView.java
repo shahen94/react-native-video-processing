@@ -61,7 +61,7 @@ public class VideoPlayerView extends ScalableVideoView implements
   private ThemedReactContext themedReactContext;
   private RCTEventEmitter eventEmitter;
   private String mediaSource;
-  private boolean playerPlaying = true;
+  private boolean mPlay = true;
   private String LOG_TAG = "RNVideoProcessing";
   private Runnable progressRunnable = null;
   private Handler progressUpdateHandler = new Handler();
@@ -69,6 +69,8 @@ public class VideoPlayerView extends ScalableVideoView implements
   private int progressUpdateHandlerDelay = 1000;
   private int videoStartAt = 0;
   private int videoEndAt = -1;
+  private boolean mLooping = false;
+  private float mVolume = 10f;
 
 
   public VideoPlayerView(ThemedReactContext ctx) {
@@ -86,8 +88,8 @@ public class VideoPlayerView extends ScalableVideoView implements
           if (mMediaPlayer.getCurrentPosition() >= videoEndAt && videoEndAt != -1) {
             Log.d(LOG_TAG, "run: End time reached");
             mMediaPlayer.seekTo(videoStartAt);
-            if (!mMediaPlayer.isLooping()) {
-              Log.d(LOG_TAG, "run: Set loop");
+            if (!mLooping) {
+              Log.d(LOG_TAG, "run: Pause video, no looping");
               pause();
             }
           }
@@ -145,7 +147,7 @@ public class VideoPlayerView extends ScalableVideoView implements
       }
       prepare(this);
 
-      if (playerPlaying && !mMediaPlayer.isPlaying()) {
+      if (mPlay && !mMediaPlayer.isPlaying()) {
         Log.d(LOG_TAG, "setSource: Start video at once");
         start();
       }
@@ -158,7 +160,7 @@ public class VideoPlayerView extends ScalableVideoView implements
 
   public void setPlay(final boolean shouldPlay) {
     Log.d(LOG_TAG, "setPlay: " + shouldPlay);
-    playerPlaying = shouldPlay;
+    mPlay = shouldPlay;
 
     if (mMediaPlayer == null) {
       Log.d(LOG_TAG, "setPlay: Player reference is null");
@@ -178,6 +180,7 @@ public class VideoPlayerView extends ScalableVideoView implements
     if (volume < 0) {
       return;
     }
+    mVolume = volume;
     if (mMediaPlayer == null) {
       return;
     }
@@ -196,6 +199,28 @@ public class VideoPlayerView extends ScalableVideoView implements
     }
     Log.d(LOG_TAG, "set seek to " + String.valueOf((int) seekTime));
     seekTo((int) seekTime);
+  }
+
+  public void setRepeat(boolean repeat) {
+    mLooping = repeat;
+
+    if (mMediaPlayer == null) {
+      return;
+    }
+    mMediaPlayer.setLooping(mLooping);
+  }
+
+  private void applyProps() {
+    if (mMediaPlayer == null) {
+      Log.d(LOG_TAG, "applyProps: MediaPlayer is null");
+    }
+    if (!mMediaPlayer.isLooping()) {
+      mMediaPlayer.setLooping(mLooping);
+    }
+    if (mPlay && !isPlaying()) {
+      mMediaPlayer.start();
+    }
+    mMediaPlayer.setVolume(mVolume, mVolume);
   }
 
   public void setVideoEndAt(int endAt) {
@@ -357,7 +382,8 @@ public class VideoPlayerView extends ScalableVideoView implements
     videoEndAt = mp.getDuration();
     setScalableType(ScalableType.FIT_XY);
     invalidate();
-    Log.d(LOG_TAG, "onPrepared: " + videoEndAt);
+
+    applyProps();
   }
 
   @Override
@@ -371,7 +397,7 @@ public class VideoPlayerView extends ScalableVideoView implements
       return;
     }
     Log.d(LOG_TAG, "onCompletion: isLooping " + mp.isLooping());
-    if (mp.isLooping()) {
+    if (mLooping) {
       Log.d(LOG_TAG, "onCompletion: seek to start at : " + videoStartAt);
       mp.seekTo(videoStartAt);
     }
