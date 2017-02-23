@@ -32,29 +32,29 @@ import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 
 public class TrimmerManager extends ReactContextBaseJavaModule {
-    public static final String REACT_PACKAGE = "RNTrimmerManager";
+  public static final String REACT_PACKAGE = "RNTrimmerManager";
 
-    private final ReactApplicationContext reactContext;
+  private final ReactApplicationContext reactContext;
 
-    public TrimmerManager(ReactApplicationContext reactContext) {
-        super(reactContext);
-        this.reactContext = reactContext;
-    }
+  public TrimmerManager(ReactApplicationContext reactContext) {
+    super(reactContext);
+    this.reactContext = reactContext;
+  }
 
-    @Override
-    public String getName() {
-        return REACT_PACKAGE;
-    }
+  @Override
+  public String getName() {
+    return REACT_PACKAGE;
+  }
 
-    @ReactMethod
-    public void getPreviewImages(String path, Promise promise) {
-        Log.d(REACT_PACKAGE, "getPreviewImages: " + path);
-        Trimmer.getPreviewImages(path, promise);
-    }
+  @ReactMethod
+  public void getPreviewImages(String path, Promise promise) {
+    Log.d(REACT_PACKAGE, "getPreviewImages: " + path);
+    Trimmer.getPreviewImages(path, promise, reactContext);
+  }
 
-    @ReactMethod
-    public void getVideoInfo(String path, Promise promise) {
-        Log.d(REACT_PACKAGE, "getVideoInfo: " + path);
-        Trimmer.getVideoInfo(path, promise);
-    }
+  @ReactMethod
+  public void getVideoInfo(String path, Promise promise) {
+    Log.d(REACT_PACKAGE, "getVideoInfo: " + path);
+    Trimmer.getVideoInfo(path, promise, reactContext);
+  }
 }
