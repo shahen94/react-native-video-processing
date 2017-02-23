@@ -126,3 +126,10 @@ class App extends Component {
 
 1. Please follow the eslint style guide.
 2. Please commit with `$ npm run commit`
+
+## Roadmap
+1.  [ ] Use FFMpeg instead of MP4Parser
+2.  [ ] Add ability to add GLSL filters
+3.  [ ] Android should be able to compress video
+4.  [ ] More processing options
+5.  [ ] Create native trimmer component for Android
