@@ -41,6 +41,7 @@ import com.facebook.react.uimanager.ThemedReactContext;
 import com.facebook.react.uimanager.events.RCTEventEmitter;
 import com.shahenlibrary.interfaces.OnTrimVideoListener;
 import com.shahenlibrary.utils.VideoEdit;
+import com.yqritc.scalablevideoview.ScalableType;
 import com.yqritc.scalablevideoview.ScalableVideoView;
 import com.yqritc.scalablevideoview.ScaleManager;
 import com.yqritc.scalablevideoview.Size;
@@ -354,6 +355,8 @@ public class VideoPlayerView extends ScalableVideoView implements
   @Override
   public void onPrepared(MediaPlayer mp) {
     videoEndAt = mp.getDuration();
+    setScalableType(ScalableType.FIT_XY);
+    invalidate();
     Log.d(LOG_TAG, "onPrepared: " + videoEndAt);
   }
 
@@ -367,6 +370,7 @@ public class VideoPlayerView extends ScalableVideoView implements
     if (mp == null) {
       return;
     }
+    Log.d(LOG_TAG, "onCompletion: isLooping " + mp.isLooping());
     if (mp.isLooping()) {
       Log.d(LOG_TAG, "onCompletion: seek to start at : " + videoStartAt);
       mp.seekTo(videoStartAt);
