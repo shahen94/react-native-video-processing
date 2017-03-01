@@ -98,14 +98,14 @@ class App extends Component {
                     play={true}     // default false
                     replay={true}   // should player play video again if it's ended
                     rotate={true}   // use this prop to rotate video if it captured in landscape mode iOS only
-                    source={{ uri: 'file:///sdcard/DCIM/....' }}
+                    source={'file:///sdcard/DCIM/....'}
                     playerWidth={300} // iOS only
                     playerHeight={500} // iOS only
                     style={{ backgroundColor: 'black' }}
                     onChange={({ nativeEvent }) => console.log({ nativeEvent })} // get Current time on every second
                 />
                 <Trimmer
-                    source={{ uri: 'file:///sdcard/DCIM/....' }}
+                    source={'file:///sdcard/DCIM/....'}
                     height={100}
                     width={300}
                     currentTime={this.video.currentTime} // use this prop to set tracker position iOS only
