@@ -103,9 +103,9 @@
 - (void)resetSubviews
 {
     self.clipsToBounds = YES;
-
+    
     [self setBackgroundColor:[UIColor blackColor]];
-
+    
     [self.subviews makeObjectsPerformSelector:@selector(removeFromSuperview)];
     
     self.scrollView = [[UIScrollView alloc] initWithFrame:CGRectMake(0, 0, CGRectGetWidth(self.frame), CGRectGetHeight(self.frame))];
@@ -141,7 +141,7 @@
     
     // width for left and right overlay views
     self.overlayWidth =  CGRectGetWidth(self.frame) - (self.minLength * self.widthPerSecond);
-
+    
     // add left overlay view
     self.leftOverlayView = [[UIView alloc] initWithFrame:CGRectMake(self.thumbWidth - self.overlayWidth, 0, self.overlayWidth, CGRectGetHeight(self.frameView.frame))];
     CGRect leftThumbFrame = CGRectMake(self.overlayWidth-self.thumbWidth, 0, self.thumbWidth, CGRectGetHeight(self.frameView.frame));
@@ -156,7 +156,7 @@
     self.trackerView.layer.masksToBounds = true;
     self.trackerView.layer.cornerRadius = 2;
     [self addSubview:self.trackerView];
-
+    
     [self.leftThumbView.layer setMasksToBounds:YES];
     [self.leftOverlayView addSubview:self.leftThumbView];
     [self.leftOverlayView setUserInteractionEnabled:YES];
@@ -164,7 +164,7 @@
     [self.leftOverlayView addGestureRecognizer:leftPanGestureRecognizer];
     [self.leftOverlayView setBackgroundColor:[UIColor colorWithWhite:0 alpha:0.8]];
     [self addSubview:self.leftOverlayView];
-
+    
     // add right overlay view
     CGFloat rightViewFrameX = CGRectGetWidth(self.frameView.frame) < CGRectGetWidth(self.frame) ? CGRectGetMaxX(self.frameView.frame) : CGRectGetWidth(self.frame) - self.thumbWidth;
     self.rightOverlayView = [[UIView alloc] initWithFrame:CGRectMake(rightViewFrameX, 0, self.overlayWidth, CGRectGetHeight(self.frameView.frame))];
@@ -267,7 +267,7 @@
 }
 
 - (void)seekToTime:(CGFloat) time
-{    
+{
     CGFloat posToMove = time * self.widthPerSecond + self.thumbWidth - self.scrollView.contentOffset.x;
     
     CGRect trackerFrame = self.trackerView.frame;
@@ -360,13 +360,8 @@
         }
         tmp.frame = currentFrame;
         
-        dispatch_async(dispatch_get_main_queue(), ^{
-            [self.frameView addSubview:tmp];
-        });
-        
-        
+        [self.frameView addSubview:tmp];
     }
-    
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         for (int i=1; i<=[times count]; i++) {
             CMTime time = [((NSValue *)[times objectAtIndex:i-1]) CMTimeValue];
