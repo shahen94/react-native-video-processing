@@ -129,9 +129,14 @@
         {
             [self.writer addInput:self.videoInput];
         }
+        id pixelFormat = self.videoInputSettings[(id)kCVPixelBufferPixelFormatTypeKey];
+        if (!pixelFormat) {
+            pixelFormat = @(kCVPixelFormatType_32BGRA);
+        }
         NSDictionary *pixelBufferAttributes = @
         {
-            (id)kCVPixelBufferPixelFormatTypeKey: @(kCVPixelFormatType_32BGRA),
+            (id)kCVPixelBufferPixelFormatTypeKey : pixelFormat,
+            //            (id)kCVPixelBufferPixelFormatTypeKey: @(kCVPixelFormatType_32BGRA),
             (id)kCVPixelBufferWidthKey: @(self.videoOutput.videoComposition.renderSize.width),
             (id)kCVPixelBufferHeightKey: @(self.videoOutput.videoComposition.renderSize.height),
             @"IOSurfaceOpenGLESTextureCompatibility": @YES,
@@ -308,32 +313,44 @@
     videoComposition.frameDuration = CMTimeMake(1, trackFrameRate);
     CGSize targetSize = CGSizeMake([self.videoSettings[AVVideoWidthKey] floatValue], [self.videoSettings[AVVideoHeightKey] floatValue]);
     CGSize naturalSize = [videoTrack naturalSize];
+    
     CGAffineTransform transform = videoTrack.preferredTransform;
+    videoComposition.frameDuration = CMTimeMake(1, trackFrameRate);
+    
     CGFloat videoAngleInDegree  = atan2(transform.b, transform.a) * 180 / M_PI;
     if (videoAngleInDegree == 90 || videoAngleInDegree == -90) {
         CGFloat width = naturalSize.width;
         naturalSize.width = naturalSize.height;
         naturalSize.height = width;
     }
-    videoComposition.renderSize = naturalSize;
-    // center inside
-    {
-        float ratio;
-        float xratio = targetSize.width / naturalSize.width;
-        float yratio = targetSize.height / naturalSize.height;
-        ratio = MIN(xratio, yratio);
-        
-        float postWidth = naturalSize.width * ratio;
-        float postHeight = naturalSize.height * ratio;
-        float transx = (targetSize.width - postWidth) / 2;
-        float transy = (targetSize.height - postHeight) / 2;
-        
-        CGAffineTransform matrix = CGAffineTransformMakeTranslation(transx / xratio, transy / yratio);
-        matrix = CGAffineTransformScale(matrix, ratio / xratio, ratio / yratio);
-        transform = CGAffineTransformConcat(transform, matrix);
-    }
     
-    // Make a "pass through video track" video composition.
+    if(transform.a == 0 && transform.b == 1.0 && transform.c == -1.0 && transform.d == 0) {
+        // portrait, home button at bottom (upright)
+        if( (transform.tx == 0) && (transform.ty == 0) ) {
+            transform.tx = videoTrack.naturalSize.height;
+            transform.ty = 0;
+        }
+    }
+    else if(transform.a == 0 && transform.b == -1.0 && transform.c == 1.0 && transform.d == 0) {
+        // portrait, home button at top (upside down)
+        if( (transform.tx == 0) && (transform.ty == 0) ) {
+            transform.tx = 0;
+            transform.ty = videoTrack.naturalSize.width;
+        }
+    }
+    else if(transform.a == 1.0 && transform.b == 0 && transform.c == 0 && transform.d == 1.0) {
+        // landscape, home button on right
+        // do nothing
+    }
+    else if(transform.a == -1.0 && transform.b == 0 && transform.c == 0 && transform.d == -1.0) {
+        // landscape, home button on left
+        if( (transform.tx == 0) && (transform.ty == 0) ) {
+            transform.tx = videoTrack.naturalSize.width;
+            transform.ty = videoTrack.naturalSize.height;
+        }
+    }
+    ///////
+    videoComposition.renderSize = naturalSize;
     AVMutableVideoCompositionInstruction *passThroughInstruction = [AVMutableVideoCompositionInstruction videoCompositionInstruction];
     passThroughInstruction.timeRange = CMTimeRangeMake(kCMTimeZero, self.asset.duration);
     
