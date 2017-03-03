@@ -39,15 +39,16 @@ class RNVideoTrimmer: NSObject {
   }
 
   @objc func crop(_ source: String, options: NSDictionary, callback: @escaping RCTResponseSenderBlock) {
-    let cropOffsetX : CGFloat;
-    let cropOffsetY : CGFloat;
-    let cropWidth : CGFloat;
-    let cropHeight : CGFloat;
 
-    cropOffsetX = options.object(forKey: "cropOffsetX") as! CGFloat
-    cropOffsetY = options.object(forKey: "cropOffsetY") as! CGFloat
-    cropWidth = options.object(forKey: "cropWidth") as! CGFloat
-    cropHeight = options.object(forKey: "cropHeight") as! CGFloat
+    let cropOffsetXInt = options.object(forKey: "cropOffsetX") as! Int
+    let cropOffsetYInt = options.object(forKey: "cropOffsetY") as! Int
+    let cropWidthInt = options.object(forKey: "cropWidth") as! Int
+    let cropHeightInt = options.object(forKey: "cropHeight") as! Int
+
+    let cropOffsetX : CGFloat = CGFloat(cropOffsetXInt);
+    let cropOffsetY : CGFloat = CGFloat(cropOffsetYInt);
+    var cropWidth : CGFloat = CGFloat(cropWidthInt);
+    var cropHeight : CGFloat = CGFloat(cropHeightInt);
 
     let quality = ((options.object(forKey: "quality") as? String) != nil) ? options.object(forKey: "quality") as! String : ""
 
@@ -74,19 +75,44 @@ class RNVideoTrimmer: NSObject {
     exportSession.shouldOptimizeForNetworkUse = true
 
     let videoComposition = AVMutableVideoComposition(propertiesOf: asset)
+    let clipVideoTrack: AVAssetTrack! = asset.tracks(withMediaType: AVMediaTypeVideo)[0]
+    let videoOrientation = self.getVideoOrientationFromAsset(asset: asset)
+
+    let videoWidth : CGFloat
+    let videoHeight : CGFloat
+
+    if ( videoOrientation == UIImageOrientation.up || videoOrientation == UIImageOrientation.down ) {
+      videoWidth = clipVideoTrack.naturalSize.height
+      videoHeight = clipVideoTrack.naturalSize.width
+    } else {
+      videoWidth = clipVideoTrack.naturalSize.width
+      videoHeight = clipVideoTrack.naturalSize.height
+    }
 
     videoComposition.frameDuration = CMTimeMake(1, 30)
+
+    while( cropWidth.truncatingRemainder(dividingBy: 2) > 0 && cropWidth < videoWidth ) {
+      cropWidth += 1.0
+    }
+    while( cropWidth.truncatingRemainder(dividingBy: 2) > 0 && cropWidth > 0.0 ) {
+      cropWidth -= 1.0
+    }
+
+    while( cropHeight.truncatingRemainder(dividingBy: 2) > 0 && cropHeight < videoHeight ) {
+      cropHeight += 1.0
+    }
+    while( cropHeight.truncatingRemainder(dividingBy: 2) > 0 && cropHeight > 0.0 ) {
+      cropHeight -= 1.0
+    }
+
     videoComposition.renderSize = CGSize(width: cropWidth, height: cropHeight)
 
     let instruction : AVMutableVideoCompositionInstruction = AVMutableVideoCompositionInstruction()
     instruction.timeRange = CMTimeRange(start: kCMTimeZero, end: asset.duration)
 
-    let videoOrientation = self.getVideoOrientationFromAsset(asset: asset)
-
     var t1 = CGAffineTransform.identity
     var t2 = CGAffineTransform.identity
 
-    let clipVideoTrack: AVAssetTrack! = asset.tracks(withMediaType: AVMediaTypeVideo)[0]
     let transformer = AVMutableVideoCompositionLayerInstruction(assetTrack: clipVideoTrack)
 
 
