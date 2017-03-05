@@ -42,13 +42,23 @@ class RNVideoTrimmer: NSObject {
 
     let cropOffsetXInt = options.object(forKey: "cropOffsetX") as! Int
     let cropOffsetYInt = options.object(forKey: "cropOffsetY") as! Int
-    let cropWidthInt = options.object(forKey: "cropWidth") as! Int
-    let cropHeightInt = options.object(forKey: "cropHeight") as! Int
+    let cropWidthInt = options.object(forKey: "cropWidth") as? Int
+    let cropHeightInt = options.object(forKey: "cropHeight") as? Int
+
+    if ( cropWidthInt == nil ) {
+      callback(["Invalid cropWidth", NSNull()])
+      return
+    }
+
+    if ( cropHeightInt == nil ) {
+      callback(["Invalid cropHeight", NSNull()])
+      return
+    }
 
     let cropOffsetX : CGFloat = CGFloat(cropOffsetXInt);
     let cropOffsetY : CGFloat = CGFloat(cropOffsetYInt);
-    var cropWidth : CGFloat = CGFloat(cropWidthInt);
-    var cropHeight : CGFloat = CGFloat(cropHeightInt);
+    var cropWidth : CGFloat = CGFloat(cropWidthInt!);
+    var cropHeight : CGFloat = CGFloat(cropHeightInt!);
 
     let quality = ((options.object(forKey: "quality") as? String) != nil) ? options.object(forKey: "quality") as! String : ""
 
@@ -179,7 +189,7 @@ class RNVideoTrimmer: NSObject {
 
     let sourceURL = getSourceURL(source: source)
     let asset = AVAsset(url: sourceURL as URL)
-    if eTime == nil {
+    if ( eTime == nil || eTime! > Float(asset.duration.seconds) ) {
       eTime = Float(asset.duration.seconds)
     }
     if sTime == nil {
