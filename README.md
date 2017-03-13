@@ -108,6 +108,7 @@ class App extends Component {
                     source={'file:///sdcard/DCIM/....'}
                     height={100}
                     width={300}
+                    onTrackerMove={(e) => console.log(e.currentTime)} // iOS only
                     currentTime={this.video.currentTime} // use this prop to set tracker position iOS only
                     themeColor={'white'} // iOS only
                     trackerColor={'green'} // iOS only
