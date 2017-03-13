@@ -25,6 +25,7 @@
 @property (strong, nonatomic) UIView *trackerView;
 @property (strong, nonatomic) UIView *topBorder;
 @property (strong, nonatomic) UIView *bottomBorder;
+@property (strong, nonatomic) UIPanGestureRecognizer *panGestureRecognizer;
 
 @property (nonatomic) CGFloat startTime;
 @property (nonatomic) CGFloat endTime;
@@ -109,6 +110,8 @@
     [self.subviews makeObjectsPerformSelector:@selector(removeFromSuperview)];
     
     self.scrollView = [[UIScrollView alloc] initWithFrame:CGRectMake(0, 0, CGRectGetWidth(self.frame), CGRectGetHeight(self.frame))];
+    [self.scrollView setBounces:NO];
+    [self.scrollView setScrollEnabled:NO];
     [self addSubview:self.scrollView];
     [self.scrollView setDelegate:self];
     [self.scrollView setShowsHorizontalScrollIndicator:NO];
@@ -151,11 +154,19 @@
         self.leftThumbView = [[ICGThumbView alloc] initWithFrame:leftThumbFrame color:self.themeColor right:NO];
     }
     
-    self.trackerView = [[UIView alloc] initWithFrame:CGRectMake(self.thumbWidth, -5, 3, CGRectGetHeight(self.frameView.frame) + 10)];
+    self.trackerView = [[UIView alloc] initWithFrame:CGRectMake(self.thumbWidth, -5, 3, CGRectGetHeight(self.frameView.frame) + 20)];
     self.trackerView.backgroundColor = self.trackerColor;
     self.trackerView.layer.masksToBounds = true;
     self.trackerView.layer.cornerRadius = 2;
+    
+    [self.trackerView setUserInteractionEnabled:YES];
     [self addSubview:self.trackerView];
+    
+    self.panGestureRecognizer = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(handleTrackerPan:)];
+    
+    [self.panGestureRecognizer locationInView:self.trackerView];
+    
+    [self.trackerView addGestureRecognizer:self.panGestureRecognizer];
     
     [self.leftThumbView.layer setMasksToBounds:YES];
     [self.leftOverlayView addSubview:self.leftThumbView];
@@ -190,6 +201,18 @@
     CGFloat height = self.borderWidth;
     [self.topBorder setFrame:CGRectMake(CGRectGetMaxX(self.leftOverlayView.frame), 0, CGRectGetMinX(self.rightOverlayView.frame)-CGRectGetMaxX(self.leftOverlayView.frame), height)];
     [self.bottomBorder setFrame:CGRectMake(CGRectGetMaxX(self.leftOverlayView.frame), CGRectGetHeight(self.frameView.frame)-height, CGRectGetMinX(self.rightOverlayView.frame)-CGRectGetMaxX(self.leftOverlayView.frame), height)];
+}
+
+- (void)handleTrackerPan: (UISwipeGestureRecognizer *) recognizer {
+    CGPoint point = [self.panGestureRecognizer locationInView:self.trackerView];
+    
+    CGRect trackerFrame = self.trackerView.frame;
+    trackerFrame.origin.x += point.x;
+    self.trackerView.frame = trackerFrame;
+    
+    CGFloat time = (trackerFrame.origin.x - self.thumbWidth + self.scrollView.contentOffset.x) / self.widthPerSecond;
+    [self.delegate trimmerView:self currentPosition:time ];
+    
 }
 
 - (void)moveLeftOverlayView:(UIPanGestureRecognizer *)gesture

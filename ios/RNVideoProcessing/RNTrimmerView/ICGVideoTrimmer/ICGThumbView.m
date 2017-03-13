@@ -55,6 +55,12 @@
     return CGRectContainsPoint(hitFrame, point);
 }
 
+- (UIView *)hitTest:(CGPoint)point withEvent:(UIEvent *)event {
+    CGRect frame = CGRectInset(self.bounds, -20, -20);
+    
+    return CGRectContainsPoint(frame, point) ? self : nil;
+}
+
 - (void)drawRect:(CGRect)rect
 {
     // Drawing code
@@ -81,7 +87,7 @@
         [decoratingPath closePath];
         [[UIColor colorWithWhite:1 alpha:0.5] setFill];
         [decoratingPath fill];
-
+        
     }
     
     
