@@ -15,6 +15,7 @@ class RNTrimmerView: RCTView, ICGVideoTrimmerDelegate {
     var mThemeColor = UIColor.clear
     var bridge: RCTBridge!
     var onChange: RCTBubblingEventBlock?
+    var onTrackerMove: RCTBubblingEventBlock?
     var _minLength: CGFloat? = nil
     var _maxLength: CGFloat? = nil
     var _trackerColor: UIColor = UIColor.clear
@@ -172,5 +173,14 @@ class RNTrimmerView: RCTView, ICGVideoTrimmerDelegate {
     
     func trimmerView(_ trimmerView: ICGVideoTrimmerView, didChangeLeftPosition startTime: CGFloat, rightPosition endTime: CGFloat) {
         onTrimmerPositionChange(startTime: startTime, endTime: endTime)
+    }
+    
+    public func trimmerView(_ trimmerView: ICGVideoTrimmerView, currentPosition currentTime: CGFloat) {
+        print("current", currentTime)
+        if onTrackerMove == nil {
+            return
+        }
+        let event = ["currentTime": currentTime]
+        self.onTrackerMove!(event)
     }
 }
