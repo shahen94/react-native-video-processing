@@ -8,7 +8,7 @@ import AVKit
 
 @objc(RNTrimmerView)
 class RNTrimmerView: RCTView, ICGVideoTrimmerDelegate {
-    
+
     var trimmerView: ICGVideoTrimmerView?
     var asset: AVAsset!
     var rect: CGRect = CGRect.zero
@@ -18,18 +18,19 @@ class RNTrimmerView: RCTView, ICGVideoTrimmerDelegate {
     var onTrackerMove: RCTBubblingEventBlock?
     var _minLength: CGFloat? = nil
     var _maxLength: CGFloat? = nil
+    var _thumbWidth: CGFloat? = nil
     var _trackerColor: UIColor = UIColor.clear
-    
+
     var source: NSString? {
         set {
             setSource(source: newValue)
         }
         get {
-            
+
             return nil
         }
     }
-    
+
     var height: NSNumber? {
         set {
             self.rect.size.height = RCTConvert.cgFloat(newValue)
@@ -39,7 +40,7 @@ class RNTrimmerView: RCTView, ICGVideoTrimmerDelegate {
             return nil
         }
     }
-    
+
     var width: NSNumber? {
         set {
             self.rect.size.width = RCTConvert.cgFloat(newValue)
@@ -49,7 +50,7 @@ class RNTrimmerView: RCTView, ICGVideoTrimmerDelegate {
             return nil
         }
     }
-    
+
     var themeColor: NSString? {
         set {
             if newValue != nil {
@@ -62,7 +63,7 @@ class RNTrimmerView: RCTView, ICGVideoTrimmerDelegate {
             return nil
         }
     }
-    
+
     var maxLength: NSNumber? {
         set {
             if newValue != nil {
@@ -74,7 +75,7 @@ class RNTrimmerView: RCTView, ICGVideoTrimmerDelegate {
             return nil
         }
     }
-    
+
     var minLength: NSNumber? {
         set {
             if newValue != nil {
@@ -86,7 +87,19 @@ class RNTrimmerView: RCTView, ICGVideoTrimmerDelegate {
             return nil
         }
     }
-    
+
+    var thumbWidth: NSNumber? {
+        set {
+            if newValue != nil {
+                self._thumbWidth = RCTConvert.cgFloat(newValue!)
+                self.updateView()
+            }
+        }
+        get {
+            return nil
+        }
+    }
+
     var currentTime: NSNumber? {
         set {
             print("CHANGED: [TrimmerView]: currentTime: \(newValue)")
@@ -100,7 +113,7 @@ class RNTrimmerView: RCTView, ICGVideoTrimmerDelegate {
             return nil
         }
     }
-    
+
     var trackerColor: NSString? {
         set {
             if newValue == nil {
@@ -120,7 +133,7 @@ class RNTrimmerView: RCTView, ICGVideoTrimmerDelegate {
             return nil
         }
     }
-    
+
     func updateView() {
         self.frame = rect
         if trimmerView != nil {
@@ -131,20 +144,23 @@ class RNTrimmerView: RCTView, ICGVideoTrimmerDelegate {
             if _minLength != nil {
                 trimmerView!.minLength = _minLength!
             }
+            if _thumbWidth != nil {
+                trimmerView!.thumbWidth = _thumbWidth!
+            }
             self.trimmerView!.resetSubviews()
             //      Timer.scheduledTimer(timeInterval: 0.5, target: self, selector: #selector(self.updateTrimmer), userInfo: nil, repeats: false)
         }
     }
-    
+
     func updateTrimmer() {
         self.trimmerView!.resetSubviews()
     }
-    
+
     func setSource(source: NSString?) {
         if source != nil {
             let pathToSource = NSURL(string: source! as String)
             self.asset = AVURLAsset(url: pathToSource as! URL, options: nil)
-            
+
             trimmerView = ICGVideoTrimmerView(frame: rect, asset: self.asset)
             trimmerView!.showsRulerView = false
             trimmerView!.hideTracker(false)
@@ -154,27 +170,27 @@ class RNTrimmerView: RCTView, ICGVideoTrimmerDelegate {
             self.updateView()
         }
     }
-    
+
     init(frame: CGRect, bridge: RCTBridge) {
         super.init(frame: frame)
         self.bridge = bridge
     }
-    
+
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
+
     func onTrimmerPositionChange(startTime: CGFloat, endTime: CGFloat) {
         if self.onChange != nil {
             let event = ["startTime": startTime, "endTime": endTime]
             self.onChange!(event)
         }
     }
-    
+
     func trimmerView(_ trimmerView: ICGVideoTrimmerView, didChangeLeftPosition startTime: CGFloat, rightPosition endTime: CGFloat) {
         onTrimmerPositionChange(startTime: startTime, endTime: endTime)
     }
-    
+
     public func trimmerView(_ trimmerView: ICGVideoTrimmerView, currentPosition currentTime: CGFloat) {
         print("current", currentTime)
         if onTrackerMove == nil {
