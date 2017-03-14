@@ -144,6 +144,9 @@ class RNTrimmerView: RCTView, ICGVideoTrimmerDelegate {
             if _minLength != nil {
                 trimmerView!.minLength = _minLength!
             }
+            if _thumbWidth != nil {
+                trimmerView!.thumbWidth = _thumbWidth!
+            }
             self.trimmerView!.resetSubviews()
             //      Timer.scheduledTimer(timeInterval: 0.5, target: self, selector: #selector(self.updateTrimmer), userInfo: nil, repeats: false)
         }
