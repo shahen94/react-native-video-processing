@@ -121,7 +121,7 @@ class App extends Component {
 }
 ```
 or you can use ProcessingManager without mounting VideoPlayer component
-```
+```javascript
 import React, { Component } from 'react';
 import { View } from 'react-native'; 
 import { ProcessingManager } from 'react-native-video-processing';
