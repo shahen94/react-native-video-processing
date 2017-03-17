@@ -11,4 +11,5 @@ public class Events {
     public static final String GET_PREVIEW_IMAGE = "getPreviewForSecond";
     public static final String ERROR_TRIM = "error";
     public static final String ORIENTATION = "orientation";
+    public static final String SIZE = "size";
 }

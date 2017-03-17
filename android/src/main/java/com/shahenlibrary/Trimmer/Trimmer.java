@@ -127,9 +127,13 @@ public class Trimmer {
     int orientation = Integer.parseInt(mmr.extractMetadata(FFmpegMediaMetadataRetriever.METADATA_KEY_VIDEO_ROTATION));
 
     WritableMap event = Arguments.createMap();
+    WritableMap size = Arguments.createMap();
+
+    size.putInt(Events.WIDTH, width);
+    size.putInt(Events.HEIGHT, height);
+
+    event.putMap(Events.SIZE, size);
     event.putInt(Events.DURATION, duration);
-    event.putInt(Events.WIDTH, width);
-    event.putInt(Events.HEIGHT, height);
     event.putInt(Events.ORIENTATION, orientation);
 
     promise.resolve(event);
