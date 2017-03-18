@@ -108,14 +108,42 @@ class App extends Component {
                     source={'file:///sdcard/DCIM/....'}
                     height={100}
                     width={300}
+                    onTrackerMove={(e) => console.log(e.currentTime)} // iOS only
                     currentTime={this.video.currentTime} // use this prop to set tracker position iOS only
                     themeColor={'white'} // iOS only
+                    thumbWidth={30} // iOS only
                     trackerColor={'green'} // iOS only
                     onChange={(e) => console.log(e.startTime, e.endTime)}
                 />
             </View>
         );
     }
+}
+```
+or you can use ProcessingManager without mounting VideoPlayer component
+```javascript
+import React, { Component } from 'react';
+import { View } from 'react-native'; 
+import { ProcessingManager } from 'react-native-video-processing';
+export class App extends Component {
+  componentWillMount() {
+    const { source } = this.props; 
+    ProcessingManager.getVideoInfo(source)
+      .then(({ duration, size }) => console.log(duration, size));
+      
+    ProcessingManager.trim(source, options) // like VideoPlayer trim options
+          .then((data) => console.log(data));
+          
+    ProcessingManager.compress(source, options) // like VideoPlayer compress options
+              .then((data) => console.log(data));
+    
+    const maximumSize = { width: 100, height: 200 };
+    ProcessingManager.getPreviewForSecond(source, forSecond, maximumSize)
+      .then((data) => console.log(data))
+  }
+  render() {
+    return <View />;
+  }
 }
 ```
 
@@ -133,3 +161,4 @@ class App extends Component {
 3.  [ ] Android should be able to compress video
 4.  [ ] More processing options
 5.  [ ] Create native trimmer component for Android
+6.  [x] Provide Standalone API

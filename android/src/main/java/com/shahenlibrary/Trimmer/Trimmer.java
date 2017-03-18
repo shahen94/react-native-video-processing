@@ -36,17 +36,24 @@ import android.util.Log;
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
+import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.uimanager.events.Event;
 import com.shahenlibrary.Events.Events;
+import com.shahenlibrary.Events.EventsEnum;
+import com.shahenlibrary.interfaces.OnTrimVideoListener;
 import com.shahenlibrary.utils.VideoEdit;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
 
 import wseemann.media.FFmpegMediaMetadataRetriever;
 
 public class Trimmer {
+
+  private static final String LOG_TAG = "RNTrimmerManager";
 
   public static void getPreviewImages(String path, Promise promise, ReactApplicationContext ctx) {
     FFmpegMediaMetadataRetriever retriever = new FFmpegMediaMetadataRetriever();
@@ -120,13 +127,91 @@ public class Trimmer {
     int orientation = Integer.parseInt(mmr.extractMetadata(FFmpegMediaMetadataRetriever.METADATA_KEY_VIDEO_ROTATION));
 
     WritableMap event = Arguments.createMap();
+    WritableMap size = Arguments.createMap();
+
+    size.putInt(Events.WIDTH, width);
+    size.putInt(Events.HEIGHT, height);
+
+    event.putMap(Events.SIZE, size);
     event.putInt(Events.DURATION, duration);
-    event.putInt(Events.WIDTH, width);
-    event.putInt(Events.HEIGHT, height);
     event.putInt(Events.ORIENTATION, orientation);
 
     promise.resolve(event);
 
     mmr.release();
+  }
+
+  static void trim(ReadableMap options, final Promise promise) {
+    double startMs = options.getDouble("startTime");
+    double endMs = options.getDouble("endTime");
+    String mediaSource = options.getString("source");
+
+    OnTrimVideoListener trimVideoListener = new OnTrimVideoListener() {
+      @Override
+      public void onError(String message) {
+        Log.d(LOG_TAG, "Trimmed onError: " + message);
+        WritableMap event = Arguments.createMap();
+        event.putString(Events.ERROR_TRIM, message);
+
+        promise.reject("trim error", message);
+      }
+
+      @Override
+      public void onTrimStarted() {
+        Log.d(LOG_TAG, "Trimmed onTrimStarted");
+      }
+
+      @Override
+      public void getResult(Uri uri) {
+        Log.d(LOG_TAG, "getResult: " + uri.toString());
+        WritableMap event = Arguments.createMap();
+        event.putString("source", uri.toString());
+        promise.resolve(event);
+      }
+
+      @Override
+      public void cancelAction() {
+        Log.d(LOG_TAG, "Trimmed cancelAction");
+      }
+    };
+    Log.d(LOG_TAG, "trimMedia at : startAt -> " + startMs + " : endAt -> " + endMs);
+    File mediaFile = new File(mediaSource.replace("file:///", "/"));
+    long startTrimFromPos = (long) startMs * 1000;
+    long endTrimFromPos = (long) endMs * 1000;
+    String[] dPath = mediaSource.split("/");
+    StringBuilder builder = new StringBuilder();
+    for (int i = 0; i < dPath.length; ++i) {
+      if (i == dPath.length - 1) {
+        continue;
+      }
+      builder.append(dPath[i]);
+      builder.append(File.separator);
+    }
+    String path = builder.toString().replace("file:///", "/");
+
+    Log.d(LOG_TAG, "trimMedia: " + mediaFile.toString() + " isExists: " + mediaFile.exists());
+    try {
+      VideoEdit.startTrim(mediaFile, path, startTrimFromPos, endTrimFromPos, trimVideoListener);
+    } catch (IOException e) {
+      trimVideoListener.onError(e.toString());
+      e.printStackTrace();
+      Log.d(LOG_TAG, "trimMedia: error -> " + e.toString());
+    }
+  }
+
+  static void getPreviewAtPosition(String source, double sec, final Promise promise) {
+    FFmpegMediaMetadataRetriever metadataRetriever = new FFmpegMediaMetadataRetriever();
+    metadataRetriever.setDataSource(source);
+
+    Bitmap bmp = metadataRetriever.getFrameAtTime((long) (sec * 1000000));
+    ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+    bmp.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream);
+    byte[] byteArray = byteArrayOutputStream .toByteArray();
+    String encoded = Base64.encodeToString(byteArray, Base64.DEFAULT);
+
+    WritableMap event = Arguments.createMap();
+    event.putString("image", encoded);
+
+    promise.resolve(event);
   }
 }
