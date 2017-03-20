@@ -102,6 +102,7 @@ class App extends Component {
                     playerWidth={300} // iOS only
                     playerHeight={500} // iOS only
                     style={{ backgroundColor: 'black' }}
+                    resizeMode={VideoPlayer.Constants.resizeMode.CONTAIN}
                     onChange={({ nativeEvent }) => console.log({ nativeEvent })} // get Current time on every second
                 />
                 <Trimmer
