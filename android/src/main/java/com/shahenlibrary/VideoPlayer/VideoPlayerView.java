@@ -62,6 +62,7 @@ public class VideoPlayerView extends ScalableVideoView implements
   private RCTEventEmitter eventEmitter;
   private String mediaSource;
   private boolean mPlay = true;
+  private ScalableType mResizeMode = ScalableType.FIT_XY;
   private String LOG_TAG = "RNVideoProcessing";
   private Runnable progressRunnable = null;
   private Handler progressUpdateHandler = new Handler();
@@ -71,6 +72,7 @@ public class VideoPlayerView extends ScalableVideoView implements
   private int videoEndAt = -1;
   private boolean mLooping = false;
   private float mVolume = 10f;
+  private ScalableType resizeMode;
 
 
   public VideoPlayerView(ThemedReactContext ctx) {
@@ -380,7 +382,7 @@ public class VideoPlayerView extends ScalableVideoView implements
   @Override
   public void onPrepared(MediaPlayer mp) {
     videoEndAt = mp.getDuration();
-    setScalableType(ScalableType.FIT_XY);
+    setScalableType(mResizeMode);
     invalidate();
 
     applyProps();
@@ -446,5 +448,19 @@ public class VideoPlayerView extends ScalableVideoView implements
   @Override
   public int getAudioSessionId() {
     return 0;
+  }
+
+  public void setResizeMode(@Nullable ScalableType resizeMode) {
+    if (resizeMode == null) {
+      return;
+    }
+    Log.d(LOG_TAG, "setResizeMode: " + resizeMode.toString());
+    mResizeMode = resizeMode;
+
+    if (mMediaPlayer == null) {
+      return;
+    }
+    setScalableType(mResizeMode);
+    invalidate();
   }
 }
