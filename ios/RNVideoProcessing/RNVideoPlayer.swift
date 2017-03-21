@@ -56,9 +56,6 @@ class RNVideoPlayer: RCTView {
     override init(frame: CGRect) {
         super.init(frame: frame)
         playerLayer = AVPlayerLayer.init(player: player)
-        //    self.layer.addSublayer(playerLayer!)
-        //    playerLayer?.frame = self.bounds
-        //    self.layer.needsDisplayOnBoundsChange = true
     }
     
     required init?(coder aDecoder: NSCoder) {
@@ -247,8 +244,9 @@ class RNVideoPlayer: RCTView {
                     filterView.bounds.size.height = self._playerHeight
                 }
                 filterView.frame.origin = CGPoint.zero
-                playerLayer?.frame = filterView.frame
                 self.filterView.transform = CGAffineTransform(rotationAngle: rotationAngle)
+                playerLayer?.frame = filterView.bounds
+                self.setNeedsLayout()
                 self.layoutIfNeeded()
             }
         }
@@ -349,6 +347,7 @@ class RNVideoPlayer: RCTView {
         playerLayer!.frame = filterView.bounds
         playerLayer!.videoGravity = self._resizeMode
         playerLayer!.masksToBounds = true
+        playerLayer!.removeFromSuperlayer()
         filterView.layer.addSublayer(playerLayer!)
         
         print("CHANGED playerframe \(playerLayer), frameAAA \(playerLayer?.frame)")
