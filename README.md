@@ -151,7 +151,7 @@ export class App extends Component {
 ### How to setup Library
 [![Setup](https://img.youtube.com/vi/HRjgeT6NQJM/0.jpg)](https://youtu.be/HRjgeT6NQJM)
 
-##Contributing
+## Contributing
 
 1. Please follow the eslint style guide.
 2. Please commit with `$ npm run commit`
