@@ -1,11 +1,11 @@
 {
   "name": "react-native-video-processing",
-  "version": "1.7.0",
+  "version": "1.7.1",
   "description": "Native Video processing/editing for React-Native",
   "main": "index.js",
   "scripts": {
     "commit": "git add . && git-cz",
-    "test": "NODE_ENV=test jest --verbose",
+    "test": "jest --verbose",
     "test:snapshots": "jest -u",
     "semantic-release": "semantic-release pre && npm publish && semantic-release post"
   },
@@ -36,15 +36,16 @@
   },
   "homepage": "https://github.com/shahen94/react-native-video-processing#readme",
   "dependencies": {
-    "lodash": "4.16.6"
-  },
-  "devDependencies": {
-    "babel-eslint": "7.1.0",
-    "babel-jest": "17.0.0",
     "babel-preset-es2015": "6.18.0",
     "babel-preset-react": "6.16.0",
     "babel-preset-react-native": "1.9.0",
     "babel-preset-react-native-stage-0": "1.0.1",
+    "lodash": "^4.16.6",
+    "react": "^15.3.2"
+  },
+  "devDependencies": {
+    "babel-eslint": "7.1.0",
+    "babel-jest": "17.0.0",
     "commitizen": "^2.8.6",
     "cz-conventional-changelog": "^1.2.0",
     "eslint": "2.7.0",
@@ -53,11 +54,13 @@
     "eslint-plugin-react": "4.2.3",
     "eslint-plugin-react-native": "1.1.0",
     "jest": "17.0.0",
-    "jest-react-native": "18.0.0",
-    "react": "15.3.2",
-    "react-native": "0.42.0",
+    "jest-react-native": "17.0.0",
+    "react-native": "^0.37.0",
     "react-native-create-library": "^1.0.4",
     "react-test-renderer": "15.3.2",
     "semantic-release": "^4.3.5"
+  },
+   "peerDependencies": {
+    "react-native": ">=0.35"
   }
 }
