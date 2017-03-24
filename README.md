@@ -68,7 +68,8 @@ class App extends Component {
             bitrateMultiplier: 3,
             saveToCameraRoll: true, // default is false
             saveWithCurrentDate: true, // default is false
-            minimumBitrate: 300000
+            minimumBitrate: 300000,
+            removeAudio: true, // default is false
         };
         this.videoPlayerRef.compress(options)
             .then((newSource) => console.log(newSource))
@@ -124,20 +125,20 @@ class App extends Component {
 or you can use ProcessingManager without mounting VideoPlayer component
 ```javascript
 import React, { Component } from 'react';
-import { View } from 'react-native'; 
+import { View } from 'react-native';
 import { ProcessingManager } from 'react-native-video-processing';
 export class App extends Component {
   componentWillMount() {
-    const { source } = this.props; 
+    const { source } = this.props;
     ProcessingManager.getVideoInfo(source)
       .then(({ duration, size }) => console.log(duration, size));
-      
+
     ProcessingManager.trim(source, options) // like VideoPlayer trim options
           .then((data) => console.log(data));
-          
+
     ProcessingManager.compress(source, options) // like VideoPlayer compress options
               .then((data) => console.log(data));
-    
+
     const maximumSize = { width: 100, height: 200 };
     ProcessingManager.getPreviewForSecond(source, forSecond, maximumSize)
       .then((data) => console.log(data))
