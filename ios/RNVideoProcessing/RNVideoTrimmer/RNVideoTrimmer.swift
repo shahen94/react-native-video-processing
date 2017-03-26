@@ -110,6 +110,7 @@ class RNVideoTrimmer: NSObject {
         let saveToCameraRoll = options.object(forKey: "saveToCameraRoll") as? Bool ?? false
         let minimumBitrate = options.object(forKey: "minimumBitrate") as? Float
         let saveWithCurrentDate = options.object(forKey: "saveWithCurrentDate") as? Bool ?? false
+        let removeAudio = options.object(forKey: "removeAudio") as? Bool ?? false
 
         let manager = FileManager.default
         guard let documentDirectory = try? manager.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
@@ -177,12 +178,14 @@ class RNVideoTrimmer: NSObject {
                 AVVideoProfileLevelKey: AVVideoProfileLevelH264HighAutoLevel
             ]
         ]
-        compressionEncoder?.audioSettings = [
-            AVFormatIDKey: kAudioFormatMPEG4AAC,
-            AVNumberOfChannelsKey: 1,
-            AVSampleRateKey: 44100,
-            AVEncoderBitRateKey: 128000
-        ]
+        if !removeAudio {
+          compressionEncoder?.audioSettings = [
+              AVFormatIDKey: kAudioFormatMPEG4AAC,
+              AVNumberOfChannelsKey: 1,
+              AVSampleRateKey: 44100,
+              AVEncoderBitRateKey: 128000
+          ]
+        }
         compressionEncoder!.exportAsynchronously(completionHandler: {
             switch compressionEncoder!.status {
             case .completed:
