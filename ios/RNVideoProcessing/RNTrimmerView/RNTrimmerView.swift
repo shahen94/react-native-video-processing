@@ -19,7 +19,6 @@ class RNTrimmerView: RCTView, ICGVideoTrimmerDelegate {
     var _minLength: CGFloat? = nil
     var _maxLength: CGFloat? = nil
     var _thumbWidth: CGFloat? = nil
-    var _borderWidth: CGFloat? = nil
     var _trackerColor: UIColor = UIColor.clear
 
     var source: NSString? {
@@ -101,18 +100,6 @@ class RNTrimmerView: RCTView, ICGVideoTrimmerDelegate {
         }
     }
 
-    var borderWidth: NSNumber? {
-        set {
-            if newValue != nil {
-                self._borderWidth = RCTConvert.cgFloat(newValue!)
-                self.updateView()
-            }
-        }
-        get {
-            return nil
-        }
-    }
-
     var currentTime: NSNumber? {
         set {
             print("CHANGED: [TrimmerView]: currentTime: \(newValue)")
@@ -159,9 +146,6 @@ class RNTrimmerView: RCTView, ICGVideoTrimmerDelegate {
             }
             if _thumbWidth != nil {
                 trimmerView!.thumbWidth = _thumbWidth!
-            }
-            if _borderWidth != nil {
-                trimmerView!.borderWidth = _borderWidth!
             }
             self.trimmerView!.resetSubviews()
             //      Timer.scheduledTimer(timeInterval: 0.5, target: self, selector: #selector(self.updateTrimmer), userInfo: nil, repeats: false)
