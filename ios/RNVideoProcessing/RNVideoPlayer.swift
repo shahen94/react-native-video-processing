@@ -343,12 +343,13 @@ class RNVideoPlayer: RCTView {
         playerItem = AVPlayerItem(url: movieURL as! URL)
         player.replaceCurrentItem(with: playerItem)
         
-        playerLayer = AVPlayerLayer(player: player)
-        playerLayer!.frame = filterView.bounds
-        playerLayer!.videoGravity = self._resizeMode
-        playerLayer!.masksToBounds = true
-        playerLayer!.removeFromSuperlayer()
-        filterView.layer.addSublayer(playerLayer!)
+        // MARK - Temporary removing playeLayer, it dublicates video if it's in landscape mode
+        //        playerLayer = AVPlayerLayer(player: player)
+        //        playerLayer!.frame = filterView.bounds
+        //        playerLayer!.videoGravity = self._resizeMode
+        //        playerLayer!.masksToBounds = true
+        //        playerLayer!.removeFromSuperlayer()
+        //        filterView.layer.addSublayer(playerLayer!)
         
         print("CHANGED playerframe \(playerLayer), frameAAA \(playerLayer?.frame)")
         self.setNeedsLayout()
