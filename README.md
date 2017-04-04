@@ -13,9 +13,23 @@ npm install react-native-video-processing --save
 
 **Note: For RN 0.4x use 1.0 version, For RN 0.3x use  0.16**
 #### [Android]
-```sh
-$ react-native link react-native-video-processing
+1. Open up `android/app/src/main/java/[...]/MainApplication.java`
+
+2. Add `import com.shahenlibrary.RNVideoProcessingPackage;` to the imports at the top of the file
+
+3. Add new  `new RNVideoProcessingPackage()`  to the list returned by the getPackages() method
+
+4. Append the following lines to `android/settings.gradle`:
 ```
+include ':react-native-video-processing'
+project(':react-native-video-processing').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-video-processing/android')
+```
+
+5. Insert the following lines inside the dependencies block in `android/app/build.gradle`:
+```
+    compile project(':react-native-video-processing')
+```
+
 #### [iOS]
 
 1. In Xcode, click the "Add Files to <your-project-name>".
