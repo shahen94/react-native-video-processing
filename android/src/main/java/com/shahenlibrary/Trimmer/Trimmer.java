@@ -93,6 +93,14 @@ public class Trimmer {
 
     for (int i = 0; i < duration; i += duration / 10) {
       Bitmap frame = retriever.getFrameAtTime(i * 1000);
+      if (frame == null) {
+        frame = retriever.getFrameAtTime(i * 100);
+      }
+      if (frame == null) {
+        String lastEncoded = images.getString(images.size() - 1);
+        images.pushString(lastEncoded);
+        continue;
+      }
       Bitmap currBmp = Bitmap.createScaledBitmap(frame, resizeWidth, resizeHeight, false);
 
       Bitmap normalizedBmp = Bitmap.createBitmap(currBmp, 0, 0, resizeWidth, resizeHeight, mx, true);
