@@ -175,6 +175,6 @@ export class App extends Component {
 1.  [ ] Use FFMpeg instead of MP4Parser
 2.  [ ] Add ability to add GLSL filters
 3.  [ ] Android should be able to compress video
-4.  [ ] More processing options
+4.  [x] More processing options
 5.  [ ] Create native trimmer component for Android
 6.  [x] Provide Standalone API
