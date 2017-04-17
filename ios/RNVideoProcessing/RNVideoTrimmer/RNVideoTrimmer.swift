@@ -355,36 +355,36 @@ class RNVideoTrimmer: NSObject {
       })
   }
 
-    @objc func getAssetInfo(_ source: String, callback: RCTResponseSenderBlock) {
+  @objc func getAssetInfo(_ source: String, callback: RCTResponseSenderBlock) {
     let sourceURL = getSourceURL(source: source)
     let asset = AVAsset(url: sourceURL)
     var assetInfo: [String: Any] = [
-    "duration" : asset.duration.seconds
+      "duration" : asset.duration.seconds
     ]
     if let track = asset.tracks(withMediaType: AVMediaTypeVideo).first {
-    let naturalSize = track.naturalSize
-    let t = track.preferredTransform
-    let isPortrait = t.a == 0 && abs(t.b) == 1 && t.d == 0
-    let size = [
-    "width": isPortrait ? naturalSize.height : naturalSize.width,
-    "height": isPortrait ? naturalSize.width : naturalSize.height
-    ]
-    assetInfo["size"] = size
+      let naturalSize = track.naturalSize
+      let t = track.preferredTransform
+      let isPortrait = t.a == 0 && abs(t.b) == 1 && t.d == 0
+      let size = [
+        "width": isPortrait ? naturalSize.height : naturalSize.width,
+        "height": isPortrait ? naturalSize.width : naturalSize.height
+      ]
+      assetInfo["size"] = size
     }
     callback( [NSNull(), assetInfo] )
-    }
+  }
 
-    @objc func getPreviewImageAtPosition(_ source: String, atTime: Float = 0, maximumSize: NSDictionary, callback: RCTResponseSenderBlock) {
+  @objc func getPreviewImageAtPosition(_ source: String, atTime: Float = 0, maximumSize: NSDictionary, callback: RCTResponseSenderBlock) {
     let sourceURL = getSourceURL(source: source)
     let asset = AVAsset(url: sourceURL)
 
     var width: CGFloat = 1080
     if let _width = maximumSize.object(forKey: "width") as? CGFloat {
-    width = _width
+      width = _width
     }
     var height: CGFloat = 1080
     if let _height = maximumSize.object(forKey: "height") as? CGFloat {
-    height = _height
+      height = _height
     }
 
     let imageGenerator = AVAssetImageGenerator(asset: asset)
@@ -392,7 +392,7 @@ class RNVideoTrimmer: NSObject {
     imageGenerator.appliesPreferredTrackTransform = true
     var second = atTime
     if atTime > Float(asset.duration.seconds) || atTime < 0 {
-    second = 0
+      second = 0
     }
     let timestamp = CMTime(seconds: Double(second), preferredTimescale: 600)
     do {
@@ -421,69 +421,69 @@ class RNVideoTrimmer: NSObject {
     } catch {
       callback( ["Failed to convert base64: \(error.localizedDescription)", NSNull()] )
     }
-    }
+  }
 
-    func randomString() -> String {
+  func randomString() -> String {
     let letters: NSString = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
     let randomString: NSMutableString = NSMutableString(capacity: 20)
     let s:String = "RNTrimmer-Temp-Video"
     for _ in 0...19 {
-    randomString.appendFormat("%C", letters.character(at: Int(arc4random_uniform(UInt32(letters.length)))))
+      randomString.appendFormat("%C", letters.character(at: Int(arc4random_uniform(UInt32(letters.length)))))
     }
     return s.appending(randomString as String)
-    }
+  }
 
-    func getSourceURL(source: String) -> URL {
+  func getSourceURL(source: String) -> URL {
     var sourceURL: URL
     if source.contains("assets-library") {
-    sourceURL = NSURL(string: source) as! URL
+      sourceURL = NSURL(string: source) as! URL
     } else {
-    let bundleUrl = Bundle.main.resourceURL!
-    sourceURL = URL(string: source, relativeTo: bundleUrl)!
+      let bundleUrl = Bundle.main.resourceURL!
+      sourceURL = URL(string: source, relativeTo: bundleUrl)!
     }
     return sourceURL
-    }
+  }
 
-    func getQualityForAsset(quality: String, asset: AVAsset) -> String {
+  func getQualityForAsset(quality: String, asset: AVAsset) -> String {
     var useQuality: String
 
     switch quality {
-    case QUALITY_ENUM.QUALITY_LOW.rawValue:
-    useQuality = AVAssetExportPresetLowQuality
+      case QUALITY_ENUM.QUALITY_LOW.rawValue:
+        useQuality = AVAssetExportPresetLowQuality
 
-    case QUALITY_ENUM.QUALITY_MEDIUM.rawValue:
-    useQuality = AVAssetExportPresetMediumQuality
+      case QUALITY_ENUM.QUALITY_MEDIUM.rawValue:
+        useQuality = AVAssetExportPresetMediumQuality
 
-    case QUALITY_ENUM.QUALITY_HIGHEST.rawValue:
-    useQuality = AVAssetExportPresetHighestQuality
+      case QUALITY_ENUM.QUALITY_HIGHEST.rawValue:
+        useQuality = AVAssetExportPresetHighestQuality
 
-    case QUALITY_ENUM.QUALITY_640x480.rawValue:
-    useQuality = AVAssetExportPreset640x480
+      case QUALITY_ENUM.QUALITY_640x480.rawValue:
+        useQuality = AVAssetExportPreset640x480
 
-    case QUALITY_ENUM.QUALITY_960x540.rawValue:
-    useQuality = AVAssetExportPreset960x540
+      case QUALITY_ENUM.QUALITY_960x540.rawValue:
+        useQuality = AVAssetExportPreset960x540
 
-    case QUALITY_ENUM.QUALITY_1280x720.rawValue:
-    useQuality = AVAssetExportPreset1280x720
+      case QUALITY_ENUM.QUALITY_1280x720.rawValue:
+        useQuality = AVAssetExportPreset1280x720
 
-    case QUALITY_ENUM.QUALITY_1920x1080.rawValue:
-    useQuality = AVAssetExportPreset1920x1080
+      case QUALITY_ENUM.QUALITY_1920x1080.rawValue:
+        useQuality = AVAssetExportPreset1920x1080
 
-    case QUALITY_ENUM.QUALITY_3840x2160.rawValue:
-    if #available(iOS 9.0, *) {
-    useQuality = AVAssetExportPreset3840x2160
-    } else {
-    useQuality = AVAssetExportPresetPassthrough
-    }
+      case QUALITY_ENUM.QUALITY_3840x2160.rawValue:
+        if #available(iOS 9.0, *) {
+          useQuality = AVAssetExportPreset3840x2160
+        } else {
+          useQuality = AVAssetExportPresetPassthrough
+        }
 
-    default:
-    useQuality = AVAssetExportPresetPassthrough
+      default:
+        useQuality = AVAssetExportPresetPassthrough
     }
 
     let compatiblePresets = AVAssetExportSession.exportPresets(compatibleWith: asset)
     if !compatiblePresets.contains(useQuality) {
-    useQuality = AVAssetExportPresetPassthrough
+      useQuality = AVAssetExportPresetPassthrough
     }
     return useQuality
-    }
+  }
 }
