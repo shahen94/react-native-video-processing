@@ -13,9 +13,23 @@ npm install react-native-video-processing --save
 
 **Note: For RN 0.4x use 1.0 version, For RN 0.3x use  0.16**
 #### [Android]
-```sh
-$ react-native link react-native-video-processing
+1. Open up `android/app/src/main/java/[...]/MainApplication.java`
+
+2. Add `import com.shahenlibrary.RNVideoProcessingPackage;` to the imports at the top of the file
+
+3. Add new  `new RNVideoProcessingPackage()`  to the list returned by the getPackages() method
+
+4. Append the following lines to `android/settings.gradle`:
 ```
+include ':react-native-video-processing'
+project(':react-native-video-processing').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-video-processing/android')
+```
+
+5. Insert the following lines inside the dependencies block in `android/app/build.gradle`:
+```
+    compile project(':react-native-video-processing')
+```
+
 #### [iOS]
 
 1. In Xcode, click the "Add Files to <your-project-name>".
@@ -68,7 +82,8 @@ class App extends Component {
             bitrateMultiplier: 3,
             saveToCameraRoll: true, // default is false
             saveWithCurrentDate: true, // default is false
-            minimumBitrate: 300000
+            minimumBitrate: 300000,
+            removeAudio: true, // default is false
         };
         this.videoPlayerRef.compress(options)
             .then((newSource) => console.log(newSource))
@@ -102,6 +117,7 @@ class App extends Component {
                     playerWidth={300} // iOS only
                     playerHeight={500} // iOS only
                     style={{ backgroundColor: 'black' }}
+                    resizeMode={VideoPlayer.Constants.resizeMode.CONTAIN}
                     onChange={({ nativeEvent }) => console.log({ nativeEvent })} // get Current time on every second
                 />
                 <Trimmer
@@ -123,20 +139,20 @@ class App extends Component {
 or you can use ProcessingManager without mounting VideoPlayer component
 ```javascript
 import React, { Component } from 'react';
-import { View } from 'react-native'; 
+import { View } from 'react-native';
 import { ProcessingManager } from 'react-native-video-processing';
 export class App extends Component {
   componentWillMount() {
-    const { source } = this.props; 
+    const { source } = this.props;
     ProcessingManager.getVideoInfo(source)
       .then(({ duration, size }) => console.log(duration, size));
-      
+
     ProcessingManager.trim(source, options) // like VideoPlayer trim options
           .then((data) => console.log(data));
-          
+
     ProcessingManager.compress(source, options) // like VideoPlayer compress options
               .then((data) => console.log(data));
-    
+
     const maximumSize = { width: 100, height: 200 };
     ProcessingManager.getPreviewForSecond(source, forSecond, maximumSize)
       .then((data) => console.log(data))
@@ -150,7 +166,7 @@ export class App extends Component {
 ### How to setup Library
 [![Setup](https://img.youtube.com/vi/HRjgeT6NQJM/0.jpg)](https://youtu.be/HRjgeT6NQJM)
 
-##Contributing
+## Contributing
 
 1. Please follow the eslint style guide.
 2. Please commit with `$ npm run commit`
@@ -159,6 +175,6 @@ export class App extends Component {
 1.  [ ] Use FFMpeg instead of MP4Parser
 2.  [ ] Add ability to add GLSL filters
 3.  [ ] Android should be able to compress video
-4.  [ ] More processing options
+4.  [x] More processing options
 5.  [ ] Create native trimmer component for Android
 6.  [x] Provide Standalone API
