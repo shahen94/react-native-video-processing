@@ -93,6 +93,9 @@ public class Trimmer {
 
     for (int i = 0; i < duration; i += duration / 10) {
       Bitmap frame = retriever.getFrameAtTime(i * 1000);
+      if(frame == null) {
+        continue;
+      }
       Bitmap currBmp = Bitmap.createScaledBitmap(frame, resizeWidth, resizeHeight, false);
 
       Bitmap normalizedBmp = Bitmap.createBitmap(currBmp, 0, 0, resizeWidth, resizeHeight, mx, true);
