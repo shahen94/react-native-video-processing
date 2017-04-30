@@ -74,6 +74,7 @@ public class TrimmerManager extends ReactContextBaseJavaModule {
   public void getPreviewImageAtPosition(ReadableMap options, Promise promise) {
     String source = options.getString("source");
     double sec = options.getDouble("second");
-    Trimmer.getPreviewAtPosition(source, sec, promise);
+    String format = options.getString("format");
+    Trimmer.getPreviewImageAtPosition(source, sec, format, promise, reactContext);
   }
 }

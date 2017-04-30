@@ -374,7 +374,7 @@ class RNVideoTrimmer: NSObject {
     callback( [NSNull(), assetInfo] )
   }
 
-  @objc func getPreviewImageAtPosition(_ source: String, atTime: Float = 0, maximumSize: NSDictionary, callback: RCTResponseSenderBlock) {
+  @objc func getPreviewImageAtPosition(_ source: String, atTime: Float = 0, maximumSize: NSDictionary, format: String = "base64", callback: RCTResponseSenderBlock) {
     let sourceURL = getSourceURL(source: source)
     let asset = AVAsset(url: sourceURL)
 
@@ -396,28 +396,32 @@ class RNVideoTrimmer: NSObject {
     }
     let timestamp = CMTime(seconds: Double(second), preferredTimescale: 600)
     do {
-      let imageRef = try imageGenerator.copyCGImage(at: timestamp, actualTime: nil)
-      let image = UIImage(cgImage: imageRef)
-      let imgData = UIImageJPEGRepresentation(image, 1.0)
+      if ( format == "base64" ) {
+        let imgData = UIImagePNGRepresentation(image)
+        let base64string = imgData?.base64EncodedString(options: Data.Base64EncodingOptions.init(rawValue: 0))
+        if base64string != nil {
+          callback( [NSNull(), base64string!] )
+        } else {
+          callback( ["Unable to convert to base64)", NSNull()]  )
+        }
+      } else if ( format == "JPEG" ) {
+        let imageRef = try imageGenerator.copyCGImage(at: timestamp, actualTime: nil)
+        let image = UIImage(cgImage: imageRef)
+        let imgData = UIImageJPEGRepresentation(image, 1.0)
 
-      let fileName = ProcessInfo.processInfo.globallyUniqueString
-      let fullPath = "\(NSTemporaryDirectory())\(fileName).jpg"
+        let fileName = ProcessInfo.processInfo.globallyUniqueString
+        let fullPath = "\(NSTemporaryDirectory())\(fileName).jpg"
 
-      try imgData?.write(to: URL(fileURLWithPath: fullPath), options: .atomic)
+        try imgData?.write(to: URL(fileURLWithPath: fullPath), options: .atomic)
 
-      let imageWidth = imageRef.width
-      let imageHeight = imageRef.height
-      let imageFormattedData: [AnyHashable: Any] = ["uri": fullPath, "width": imageWidth, "height": imageHeight]
+        let imageWidth = imageRef.width
+        let imageHeight = imageRef.height
+        let imageFormattedData: [AnyHashable: Any] = ["uri": fullPath, "width": imageWidth, "height": imageHeight]
 
-      callback( [NSNull(), imageFormattedData] )
-
-      //let imgData = UIImagePNGRepresentation(image)
-      //let base64string = imgData?.base64EncodedString(options: Data.Base64EncodingOptions.init(rawValue: 0))
-      //if base64string != nil {
-        //callback( [NSNull(), base64string!] )
-      //} else {
-        //callback( ["Unable to convert to base64)", NSNull()]  )
-      //}
+        callback( [NSNull(), imageFormattedData] )
+      } else {
+        callback( ["Failed format. Expected one of 'base64' or 'JPEG'", NSNull()] )
+      }
     } catch {
       callback( ["Failed to convert base64: \(error.localizedDescription)", NSNull()] )
     }

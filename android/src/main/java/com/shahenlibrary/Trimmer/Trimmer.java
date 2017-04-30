@@ -51,6 +51,11 @@ import java.io.IOException;
 
 import wseemann.media.FFmpegMediaMetadataRetriever;
 
+import java.util.UUID;
+import java.io.FileOutputStream;
+import android.app.Activity;
+
+
 public class Trimmer {
 
   private static final String LOG_TAG = "RNTrimmerManager";
@@ -202,18 +207,68 @@ public class Trimmer {
     }
   }
 
-  static void getPreviewAtPosition(String source, double sec, final Promise promise) {
+  static void getPreviewImageAtPosition(String source, double sec, String format, final Promise promise, ReactApplicationContext ctx) {
     FFmpegMediaMetadataRetriever metadataRetriever = new FFmpegMediaMetadataRetriever();
     metadataRetriever.setDataSource(source);
 
     Bitmap bmp = metadataRetriever.getFrameAtTime((long) (sec * 1000000));
+
+    // NOTE: FIX ROTATED BITMAP
+    int orientation = Integer.parseInt( metadataRetriever.extractMetadata(FFmpegMediaMetadataRetriever.METADATA_KEY_VIDEO_ROTATION) );
+    if ( orientation != 0 ) {
+      Matrix matrix = new Matrix();
+      matrix.postRotate(orientation);
+      bmp = Bitmap.createBitmap(bmp, 0, 0, bmp.getWidth(), bmp.getHeight(), matrix, true);
+    }
+
     ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-    bmp.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream);
-    byte[] byteArray = byteArrayOutputStream .toByteArray();
-    String encoded = Base64.encodeToString(byteArray, Base64.DEFAULT);
 
     WritableMap event = Arguments.createMap();
-    event.putString("image", encoded);
+
+    if ( format.equals(null) || format.equals("base64") ) {
+      bmp.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream);
+      byte[] byteArray = byteArrayOutputStream .toByteArray();
+      String encoded = Base64.encodeToString(byteArray, Base64.DEFAULT);
+
+      event.putString("image", encoded);
+    } else if ( format.equals("JPEG") ) {
+      bmp.compress(Bitmap.CompressFormat.JPEG, 100, byteArrayOutputStream);
+      byte[] byteArray = byteArrayOutputStream.toByteArray();
+
+      UUID uuid = UUID.randomUUID();
+      String imageName = uuid.toString() + "-screenshot";
+
+      File cacheDir = ctx.getCacheDir();
+      File image = null;
+      try {
+        image = File.createTempFile(imageName, ".jpeg", cacheDir);
+      } catch( IOException e ) {
+        promise.reject("Failed to create temp file", e);
+        return;
+      }
+
+      if (image.exists()) {
+        image.delete();
+      }
+
+      try {
+        FileOutputStream fos = new FileOutputStream( image.getPath() );
+
+        fos.write( byteArray );
+        fos.close();
+      } catch (java.io.IOException e) {
+        promise.reject("Failed to save image", e);
+        return;
+      }
+
+      WritableMap imageMap = Arguments.createMap();
+      imageMap.putString("uri", "file://" + image.getPath());
+
+      event.putMap("image", imageMap);
+    } else {
+      promise.reject("Wrong format error", "Wrong 'format'. Expected one of 'base64' or 'JPEG'.");
+      return;
+    }
 
     promise.resolve(event);
   }
