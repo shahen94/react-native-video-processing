@@ -55,10 +55,15 @@ import java.util.UUID;
 import java.io.FileOutputStream;
 import android.app.Activity;
 
+import com.github.hiteshsondhi88.libffmpeg.FFmpeg;
+import com.github.hiteshsondhi88.libffmpeg.FFmpegExecuteResponseHandler;
+import com.github.hiteshsondhi88.libffmpeg.FFmpegLoadBinaryResponseHandler;
 
 public class Trimmer {
 
   private static final String LOG_TAG = "RNTrimmerManager";
+
+  private static boolean ffmpegLoaded;
 
   public static void getPreviewImages(String path, Promise promise, ReactApplicationContext ctx) {
     FFmpegMediaMetadataRetriever retriever = new FFmpegMediaMetadataRetriever();
@@ -207,14 +212,37 @@ public class Trimmer {
     }
   }
 
+  static File createTempFile(String extension, final Promise promise, ReactApplicationContext ctx) {
+    UUID uuid = UUID.randomUUID();
+    String imageName = uuid.toString() + "-screenshot";
+
+    File cacheDir = ctx.getCacheDir();
+    File tempFile = null;
+    try {
+      tempFile = File.createTempFile(imageName, "." + extension, cacheDir);
+    } catch( IOException e ) {
+      promise.reject("Failed to create temp file", e.toString());
+      return null;
+    }
+
+    if (tempFile.exists()) {
+      tempFile.delete();
+    }
+
+    return tempFile;
+  }
+
   static void getPreviewImageAtPosition(String source, double sec, String format, final Promise promise, ReactApplicationContext ctx) {
     FFmpegMediaMetadataRetriever metadataRetriever = new FFmpegMediaMetadataRetriever();
+    FFmpegMediaMetadataRetriever.IN_PREFERRED_CONFIG = Bitmap.Config.ARGB_8888;
     metadataRetriever.setDataSource(source);
 
     Bitmap bmp = metadataRetriever.getFrameAtTime((long) (sec * 1000000));
 
     // NOTE: FIX ROTATED BITMAP
     int orientation = Integer.parseInt( metadataRetriever.extractMetadata(FFmpegMediaMetadataRetriever.METADATA_KEY_VIDEO_ROTATION) );
+    metadataRetriever.release();
+
     if ( orientation != 0 ) {
       Matrix matrix = new Matrix();
       matrix.postRotate(orientation);
@@ -243,7 +271,7 @@ public class Trimmer {
       try {
         image = File.createTempFile(imageName, ".jpeg", cacheDir);
       } catch( IOException e ) {
-        promise.reject("Failed to create temp file", e);
+        promise.reject("Failed to create temp file", e.toString());
         return;
       }
 
@@ -257,7 +285,7 @@ public class Trimmer {
         fos.write( byteArray );
         fos.close();
       } catch (java.io.IOException e) {
-        promise.reject("Failed to save image", e);
+        promise.reject("Failed to save image", e.toString());
         return;
       }
 
@@ -271,5 +299,103 @@ public class Trimmer {
     }
 
     promise.resolve(event);
+  }
+
+  static void crop(String source, ReadableMap options, final Promise promise, ReactApplicationContext ctx) {
+    int cropWidth = (int)( options.getDouble("cropWidth") );
+    int cropHeight = (int)( options.getDouble("cropHeight") );
+    int cropOffsetX = (int)( options.getDouble("cropOffsetX") );
+    int cropOffsetY = (int)( options.getDouble("cropOffsetY") );
+
+    // TODO: 1) ADD METHOD TO CHECK "IS FFMPEG LOADED".
+    // 2) CHECK IT HERE
+    // 3) EXPORT THAT METHOD TO "JS"
+
+    Log.d("cropWidth", Integer.toString(cropWidth));
+    Log.d("cropHeight", Integer.toString(cropHeight));
+    Log.d("cropOffsetX", Integer.toString(cropOffsetX));
+    Log.d("cropOffsetY", Integer.toString(cropOffsetY));
+
+    final File tempFile = createTempFile("mp4", promise, ctx);
+
+    final String[] cmd = new String[]{
+      // "-y",
+      "-i",
+      source,
+      "-filter:v",
+      "crop=" + Integer.toString(cropWidth) + ":" + Integer.toString(cropHeight) + ":" + Integer.toString(cropOffsetX) + ":" + Integer.toString(cropOffsetY),
+      // NOTE: FLAG TO CONVER "AAC" AUDIO CODEC
+      // "-strict",
+      // "-2",
+      tempFile.getPath()
+    };
+
+    try {
+      FFmpeg.getInstance(ctx).execute(cmd, new FFmpegExecuteResponseHandler() {
+
+        @Override
+        public void onStart() {
+          Log.d(LOG_TAG, "crop: onStart");
+        }
+
+        @Override
+        public void onProgress(String message) {
+          Log.d(LOG_TAG, "crop: onProgress");
+        }
+
+        @Override
+        public void onFailure(String message) {
+          Log.d(LOG_TAG, "crop: onFailure");
+          promise.reject("Crop error: failed.", message);
+        }
+
+        @Override
+        public void onSuccess(String message) {
+          Log.d(LOG_TAG, "crop: onSuccess");
+
+          WritableMap event = Arguments.createMap();
+          event.putString("source", "file://" + tempFile.getPath());
+          promise.resolve(event);
+        }
+
+        @Override
+        public void onFinish() {
+          Log.d(LOG_TAG, "crop: onFinish");
+        }
+      });
+    } catch (Exception e) {
+      promise.reject("Crop error. Command already running", e.toString());
+    }
+  }
+
+  public static void loadFfmpeg(ReactApplicationContext ctx){
+    try {
+      FFmpeg.getInstance(ctx).loadBinary(new FFmpegLoadBinaryResponseHandler() {
+          @Override
+          public void onStart() {
+            Log.d(LOG_TAG, "load FFMPEG: onStart");
+          }
+
+          @Override
+          public void onSuccess() {
+            Log.d(LOG_TAG, "load FFMPEG: onSuccess");
+            ffmpegLoaded = true;
+          }
+
+          @Override
+          public void onFailure() {
+            ffmpegLoaded = false;
+            Log.d(LOG_TAG, "load FFMPEG: Failed to load ffmpeg");
+          }
+
+          @Override
+          public void onFinish() {
+            Log.d(LOG_TAG, "load FFMPEG: onFinish");
+          }
+      });
+    } catch (Exception e){
+      ffmpegLoaded = false;
+      Log.d("Failed to load ffmpeg", e.toString());
+    }
   }
 }

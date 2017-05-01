@@ -40,6 +40,7 @@ public class TrimmerManager extends ReactContextBaseJavaModule {
   public TrimmerManager(ReactApplicationContext reactContext) {
     super(reactContext);
     this.reactContext = reactContext;
+    loadFfmpeg();
   }
 
   @Override
@@ -76,5 +77,15 @@ public class TrimmerManager extends ReactContextBaseJavaModule {
     double sec = options.getDouble("second");
     String format = options.getString("format");
     Trimmer.getPreviewImageAtPosition(source, sec, format, promise, reactContext);
+  }
+
+  @ReactMethod
+  public void crop(String path, ReadableMap options, Promise promise) {
+    Trimmer.crop(path, options, promise, reactContext);
+  }
+
+  @ReactMethod
+  private void loadFfmpeg() {
+    Trimmer.loadFfmpeg(reactContext);
   }
 }
