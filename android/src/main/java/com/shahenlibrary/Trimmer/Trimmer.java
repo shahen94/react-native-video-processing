@@ -53,11 +53,12 @@ import wseemann.media.FFmpegMediaMetadataRetriever;
 
 import java.util.UUID;
 import java.io.FileOutputStream;
-import android.app.Activity;
+import java.util.Arrays;
 
 import com.github.hiteshsondhi88.libffmpeg.FFmpeg;
 import com.github.hiteshsondhi88.libffmpeg.FFmpegExecuteResponseHandler;
 import com.github.hiteshsondhi88.libffmpeg.FFmpegLoadBinaryResponseHandler;
+
 
 public class Trimmer {
 
@@ -319,16 +320,18 @@ public class Trimmer {
     final File tempFile = createTempFile("mp4", promise, ctx);
 
     final String[] cmd = new String[]{
-      // "-y",
+      "-y",
       "-i",
       source,
-      "-filter:v",
+      "-vf",
       "crop=" + Integer.toString(cropWidth) + ":" + Integer.toString(cropHeight) + ":" + Integer.toString(cropOffsetX) + ":" + Integer.toString(cropOffsetY),
       // NOTE: FLAG TO CONVER "AAC" AUDIO CODEC
-      // "-strict",
-      // "-2",
-      tempFile.getPath()
+      "-strict",
+      "-2",
+      "file://" + tempFile.getPath()
     };
+
+    Log.d(LOG_TAG, Arrays.toString(cmd));
 
     try {
       FFmpeg.getInstance(ctx).execute(cmd, new FFmpegExecuteResponseHandler() {
