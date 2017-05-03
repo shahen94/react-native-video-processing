@@ -54,6 +54,7 @@ import wseemann.media.FFmpegMediaMetadataRetriever;
 import java.util.UUID;
 import java.io.FileOutputStream;
 import java.util.Arrays;
+import java.util.ArrayList;
 
 import com.github.hiteshsondhi88.libffmpeg.FFmpeg;
 import com.github.hiteshsondhi88.libffmpeg.FFmpegExecuteResponseHandler;
@@ -264,24 +265,10 @@ public class Trimmer {
       bmp.compress(Bitmap.CompressFormat.JPEG, 100, byteArrayOutputStream);
       byte[] byteArray = byteArrayOutputStream.toByteArray();
 
-      UUID uuid = UUID.randomUUID();
-      String imageName = uuid.toString() + "-screenshot";
-
-      File cacheDir = ctx.getCacheDir();
-      File image = null;
-      try {
-        image = File.createTempFile(imageName, ".jpeg", cacheDir);
-      } catch( IOException e ) {
-        promise.reject("Failed to create temp file", e.toString());
-        return;
-      }
-
-      if (image.exists()) {
-        image.delete();
-      }
+      File tempFile = createTempFile("jpeg", promise, ctx);
 
       try {
-        FileOutputStream fos = new FileOutputStream( image.getPath() );
+        FileOutputStream fos = new FileOutputStream( tempFile.getPath() );
 
         fos.write( byteArray );
         fos.close();
@@ -291,7 +278,7 @@ public class Trimmer {
       }
 
       WritableMap imageMap = Arguments.createMap();
-      imageMap.putString("uri", "file://" + image.getPath());
+      imageMap.putString("uri", "file://" + tempFile.getPath());
 
       event.putMap("image", imageMap);
     } else {
@@ -308,33 +295,76 @@ public class Trimmer {
     int cropOffsetX = (int)( options.getDouble("cropOffsetX") );
     int cropOffsetY = (int)( options.getDouble("cropOffsetY") );
 
+    FFmpegMediaMetadataRetriever retriever = new FFmpegMediaMetadataRetriever();
+    if (VideoEdit.shouldUseURI(source)) {
+      retriever.setDataSource(ctx, Uri.parse(source));
+    } else {
+      retriever.setDataSource(source);
+    }
+
+    int videoWidth = Integer.parseInt(retriever.extractMetadata(FFmpegMediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH));
+    int videoHeight = Integer.parseInt(retriever.extractMetadata(FFmpegMediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT));
+    retriever.release();
+
+    // NOTE: FFMpeg CROP NEED TO BE DEVIDED BY 2. OR YOU WILL SEE BLANK WHITE LINES FROM LEFT/RIGHT
+    while( cropWidth % 2 > 0 && cropWidth < videoWidth ) {
+      cropWidth += 1;
+    }
+    while( cropWidth % 2 > 0 && cropWidth > 0 ) {
+      cropWidth -= 1;
+    }
+    while( cropHeight % 2 > 0 && cropHeight < videoHeight ) {
+      cropHeight += 1;
+    }
+    while( cropHeight % 2 > 0 && cropHeight > 0 ) {
+      cropHeight -= 1;
+    }
+
     // TODO: 1) ADD METHOD TO CHECK "IS FFMPEG LOADED".
     // 2) CHECK IT HERE
     // 3) EXPORT THAT METHOD TO "JS"
 
-    Log.d("cropWidth", Integer.toString(cropWidth));
-    Log.d("cropHeight", Integer.toString(cropHeight));
-    Log.d("cropOffsetX", Integer.toString(cropOffsetX));
-    Log.d("cropOffsetY", Integer.toString(cropOffsetY));
-
     final File tempFile = createTempFile("mp4", promise, ctx);
 
-    final String[] cmd = new String[]{
-      "-y",
-      "-i",
-      source,
-      "-vf",
-      "crop=" + Integer.toString(cropWidth) + ":" + Integer.toString(cropHeight) + ":" + Integer.toString(cropOffsetX) + ":" + Integer.toString(cropOffsetY),
-      // NOTE: FLAG TO CONVER "AAC" AUDIO CODEC
-      "-strict",
-      "-2",
-      "file://" + tempFile.getPath()
-    };
+    ArrayList<String> cmd = new ArrayList<String>();
+    cmd.add("-y"); // NOTE: OVERWRITE OUTPUT FILE
 
-    Log.d(LOG_TAG, Arrays.toString(cmd));
+    String startTime = options.getString("startTime");
+    if ( !startTime.equals(null) && !startTime.equals("") ) {
+      cmd.add("-ss");
+      cmd.add(startTime);
+    }
+
+    // NOTE: INPUT FILE
+    cmd.add("-i");
+    cmd.add(source);
+
+    String endTime = options.getString("endTime");
+    if ( !endTime.equals(null) && !endTime.equals("") ) {
+      cmd.add("-to");
+      cmd.add(endTime);
+    }
+
+    cmd.add("-vf");
+    cmd.add("crop=" + Integer.toString(cropWidth) + ":" + Integer.toString(cropHeight) + ":" + Integer.toString(cropOffsetX) + ":" + Integer.toString(cropOffsetY));
+
+    cmd.add("-preset");
+    cmd.add("ultrafast");
+    // NOTE: DO NOT CONVERT AUDIO TO SAVE TIME
+    cmd.add("-c:a");
+    cmd.add("copy");
+    // NOTE: FLAG TO CONVER "AAC" AUDIO CODEC
+    cmd.add("-strict");
+    cmd.add("-2");
+    // NOTE: OUTPUT FILE
+    cmd.add(tempFile.getPath());
+
+    final String[] cmdToExec = cmd.toArray( new String[0] );
+
+    Log.d(LOG_TAG, Arrays.toString(cmdToExec));
 
     try {
-      FFmpeg.getInstance(ctx).execute(cmd, new FFmpegExecuteResponseHandler() {
+      FFmpeg.getInstance(ctx).execute(cmdToExec, new FFmpegExecuteResponseHandler() {
 
         @Override
         public void onStart() {
@@ -355,6 +385,7 @@ public class Trimmer {
         @Override
         public void onSuccess(String message) {
           Log.d(LOG_TAG, "crop: onSuccess");
+          Log.d(LOG_TAG, message);
 
           WritableMap event = Arguments.createMap();
           event.putString("source", "file://" + tempFile.getPath());

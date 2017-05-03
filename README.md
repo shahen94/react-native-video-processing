@@ -178,3 +178,4 @@ export class App extends Component {
 4.  [x] More processing options
 5.  [ ] Create native trimmer component for Android
 6.  [x] Provide Standalone API
+7.  [ ] Describe API methods with parameters in README
