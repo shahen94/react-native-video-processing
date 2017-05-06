@@ -396,6 +396,8 @@ class RNVideoTrimmer: NSObject {
     }
     let timestamp = CMTime(seconds: Double(second), preferredTimescale: 600)
     do {
+      let imageRef = try imageGenerator.copyCGImage(at: timestamp, actualTime: nil)
+      let image = UIImage(cgImage: imageRef)
       if ( format == "base64" ) {
         let imgData = UIImagePNGRepresentation(image)
         let base64string = imgData?.base64EncodedString(options: Data.Base64EncodingOptions.init(rawValue: 0))
@@ -405,8 +407,6 @@ class RNVideoTrimmer: NSObject {
           callback( ["Unable to convert to base64)", NSNull()]  )
         }
       } else if ( format == "JPEG" ) {
-        let imageRef = try imageGenerator.copyCGImage(at: timestamp, actualTime: nil)
-        let image = UIImage(cgImage: imageRef)
         let imgData = UIImageJPEGRepresentation(image, 1.0)
 
         let fileName = ProcessInfo.processInfo.globallyUniqueString
