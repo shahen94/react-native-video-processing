@@ -374,7 +374,7 @@ class RNVideoTrimmer: NSObject {
     callback( [NSNull(), assetInfo] )
   }
 
-  @objc func getPreviewImageAtPosition(_ source: String, atTime: Float = 0, maximumSize: NSDictionary, format: String = "base64", callback: RCTResponseSenderBlock) {
+  @objc func getPreviewImageAtPosition(_ source: String, atTime: Float = 0, maximumSize: NSDictionary, format: String = "base64", callback: @escaping RCTResponseSenderBlock) {
     let sourceURL = getSourceURL(source: source)
     let asset = AVAsset(url: sourceURL)
 
