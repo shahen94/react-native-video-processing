@@ -30,6 +30,15 @@ project(':react-native-video-processing').projectDir = new File(rootProject.proj
     compile project(':react-native-video-processing')
 ```
 
+6. Add this add the end of the file `android/app/build.gradle` (need it to download and compile ffmpeg lib):
+```
+allprojects {
+  repositories {
+    maven { url "https://jitpack.io" }
+  }
+}
+```
+
 #### [iOS]
 
 1. In Xcode, click the "Add Files to <your-project-name>".
@@ -178,3 +187,4 @@ export class App extends Component {
 4.  [x] More processing options
 5.  [ ] Create native trimmer component for Android
 6.  [x] Provide Standalone API
+7.  [ ] Describe API methods with parameters in README
