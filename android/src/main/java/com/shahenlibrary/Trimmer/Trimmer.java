@@ -255,7 +255,7 @@ public class Trimmer {
 
     WritableMap event = Arguments.createMap();
 
-    if ( format.equals(null) || format.equals("base64") ) {
+    if ( format == null || (format != null && format.equals("base64")) ) {
       bmp.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream);
       byte[] byteArray = byteArrayOutputStream .toByteArray();
       String encoded = Base64.encodeToString(byteArray, Base64.DEFAULT);
