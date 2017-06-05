@@ -36,9 +36,12 @@ import android.widget.MediaController;
 
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.LifecycleEventListener;
+import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.uimanager.ThemedReactContext;
 import com.facebook.react.uimanager.events.RCTEventEmitter;
+import com.shahenlibrary.Trimmer.Trimmer;
+import com.shahenlibrary.interfaces.OnCompressVideoListener;
 import com.shahenlibrary.interfaces.OnTrimVideoListener;
 import com.shahenlibrary.utils.VideoEdit;
 import com.yqritc.scalablevideoview.ScalableType;
@@ -55,8 +58,8 @@ import java.io.IOException;
 import wseemann.media.FFmpegMediaMetadataRetriever;
 
 public class VideoPlayerView extends ScalableVideoView implements
-  MediaPlayer.OnPreparedListener, MediaPlayer.OnErrorListener, MediaPlayer.OnBufferingUpdateListener,
-  MediaPlayer.OnCompletionListener, MediaPlayer.OnInfoListener, LifecycleEventListener, MediaController.MediaPlayerControl {
+        MediaPlayer.OnPreparedListener, MediaPlayer.OnErrorListener, MediaPlayer.OnBufferingUpdateListener,
+        MediaPlayer.OnCompletionListener, MediaPlayer.OnInfoListener, LifecycleEventListener, MediaController.MediaPlayerControl {
 
   private ThemedReactContext themedReactContext;
   private RCTEventEmitter eventEmitter;
@@ -350,6 +353,55 @@ public class VideoPlayerView extends ScalableVideoView implements
       trimVideoListener.onError(e.toString());
       e.printStackTrace();
       Log.d(LOG_TAG, "trimMedia: error -> " + e.toString());
+    }
+  }
+
+  public void compressMedia(ThemedReactContext ctx) {
+    OnCompressVideoListener compressVideoListener = new OnCompressVideoListener() {
+      @Override
+      public void onError(String message) {
+        Log.d(LOG_TAG, "Compress onError: " + message);
+        WritableMap event = Arguments.createMap();
+        event.putString(Events.ERROR_TRIM, message);
+
+        eventEmitter.receiveEvent(getId(), EventsEnum.EVENT_GET_COMPRESSED_SOURCE.toString(), event);
+      }
+
+      @Override
+      public void onCompressStarted() {
+        Log.d(LOG_TAG, "Compress Started");
+      }
+
+      @Override
+      public void onSuccess(String uri) {
+        Log.d(LOG_TAG, "onSuccess: " + uri.toString());
+        WritableMap event = Arguments.createMap();
+        event.putString("source", uri.toString());
+        eventEmitter.receiveEvent(getId(), EventsEnum.EVENT_GET_COMPRESSED_SOURCE.toString(), event);
+      }
+
+      @Override
+      public void cancelAction() {
+        Log.d(LOG_TAG, "Compress cancel");
+      }
+    };
+
+    String[] dPath = mediaSource.split("/");
+    StringBuilder builder = new StringBuilder();
+    for (int i = 0; i < dPath.length; ++i) {
+      if (i == dPath.length - 1) {
+        continue;
+      }
+      builder.append(dPath[i]);
+      builder.append(File.separator);
+    }
+
+    try {
+      VideoEdit.startCompress(mediaSource, compressVideoListener, ctx);
+    } catch (IOException e) {
+      compressVideoListener.onError(e.toString());
+      e.printStackTrace();
+      Log.d(LOG_TAG, "Error Compressing Video: " + e.toString());
     }
   }
 

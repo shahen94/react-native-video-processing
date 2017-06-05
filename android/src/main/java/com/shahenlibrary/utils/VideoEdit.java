@@ -29,6 +29,11 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.coremedia.iso.boxes.Container;
+import com.facebook.react.bridge.Arguments;
+import com.facebook.react.bridge.WritableMap;
+import com.facebook.react.uimanager.ThemedReactContext;
+import com.github.hiteshsondhi88.libffmpeg.FFmpeg;
+import com.github.hiteshsondhi88.libffmpeg.FFmpegExecuteResponseHandler;
 import com.googlecode.mp4parser.FileDataSourceViaHeapImpl;
 import com.googlecode.mp4parser.authoring.Movie;
 import com.googlecode.mp4parser.authoring.Track;
@@ -42,14 +47,20 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.channels.FileChannel;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Formatter;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
+import java.util.UUID;
 
+import com.shahenlibrary.Trimmer.Trimmer;
+import com.shahenlibrary.interfaces.OnCompressVideoListener;
 import com.shahenlibrary.interfaces.OnTrimVideoListener;
+
+import wseemann.media.FFmpegMediaMetadataRetriever;
 
 public class VideoEdit {
 
@@ -57,10 +68,10 @@ public class VideoEdit {
 
   public static boolean shouldUseURI(@Nullable String path) {
     String[] supportedProtocols = {
-      "content://",
-      "file://",
-      "http://",
-      "https://"
+            "content://",
+            "file://",
+            "http://",
+            "https://"
     };
     if (path == null) {
       return false;
@@ -86,6 +97,10 @@ public class VideoEdit {
     file.getParentFile().mkdirs();
     Log.d(TAG, "Generated file path " + filePath);
     genVideoUsingMp4Parser(src, file, startMs, endMs, callback);
+  }
+
+  public static void startCompress(@NonNull String source, @NonNull final OnCompressVideoListener callback, ThemedReactContext ctx) throws IOException {
+    Trimmer.compress(source, null, callback, ctx, null);
   }
 
   private static void genVideoUsingMp4Parser(@NonNull File src, @NonNull File dst, long startMs, long endMs, @NonNull OnTrimVideoListener callback) throws IOException {

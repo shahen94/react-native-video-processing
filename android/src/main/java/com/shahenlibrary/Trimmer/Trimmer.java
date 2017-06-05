@@ -25,6 +25,7 @@
 package com.shahenlibrary.Trimmer;
 
 import android.annotation.TargetApi;
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
 import android.media.MediaMetadataRetriever;
@@ -39,9 +40,11 @@ import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.bridge.WritableMap;
+import com.facebook.react.uimanager.ThemedReactContext;
 import com.facebook.react.uimanager.events.Event;
 import com.shahenlibrary.Events.Events;
 import com.shahenlibrary.Events.EventsEnum;
+import com.shahenlibrary.interfaces.OnCompressVideoListener;
 import com.shahenlibrary.interfaces.OnTrimVideoListener;
 import com.shahenlibrary.utils.VideoEdit;
 
@@ -90,12 +93,12 @@ public class Trimmer {
     float scaleHeight = ((float) resizeHeight) / height;
 
     Log.d(TrimmerManager.REACT_PACKAGE, "getPreviewImages: \n\tduration: " + duration +
-      "\n\twidth: " + width +
-      "\n\theight: " + height +
-      "\n\torientation: " + orientation +
-      "\n\taspectRatio: " + aspectRatio +
-      "\n\tresizeWidth: " + resizeWidth +
-      "\n\tresizeHeight: " + resizeHeight
+            "\n\twidth: " + width +
+            "\n\theight: " + height +
+            "\n\torientation: " + orientation +
+            "\n\taspectRatio: " + aspectRatio +
+            "\n\tresizeWidth: " + resizeWidth +
+            "\n\tresizeHeight: " + resizeHeight
     );
 
     Matrix mx = new Matrix();
@@ -214,7 +217,84 @@ public class Trimmer {
     }
   }
 
-  static File createTempFile(String extension, final Promise promise, ReactApplicationContext ctx) {
+  public static void compress(String source, final Promise promise, final OnCompressVideoListener cb, ThemedReactContext tctx, ReactApplicationContext rctx) {
+    Context ctx = tctx != null ? tctx : rctx;
+
+    FFmpegMediaMetadataRetriever retriever = new FFmpegMediaMetadataRetriever();
+    if (VideoEdit.shouldUseURI(source)) {
+      retriever.setDataSource(ctx, Uri.parse(source));
+    } else {
+      retriever.setDataSource(source);
+    }
+    retriever.release();
+
+    final File tempFile = createTempFile("mp4", promise, ctx);
+
+    ArrayList<String> cmd = new ArrayList<String>();
+    cmd.add("-y");
+    cmd.add("-i");
+    cmd.add(source);
+    cmd.add("-c:v");
+    cmd.add("libx264");
+    cmd.add("-pix_fmt");
+    cmd.add("yuv420p");
+
+    cmd.add(tempFile.getPath());
+
+    final String[] cmdToExec = cmd.toArray( new String[0] );
+
+    Log.d(LOG_TAG, Arrays.toString(cmdToExec));
+
+    try {
+      FFmpeg.getInstance(ctx).execute(cmdToExec, new FFmpegExecuteResponseHandler() {
+
+        @Override
+        public void onStart() {
+          Log.d(LOG_TAG, "Compress: Start");
+        }
+
+        @Override
+        public void onProgress(String message) {
+          Log.d(LOG_TAG, "Compress: onProgress");
+        }
+
+        @Override
+        public void onFailure(String message) {
+          Log.d(LOG_TAG, "Compress: onFailure " + message);
+          if (cb != null) {
+            cb.onError("compress error: failed. " + message);
+          } else if (promise != null) {
+            promise.reject("compress error: failed.", message);
+          }
+        }
+
+        @Override
+        public void onSuccess(String message) {
+          Log.d(LOG_TAG, "compress: onSuccess " + message);
+          if (cb != null) {
+            cb.onSuccess("file://" + tempFile.getPath());
+          } else if (promise != null) {
+            WritableMap event = Arguments.createMap();
+            event.putString("source", "file://" + tempFile.getPath());
+            promise.resolve(event);
+          }
+        }
+
+        @Override
+        public void onFinish() {
+          Log.d(LOG_TAG, "Compress: Finished");
+        }
+      });
+    } catch (Exception e) {
+      if (cb != null) {
+        cb.onError("compress error. Command already running" + e.toString());
+      } else if (promise != null) {
+        promise.reject("compress error. Command already running", e.toString());
+      }
+    }
+  }
+
+  static File createTempFile(String extension, final Promise promise, Context ctx) {
     UUID uuid = UUID.randomUUID();
     String imageName = uuid.toString() + "-screenshot";
 
@@ -405,27 +485,27 @@ public class Trimmer {
   public static void loadFfmpeg(ReactApplicationContext ctx){
     try {
       FFmpeg.getInstance(ctx).loadBinary(new FFmpegLoadBinaryResponseHandler() {
-          @Override
-          public void onStart() {
-            Log.d(LOG_TAG, "load FFMPEG: onStart");
-          }
+        @Override
+        public void onStart() {
+          Log.d(LOG_TAG, "load FFMPEG: onStart");
+        }
 
-          @Override
-          public void onSuccess() {
-            Log.d(LOG_TAG, "load FFMPEG: onSuccess");
-            ffmpegLoaded = true;
-          }
+        @Override
+        public void onSuccess() {
+          Log.d(LOG_TAG, "load FFMPEG: onSuccess");
+          ffmpegLoaded = true;
+        }
 
-          @Override
-          public void onFailure() {
-            ffmpegLoaded = false;
-            Log.d(LOG_TAG, "load FFMPEG: Failed to load ffmpeg");
-          }
+        @Override
+        public void onFailure() {
+          ffmpegLoaded = false;
+          Log.d(LOG_TAG, "load FFMPEG: Failed to load ffmpeg");
+        }
 
-          @Override
-          public void onFinish() {
-            Log.d(LOG_TAG, "load FFMPEG: onFinish");
-          }
+        @Override
+        public void onFinish() {
+          Log.d(LOG_TAG, "load FFMPEG: onFinish");
+        }
       });
     } catch (Exception e){
       ffmpegLoaded = false;

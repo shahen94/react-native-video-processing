@@ -58,6 +58,8 @@ public class VideoPlayerViewManager extends SimpleViewManager<VideoPlayerView> {
   private final int COMMAND_COMPRESS_MEDIA = 3;
   private final int COMMAND_GET_PREVIEW_IMAGE = 4;
 
+  private ThemedReactContext reactContext;
+
   @Override
   public String getName() {
     return VideoPlayerViewManager.REACT_PACKAGE;
@@ -65,6 +67,7 @@ public class VideoPlayerViewManager extends SimpleViewManager<VideoPlayerView> {
 
   @Override
   protected VideoPlayerView createViewInstance(ThemedReactContext reactContext) {
+    this.reactContext = reactContext;
     return new VideoPlayerView(reactContext);
   }
 
@@ -90,17 +93,17 @@ public class VideoPlayerViewManager extends SimpleViewManager<VideoPlayerView> {
   public Map<String, Integer> getCommandsMap() {
     Log.d(VideoPlayerViewManager.REACT_PACKAGE, "getCommandsMap");
     return MapBuilder.of(
-      Events.COMPRESS_MEDIA,
-      COMMAND_COMPRESS_MEDIA,
+            Events.COMPRESS_MEDIA,
+            COMMAND_COMPRESS_MEDIA,
 
-      Events.GET_MEDIA_INFO,
-      COMMAND_GET_INFO,
+            Events.GET_MEDIA_INFO,
+            COMMAND_GET_INFO,
 
-      Events.TRIM_MEDIA,
-      COMMAND_TRIM_MEDIA,
+            Events.TRIM_MEDIA,
+            COMMAND_TRIM_MEDIA,
 
-      Events.GET_PREVIEW_IMAGE,
-      COMMAND_GET_PREVIEW_IMAGE
+            Events.GET_PREVIEW_IMAGE,
+            COMMAND_GET_PREVIEW_IMAGE
     );
   }
 
@@ -134,6 +137,8 @@ public class VideoPlayerViewManager extends SimpleViewManager<VideoPlayerView> {
         Log.d(VideoPlayerViewManager.REACT_PACKAGE, "receiveCommand: Get Preview image for sec: " + sec);
         root.getFrame(sec);
         break;
+      case COMMAND_COMPRESS_MEDIA:
+        root.compressMedia(this.reactContext);
       default:
         Log.d(VideoPlayerViewManager.REACT_PACKAGE, "receiveCommand: Wrong command received");
     }
