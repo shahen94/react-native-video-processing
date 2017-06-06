@@ -141,6 +141,11 @@ public class Trimmer {
     int width = Integer.parseInt(mmr.extractMetadata(FFmpegMediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH));
     int height = Integer.parseInt(mmr.extractMetadata(FFmpegMediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT));
     int orientation = Integer.parseInt(mmr.extractMetadata(FFmpegMediaMetadataRetriever.METADATA_KEY_VIDEO_ROTATION));
+    if (orientation == 90 || orientation == 270) {
+      width = width + height;
+      height = width - height;
+      width = width - height;
+    }
 
     WritableMap event = Arguments.createMap();
     WritableMap size = Arguments.createMap();
@@ -149,7 +154,7 @@ public class Trimmer {
     size.putInt(Events.HEIGHT, height);
 
     event.putMap(Events.SIZE, size);
-    event.putInt(Events.DURATION, duration);
+    event.putInt(Events.DURATION, duration / 1000);
     event.putInt(Events.ORIENTATION, orientation);
 
     promise.resolve(event);
