@@ -25,11 +25,9 @@ package com.shahenlibrary.VideoPlayer;
 
 import android.util.Log;
 
-import com.facebook.react.bridge.Promise;
-import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.ReadableArray;
+import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.common.MapBuilder;
-import com.facebook.react.uimanager.IllegalViewOperationException;
 import com.facebook.react.uimanager.annotations.ReactProp;
 import com.facebook.react.uimanager.SimpleViewManager;
 import com.facebook.react.uimanager.ThemedReactContext;
@@ -138,7 +136,8 @@ public class VideoPlayerViewManager extends SimpleViewManager<VideoPlayerView> {
         root.getFrame(sec);
         break;
       case COMMAND_COMPRESS_MEDIA:
-        root.compressMedia(this.reactContext);
+        ReadableMap options = args.getMap(0);
+        root.compressMedia(this.reactContext, options);
       default:
         Log.d(VideoPlayerViewManager.REACT_PACKAGE, "receiveCommand: Wrong command received");
     }

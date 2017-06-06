@@ -41,9 +41,7 @@ import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.uimanager.ThemedReactContext;
-import com.facebook.react.uimanager.events.Event;
 import com.shahenlibrary.Events.Events;
-import com.shahenlibrary.Events.EventsEnum;
 import com.shahenlibrary.interfaces.OnCompressVideoListener;
 import com.shahenlibrary.interfaces.OnTrimVideoListener;
 import com.shahenlibrary.utils.VideoEdit;
@@ -217,7 +215,7 @@ public class Trimmer {
     }
   }
 
-  public static void compress(String source, final Promise promise, final OnCompressVideoListener cb, ThemedReactContext tctx, ReactApplicationContext rctx) {
+  public static void compress(String source, ReadableMap options, final Promise promise, final OnCompressVideoListener cb, ThemedReactContext tctx, ReactApplicationContext rctx) {
     Context ctx = tctx != null ? tctx : rctx;
 
     FFmpegMediaMetadataRetriever retriever = new FFmpegMediaMetadataRetriever();
@@ -227,6 +225,12 @@ public class Trimmer {
       retriever.setDataSource(source);
     }
     retriever.release();
+    Log.d(LOG_TAG, "OPTIONS: " + options.toString());
+    Double width = options.hasKey("width") ? options.getDouble("width") : null;
+    Double height = options.hasKey("height") ? options.getDouble("height") : null;
+    Double minimumBitrate = options.hasKey("minimumBitrate") ? options.getDouble("minimumBitrate") : null;
+    Double bitrateMultiplier = options.hasKey("bitrateMultiplier") ? options.getDouble("bitrateMultiplier") : null;
+    Boolean removeAudio = options.hasKey("removeAudio") ? options.getBoolean("removeAudio") : false;
 
     final File tempFile = createTempFile("mp4", promise, ctx);
 
@@ -236,9 +240,19 @@ public class Trimmer {
     cmd.add(source);
     cmd.add("-c:v");
     cmd.add("libx264");
+    if (width != null && height != null) {
+      cmd.add("-vf");
+      cmd.add("scale=" + Double.toString(width) + ":" + Double.toString(height));
+    }
+
+    cmd.add("-preset");
+    cmd.add("ultrafast");
     cmd.add("-pix_fmt");
     cmd.add("yuv420p");
 
+    if (removeAudio) {
+      cmd.add("-an");
+    }
     cmd.add(tempFile.getPath());
 
     final String[] cmdToExec = cmd.toArray( new String[0] );
@@ -255,12 +269,10 @@ public class Trimmer {
 
         @Override
         public void onProgress(String message) {
-          Log.d(LOG_TAG, "Compress: onProgress");
         }
 
         @Override
         public void onFailure(String message) {
-          Log.d(LOG_TAG, "Compress: onFailure " + message);
           if (cb != null) {
             cb.onError("compress error: failed. " + message);
           } else if (promise != null) {
@@ -270,7 +282,6 @@ public class Trimmer {
 
         @Override
         public void onSuccess(String message) {
-          Log.d(LOG_TAG, "compress: onSuccess " + message);
           if (cb != null) {
             cb.onSuccess("file://" + tempFile.getPath());
           } else if (promise != null) {

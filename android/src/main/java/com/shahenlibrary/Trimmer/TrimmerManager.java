@@ -31,6 +31,9 @@ import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.ReadableMap;
+import com.facebook.react.common.MapBuilder;
+
+import java.util.Map;
 
 public class TrimmerManager extends ReactContextBaseJavaModule {
   static final String REACT_PACKAGE = "RNTrimmerManager";
@@ -69,7 +72,7 @@ public class TrimmerManager extends ReactContextBaseJavaModule {
   @ReactMethod
   public void compress(String path, ReadableMap options, Promise promise) {
     Log.d(REACT_PACKAGE, "compress video: " + options.toString());
-    Trimmer.compress(path, promise, null, null, reactContext);
+    Trimmer.compress(path, options, promise, null, null, reactContext);
   }
 
   @ReactMethod

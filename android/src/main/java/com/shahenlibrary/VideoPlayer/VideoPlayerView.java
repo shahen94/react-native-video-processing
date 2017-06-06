@@ -29,18 +29,16 @@ import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Handler;
 import android.support.annotation.Nullable;
-import android.support.v4.app.ActivityCompat;
 import android.util.Base64;
 import android.util.Log;
 import android.widget.MediaController;
 
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.LifecycleEventListener;
-import com.facebook.react.bridge.ReactApplicationContext;
+import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.uimanager.ThemedReactContext;
 import com.facebook.react.uimanager.events.RCTEventEmitter;
-import com.shahenlibrary.Trimmer.Trimmer;
 import com.shahenlibrary.interfaces.OnCompressVideoListener;
 import com.shahenlibrary.interfaces.OnTrimVideoListener;
 import com.shahenlibrary.utils.VideoEdit;
@@ -356,14 +354,13 @@ public class VideoPlayerView extends ScalableVideoView implements
     }
   }
 
-  public void compressMedia(ThemedReactContext ctx) {
+  public void compressMedia(ThemedReactContext ctx, ReadableMap options) {
     OnCompressVideoListener compressVideoListener = new OnCompressVideoListener() {
       @Override
       public void onError(String message) {
         Log.d(LOG_TAG, "Compress onError: " + message);
         WritableMap event = Arguments.createMap();
         event.putString(Events.ERROR_TRIM, message);
-
         eventEmitter.receiveEvent(getId(), EventsEnum.EVENT_GET_COMPRESSED_SOURCE.toString(), event);
       }
 
@@ -374,7 +371,7 @@ public class VideoPlayerView extends ScalableVideoView implements
 
       @Override
       public void onSuccess(String uri) {
-        Log.d(LOG_TAG, "onSuccess: " + uri.toString());
+        Log.d(LOG_TAG, "Compress: onSuccess");
         WritableMap event = Arguments.createMap();
         event.putString("source", uri.toString());
         eventEmitter.receiveEvent(getId(), EventsEnum.EVENT_GET_COMPRESSED_SOURCE.toString(), event);
@@ -397,7 +394,7 @@ public class VideoPlayerView extends ScalableVideoView implements
     }
 
     try {
-      VideoEdit.startCompress(mediaSource, compressVideoListener, ctx);
+      VideoEdit.startCompress(mediaSource, compressVideoListener, ctx, options);
     } catch (IOException e) {
       compressVideoListener.onError(e.toString());
       e.printStackTrace();
