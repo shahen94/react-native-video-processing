@@ -51,9 +51,21 @@ import java.io.IOException;
 
 import wseemann.media.FFmpegMediaMetadataRetriever;
 
+import java.util.UUID;
+import java.io.FileOutputStream;
+import java.util.Arrays;
+import java.util.ArrayList;
+
+import com.github.hiteshsondhi88.libffmpeg.FFmpeg;
+import com.github.hiteshsondhi88.libffmpeg.FFmpegExecuteResponseHandler;
+import com.github.hiteshsondhi88.libffmpeg.FFmpegLoadBinaryResponseHandler;
+
+
 public class Trimmer {
 
   private static final String LOG_TAG = "RNTrimmerManager";
+
+  private static boolean ffmpegLoaded;
 
   public static void getPreviewImages(String path, Promise promise, ReactApplicationContext ctx) {
     FFmpegMediaMetadataRetriever retriever = new FFmpegMediaMetadataRetriever();
@@ -93,12 +105,8 @@ public class Trimmer {
 
     for (int i = 0; i < duration; i += duration / 10) {
       Bitmap frame = retriever.getFrameAtTime(i * 1000);
-      if (frame == null) {
-        frame = retriever.getFrameAtTime(i * 100);
-      }
-      if (frame == null) {
-        String lastEncoded = images.getString(images.size() - 1);
-        images.pushString(lastEncoded);
+
+      if(frame == null) {
         continue;
       }
       Bitmap currBmp = Bitmap.createScaledBitmap(frame, resizeWidth, resizeHeight, false);
@@ -207,19 +215,222 @@ public class Trimmer {
     }
   }
 
-  static void getPreviewAtPosition(String source, double sec, final Promise promise) {
+  static File createTempFile(String extension, final Promise promise, ReactApplicationContext ctx) {
+    UUID uuid = UUID.randomUUID();
+    String imageName = uuid.toString() + "-screenshot";
+
+    File cacheDir = ctx.getCacheDir();
+    File tempFile = null;
+    try {
+      tempFile = File.createTempFile(imageName, "." + extension, cacheDir);
+    } catch( IOException e ) {
+      promise.reject("Failed to create temp file", e.toString());
+      return null;
+    }
+
+    if (tempFile.exists()) {
+      tempFile.delete();
+    }
+
+    return tempFile;
+  }
+
+  static void getPreviewImageAtPosition(String source, double sec, String format, final Promise promise, ReactApplicationContext ctx) {
     FFmpegMediaMetadataRetriever metadataRetriever = new FFmpegMediaMetadataRetriever();
+    FFmpegMediaMetadataRetriever.IN_PREFERRED_CONFIG = Bitmap.Config.ARGB_8888;
     metadataRetriever.setDataSource(source);
 
     Bitmap bmp = metadataRetriever.getFrameAtTime((long) (sec * 1000000));
+
+    // NOTE: FIX ROTATED BITMAP
+    int orientation = Integer.parseInt( metadataRetriever.extractMetadata(FFmpegMediaMetadataRetriever.METADATA_KEY_VIDEO_ROTATION) );
+    metadataRetriever.release();
+
+    if ( orientation != 0 ) {
+      Matrix matrix = new Matrix();
+      matrix.postRotate(orientation);
+      bmp = Bitmap.createBitmap(bmp, 0, 0, bmp.getWidth(), bmp.getHeight(), matrix, true);
+    }
+
     ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-    bmp.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream);
-    byte[] byteArray = byteArrayOutputStream .toByteArray();
-    String encoded = Base64.encodeToString(byteArray, Base64.DEFAULT);
 
     WritableMap event = Arguments.createMap();
-    event.putString("image", encoded);
+
+    if ( format.equals(null) || format.equals("base64") ) {
+      bmp.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream);
+      byte[] byteArray = byteArrayOutputStream .toByteArray();
+      String encoded = Base64.encodeToString(byteArray, Base64.DEFAULT);
+
+      event.putString("image", encoded);
+    } else if ( format.equals("JPEG") ) {
+      bmp.compress(Bitmap.CompressFormat.JPEG, 100, byteArrayOutputStream);
+      byte[] byteArray = byteArrayOutputStream.toByteArray();
+
+      File tempFile = createTempFile("jpeg", promise, ctx);
+
+      try {
+        FileOutputStream fos = new FileOutputStream( tempFile.getPath() );
+
+        fos.write( byteArray );
+        fos.close();
+      } catch (java.io.IOException e) {
+        promise.reject("Failed to save image", e.toString());
+        return;
+      }
+
+      WritableMap imageMap = Arguments.createMap();
+      imageMap.putString("uri", "file://" + tempFile.getPath());
+
+      event.putMap("image", imageMap);
+    } else {
+      promise.reject("Wrong format error", "Wrong 'format'. Expected one of 'base64' or 'JPEG'.");
+      return;
+    }
 
     promise.resolve(event);
+  }
+
+  static void crop(String source, ReadableMap options, final Promise promise, ReactApplicationContext ctx) {
+    int cropWidth = (int)( options.getDouble("cropWidth") );
+    int cropHeight = (int)( options.getDouble("cropHeight") );
+    int cropOffsetX = (int)( options.getDouble("cropOffsetX") );
+    int cropOffsetY = (int)( options.getDouble("cropOffsetY") );
+
+    FFmpegMediaMetadataRetriever retriever = new FFmpegMediaMetadataRetriever();
+    if (VideoEdit.shouldUseURI(source)) {
+      retriever.setDataSource(ctx, Uri.parse(source));
+    } else {
+      retriever.setDataSource(source);
+    }
+
+    int videoWidth = Integer.parseInt(retriever.extractMetadata(FFmpegMediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH));
+    int videoHeight = Integer.parseInt(retriever.extractMetadata(FFmpegMediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT));
+    retriever.release();
+
+    // NOTE: FFMpeg CROP NEED TO BE DEVIDED BY 2. OR YOU WILL SEE BLANK WHITE LINES FROM LEFT/RIGHT
+    while( cropWidth % 2 > 0 && cropWidth < videoWidth ) {
+      cropWidth += 1;
+    }
+    while( cropWidth % 2 > 0 && cropWidth > 0 ) {
+      cropWidth -= 1;
+    }
+    while( cropHeight % 2 > 0 && cropHeight < videoHeight ) {
+      cropHeight += 1;
+    }
+    while( cropHeight % 2 > 0 && cropHeight > 0 ) {
+      cropHeight -= 1;
+    }
+
+    // TODO: 1) ADD METHOD TO CHECK "IS FFMPEG LOADED".
+    // 2) CHECK IT HERE
+    // 3) EXPORT THAT METHOD TO "JS"
+
+    final File tempFile = createTempFile("mp4", promise, ctx);
+
+    ArrayList<String> cmd = new ArrayList<String>();
+    cmd.add("-y"); // NOTE: OVERWRITE OUTPUT FILE
+
+    String startTime = options.getString("startTime");
+    if ( !startTime.equals(null) && !startTime.equals("") ) {
+      cmd.add("-ss");
+      cmd.add(startTime);
+    }
+
+    // NOTE: INPUT FILE
+    cmd.add("-i");
+    cmd.add(source);
+
+    String endTime = options.getString("endTime");
+    if ( !endTime.equals(null) && !endTime.equals("") ) {
+      cmd.add("-to");
+      cmd.add(endTime);
+    }
+
+    cmd.add("-vf");
+    cmd.add("crop=" + Integer.toString(cropWidth) + ":" + Integer.toString(cropHeight) + ":" + Integer.toString(cropOffsetX) + ":" + Integer.toString(cropOffsetY));
+
+    cmd.add("-preset");
+    cmd.add("ultrafast");
+    // NOTE: DO NOT CONVERT AUDIO TO SAVE TIME
+    cmd.add("-c:a");
+    cmd.add("copy");
+    // NOTE: FLAG TO CONVER "AAC" AUDIO CODEC
+    cmd.add("-strict");
+    cmd.add("-2");
+    // NOTE: OUTPUT FILE
+    cmd.add(tempFile.getPath());
+
+    final String[] cmdToExec = cmd.toArray( new String[0] );
+
+    Log.d(LOG_TAG, Arrays.toString(cmdToExec));
+
+    try {
+      FFmpeg.getInstance(ctx).execute(cmdToExec, new FFmpegExecuteResponseHandler() {
+
+        @Override
+        public void onStart() {
+          Log.d(LOG_TAG, "crop: onStart");
+        }
+
+        @Override
+        public void onProgress(String message) {
+          Log.d(LOG_TAG, "crop: onProgress");
+        }
+
+        @Override
+        public void onFailure(String message) {
+          Log.d(LOG_TAG, "crop: onFailure");
+          promise.reject("Crop error: failed.", message);
+        }
+
+        @Override
+        public void onSuccess(String message) {
+          Log.d(LOG_TAG, "crop: onSuccess");
+          Log.d(LOG_TAG, message);
+
+          WritableMap event = Arguments.createMap();
+          event.putString("source", "file://" + tempFile.getPath());
+          promise.resolve(event);
+        }
+
+        @Override
+        public void onFinish() {
+          Log.d(LOG_TAG, "crop: onFinish");
+        }
+      });
+    } catch (Exception e) {
+      promise.reject("Crop error. Command already running", e.toString());
+    }
+  }
+
+  public static void loadFfmpeg(ReactApplicationContext ctx){
+    try {
+      FFmpeg.getInstance(ctx).loadBinary(new FFmpegLoadBinaryResponseHandler() {
+          @Override
+          public void onStart() {
+            Log.d(LOG_TAG, "load FFMPEG: onStart");
+          }
+
+          @Override
+          public void onSuccess() {
+            Log.d(LOG_TAG, "load FFMPEG: onSuccess");
+            ffmpegLoaded = true;
+          }
+
+          @Override
+          public void onFailure() {
+            ffmpegLoaded = false;
+            Log.d(LOG_TAG, "load FFMPEG: Failed to load ffmpeg");
+          }
+
+          @Override
+          public void onFinish() {
+            Log.d(LOG_TAG, "load FFMPEG: onFinish");
+          }
+      });
+    } catch (Exception e){
+      ffmpegLoaded = false;
+      Log.d("Failed to load ffmpeg", e.toString());
+    }
   }
 }
