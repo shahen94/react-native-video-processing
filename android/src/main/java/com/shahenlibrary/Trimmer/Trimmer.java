@@ -105,6 +105,7 @@ public class Trimmer {
 
     for (int i = 0; i < duration; i += duration / 10) {
       Bitmap frame = retriever.getFrameAtTime(i * 1000);
+
       if(frame == null) {
         continue;
       }

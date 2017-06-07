@@ -287,8 +287,17 @@ public class VideoPlayerView extends ScalableVideoView implements
 
   public void getFrame(float sec) {
     Bitmap bmp = metadataRetriever.getFrameAtTime((long) (sec * 1000000));
+
+    int width = Integer.parseInt(metadataRetriever.extractMetadata(FFmpegMediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH));
+    int height = Integer.parseInt(metadataRetriever.extractMetadata(FFmpegMediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT));
+    int orientation = Integer.parseInt(metadataRetriever.extractMetadata(FFmpegMediaMetadataRetriever.METADATA_KEY_VIDEO_ROTATION));
+
+    Matrix mx = new Matrix();
+    mx.postRotate(orientation - 360);
+    Bitmap normalizedBmp = Bitmap.createBitmap(bmp, 0, 0, width, height, mx, true);
+
     ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-    bmp.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream);
+    normalizedBmp.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream);
     byte[] byteArray = byteArrayOutputStream .toByteArray();
     String encoded = Base64.encodeToString(byteArray, Base64.DEFAULT);
 
