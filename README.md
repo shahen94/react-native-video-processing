@@ -83,15 +83,14 @@ class App extends Component {
             .catch(console.warn);
     }
 
-    // iOS only
     compressVideo() {
         const options = {
             width: 720,
-            endTime: 1280,
-            bitrateMultiplier: 3,
-            saveToCameraRoll: true, // default is false
-            saveWithCurrentDate: true, // default is false
-            minimumBitrate: 300000,
+            height: 1280,
+            bitrateMultiplier: 3, // iOS only
+            saveToCameraRoll: true, // default is false, iOS only
+            saveWithCurrentDate: true, // default is false, iOS only
+            minimumBitrate: 300000, // iOS only
             removeAudio: true, // default is false
         };
         this.videoPlayerRef.compress(options)
@@ -183,7 +182,7 @@ export class App extends Component {
 ## Roadmap
 1.  [ ] Use FFMpeg instead of MP4Parser
 2.  [ ] Add ability to add GLSL filters
-3.  [ ] Android should be able to compress video
+3.  [x] Android should be able to compress video
 4.  [x] More processing options
 5.  [ ] Create native trimmer component for Android
 6.  [x] Provide Standalone API

@@ -31,6 +31,9 @@ import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.ReadableMap;
+import com.facebook.react.common.MapBuilder;
+
+import java.util.Map;
 
 public class TrimmerManager extends ReactContextBaseJavaModule {
   static final String REACT_PACKAGE = "RNTrimmerManager";
@@ -65,17 +68,18 @@ public class TrimmerManager extends ReactContextBaseJavaModule {
     Log.d(REACT_PACKAGE, options.toString());
     Trimmer.trim(options, promise);
   }
+
   @ReactMethod
-  public void compress(ReadableMap options, Promise promise) {
-    Log.d(REACT_PACKAGE, "compress: not supported");
-    promise.reject("not supported on android", "");
+  public void compress(String path, ReadableMap options, Promise promise) {
+    Log.d(REACT_PACKAGE, "compress video: " + options.toString());
+    Trimmer.compress(path, options, promise, null, null, reactContext);
   }
 
   @ReactMethod
   public void getPreviewImageAtPosition(ReadableMap options, Promise promise) {
     String source = options.getString("source");
-    double sec = options.getDouble("second");
-    String format = options.getString("format");
+    double sec = options.hasKey("second") ? options.getDouble("second") : 0;
+    String format = options.hasKey("format") ? options.getString("format") : null;
     Trimmer.getPreviewImageAtPosition(source, sec, format, promise, reactContext);
   }
 
