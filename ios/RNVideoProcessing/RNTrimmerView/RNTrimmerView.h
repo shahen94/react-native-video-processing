@@ -7,6 +7,7 @@
 #define RNTrimmerView_h
 
 #import "ICGVideoTrimmer.h"
+#import "React/RCTView.h"
 #import "React/RCTViewManager.h"
 #import "React/RCTConvert.h"
 #import "React/RCTBridge.h"

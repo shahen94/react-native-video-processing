@@ -21,5 +21,7 @@ RCT_EXPORT_VIEW_PROPERTY(maxLength, NSNumber)
 RCT_EXPORT_VIEW_PROPERTY(currentTime, NSNumber)
 RCT_EXPORT_VIEW_PROPERTY(trackerColor, NSString)
 RCT_EXPORT_VIEW_PROPERTY(thumbWidth, NSNumber)
+RCT_EXPORT_VIEW_PROPERTY(showTrackerHandle, NSNumber)
+RCT_EXPORT_VIEW_PROPERTY(trackerHandleColor, NSString)
 
 @end
