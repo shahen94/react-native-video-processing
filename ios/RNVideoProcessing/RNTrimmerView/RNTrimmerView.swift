@@ -178,7 +178,6 @@ class RNTrimmerView: RCTView, ICGVideoTrimmerDelegate {
             trimmerView!.showTrackerHandle = self._showTrackerHandle
             trimmerView!.maxLength = _maxLength == nil ? CGFloat(self.asset.duration.seconds) : _maxLength!
             self.frame = CGRect(x: rect.origin.x, y: rect.origin.y, width: rect.size.width, height: rect.size.height + 20)
-            self.backgroundColor = UIColor.blue
             if _minLength != nil {
                 trimmerView!.minLength = _minLength!
             }

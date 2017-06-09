@@ -238,7 +238,6 @@
 }
 
 - (void)handleTrackerPan: (UIGestureRecognizer *) recognizer {
-    NSLog(@"Test");
     CGPoint point = [self.panGestureRecognizer locationInView:self.trackerView];
     
     CGRect trackerFrame = self.trackerView.frame;
@@ -326,10 +325,10 @@
 
 - (void)seekToTime:(CGFloat) time
 {
-    CGFloat posToMove = time * self.widthPerSecond + self.thumbWidth - self.scrollView.contentOffset.x;
+    CGFloat posToMove = time * self.widthPerSecond + self.thumbWidth - self.scrollView.contentOffset.x - self.trackerHandleHeight;
     
     CGRect trackerFrame = self.trackerView.frame;
-    trackerFrame.origin.x = posToMove - self.trackerHandleHeight / 2;
+    trackerFrame.origin.x = posToMove;
     self.trackerView.frame = trackerFrame;
     
 }
