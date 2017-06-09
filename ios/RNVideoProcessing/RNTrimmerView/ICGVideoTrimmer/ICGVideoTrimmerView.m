@@ -435,6 +435,7 @@
             CGImageRelease(halfWayImage);
             dispatch_async(dispatch_get_main_queue(), ^{
                 UIImageView *imageView = (UIImageView *)[self.frameView viewWithTag:i];
+                [imageView setContentMode:UIViewContentModeScaleAspectFill];
                 [imageView setImage:videoScreen];
                 
             });
