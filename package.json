@@ -59,8 +59,8 @@
     "react-test-renderer": "15.3.2",
     "semantic-release": "^4.3.5"
   },
-   "peerDependencies": {
-    "react-native": ">=0.35",
-    "react": "^15.3.2"
+  "peerDependencies": {
+    "react": "^15.3.2",
+    "react-native": ">=0.35"
   }
 }
