@@ -54,13 +54,13 @@
     "eslint-plugin-react-native": "1.1.0",
     "jest": "17.0.0",
     "jest-react-native": "17.0.0",
+    "react": "^15.3.2",
     "react-native": "^0.37.0",
     "react-native-create-library": "^1.0.4",
     "react-test-renderer": "15.3.2",
     "semantic-release": "^4.3.5"
   },
   "peerDependencies": {
-    "react": "^15.3.2",
     "react-native": ">=0.35"
   }
 }
