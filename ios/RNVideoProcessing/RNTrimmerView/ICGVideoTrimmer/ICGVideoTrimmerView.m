@@ -23,6 +23,8 @@
 @property (strong, nonatomic) ICGThumbView *rightThumbView;
 
 @property (strong, nonatomic) UIView *trackerView;
+@property (strong, nonatomic) UIView *tracker;
+@property (strong, nonatomic) UIView *trackerHandle;
 @property (strong, nonatomic) UIView *topBorder;
 @property (strong, nonatomic) UIView *bottomBorder;
 @property (strong, nonatomic) UIPanGestureRecognizer *panGestureRecognizer;
@@ -31,6 +33,7 @@
 @property (nonatomic) CGFloat endTime;
 
 @property (nonatomic) CGFloat widthPerSecond;
+@property (nonatomic) int trackerHandleHeight;
 
 @property (nonatomic) CGPoint leftStartPoint;
 @property (nonatomic) CGPoint rightStartPoint;
@@ -91,6 +94,16 @@
     return _trackerColor ?: [UIColor whiteColor];
 }
 
+- (UIColor *) trackerHandleColor
+{
+    return _trackerHandleColor ?: [UIColor whiteColor];
+}
+
+- (Boolean) showTrackerHandle
+{
+    return _showTrackerHandle ?: NO;
+}
+
 - (CGFloat)borderWidth
 {
     return _borderWidth ?: 1;
@@ -103,13 +116,15 @@
 
 - (void)resetSubviews
 {
-    self.clipsToBounds = YES;
+    //    self.clipsToBounds = YES;
     
-    [self setBackgroundColor:[UIColor blackColor]];
+    self.trackerHandleHeight = 20;
+    
+    [self setBackgroundColor:[UIColor clearColor]];
     
     [self.subviews makeObjectsPerformSelector:@selector(removeFromSuperview)];
     
-    self.scrollView = [[UIScrollView alloc] initWithFrame:CGRectMake(0, 0, CGRectGetWidth(self.frame), CGRectGetHeight(self.frame))];
+    self.scrollView = [[UIScrollView alloc] initWithFrame:CGRectMake(0, 0, CGRectGetWidth(self.frame), CGRectGetHeight(self.frame) - self.trackerHandleHeight)];
     [self.scrollView setBounces:NO];
     [self.scrollView setScrollEnabled:NO];
     [self addSubview:self.scrollView];
@@ -122,7 +137,7 @@
     
     CGFloat ratio = self.showsRulerView ? 0.7 : 1.0;
     self.frameView = [[UIView alloc] initWithFrame:CGRectMake(self.thumbWidth, 0, CGRectGetWidth(self.contentView.frame)-2*self.thumbWidth, CGRectGetHeight(self.contentView.frame)*ratio)];
-    [self.frameView.layer setMasksToBounds:YES];
+    //[self.frameView.layer setMasksToBounds:YES];
     [self.contentView addSubview:self.frameView];
     
     [self addFrames];
@@ -154,19 +169,38 @@
         self.leftThumbView = [[ICGThumbView alloc] initWithFrame:leftThumbFrame color:self.themeColor right:NO];
     }
     
-    self.trackerView = [[UIView alloc] initWithFrame:CGRectMake(self.thumbWidth, -5, 3, CGRectGetHeight(self.frameView.frame) + 20)];
-    self.trackerView.backgroundColor = self.trackerColor;
-    self.trackerView.layer.masksToBounds = true;
-    self.trackerView.layer.cornerRadius = 2;
+    self.trackerView = [[UIView alloc] initWithFrame:CGRectMake(self.thumbWidth - self.trackerHandleHeight / 2, 0, 20, CGRectGetHeight(self.frameView.frame) + self.trackerHandleHeight)];
     
+    self.tracker = [[UIView alloc] initWithFrame:CGRectMake(self.thumbWidth, 0, 3, CGRectGetHeight(self.frameView.frame))];
+    self.trackerHandle = [[UIView alloc] initWithFrame:CGRectMake(1, CGRectGetHeight(self.frameView.frame), self.trackerHandleHeight, self.trackerHandleHeight)];
+    
+    [self.trackerHandle.layer setMasksToBounds:YES];
+    [self.contentView setUserInteractionEnabled:YES];
+    
+    //    self.trackerHandle.clipsToBounds = YES;
+    [self.trackerHandle.layer setCornerRadius:10];
+    self.tracker.backgroundColor = self.trackerColor;
+    self.trackerHandle.backgroundColor = self.trackerHandleColor;
+    //    self.trackerView.layer.masksToBounds = true;
+    self.tracker.layer.cornerRadius = 2;
+    
+    
+    [self.trackerView addSubview:self.tracker];
+    if (self.showTrackerHandle) {
+        [self.trackerView addSubview: self.trackerHandle];
+    }
+    [self.tracker setUserInteractionEnabled:YES];
     [self.trackerView setUserInteractionEnabled:YES];
+    [self.trackerHandle setUserInteractionEnabled:YES];
     [self addSubview:self.trackerView];
     
     self.panGestureRecognizer = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(handleTrackerPan:)];
     
-    [self.panGestureRecognizer locationInView:self.trackerView];
+    [self.panGestureRecognizer locationInView: self.trackerView];
     
     [self.trackerView addGestureRecognizer:self.panGestureRecognizer];
+    //    [self.trackerHandle addGestureRecognizer:self.panGestureRecognizer];
+    
     
     [self.leftThumbView.layer setMasksToBounds:YES];
     [self.leftOverlayView addSubview:self.leftThumbView];
@@ -203,14 +237,14 @@
     [self.bottomBorder setFrame:CGRectMake(CGRectGetMaxX(self.leftOverlayView.frame), CGRectGetHeight(self.frameView.frame)-height, CGRectGetMinX(self.rightOverlayView.frame)-CGRectGetMaxX(self.leftOverlayView.frame), height)];
 }
 
-- (void)handleTrackerPan: (UISwipeGestureRecognizer *) recognizer {
+- (void)handleTrackerPan: (UIGestureRecognizer *) recognizer {
     CGPoint point = [self.panGestureRecognizer locationInView:self.trackerView];
     
     CGRect trackerFrame = self.trackerView.frame;
-    trackerFrame.origin.x += point.x;
+    trackerFrame.origin.x += point.x - self.trackerHandleHeight / 2;
     self.trackerView.frame = trackerFrame;
     
-    CGFloat time = (trackerFrame.origin.x - self.thumbWidth + self.scrollView.contentOffset.x) / self.widthPerSecond;
+    CGFloat time = (trackerFrame.origin.x - self.thumbWidth + self.scrollView.contentOffset.x + self.trackerHandleHeight) / self.widthPerSecond;
     [self.delegate trimmerView:self currentPosition:time ];
     
 }
@@ -291,7 +325,7 @@
 
 - (void)seekToTime:(CGFloat) time
 {
-    CGFloat posToMove = time * self.widthPerSecond + self.thumbWidth - self.scrollView.contentOffset.x;
+    CGFloat posToMove = time * self.widthPerSecond + self.thumbWidth - self.scrollView.contentOffset.x - self.trackerHandleHeight;
     
     CGRect trackerFrame = self.trackerView.frame;
     trackerFrame.origin.x = posToMove;
@@ -401,6 +435,7 @@
             CGImageRelease(halfWayImage);
             dispatch_async(dispatch_get_main_queue(), ^{
                 UIImageView *imageView = (UIImageView *)[self.frameView viewWithTag:i];
+                [imageView setContentMode:UIViewContentModeScaleAspectFill];
                 [imageView setImage:videoScreen];
                 
             });

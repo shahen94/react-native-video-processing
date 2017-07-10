@@ -29,16 +29,17 @@ import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Handler;
 import android.support.annotation.Nullable;
-import android.support.v4.app.ActivityCompat;
 import android.util.Base64;
 import android.util.Log;
 import android.widget.MediaController;
 
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.LifecycleEventListener;
+import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.uimanager.ThemedReactContext;
 import com.facebook.react.uimanager.events.RCTEventEmitter;
+import com.shahenlibrary.interfaces.OnCompressVideoListener;
 import com.shahenlibrary.interfaces.OnTrimVideoListener;
 import com.shahenlibrary.utils.VideoEdit;
 import com.yqritc.scalablevideoview.ScalableType;
@@ -55,8 +56,8 @@ import java.io.IOException;
 import wseemann.media.FFmpegMediaMetadataRetriever;
 
 public class VideoPlayerView extends ScalableVideoView implements
-  MediaPlayer.OnPreparedListener, MediaPlayer.OnErrorListener, MediaPlayer.OnBufferingUpdateListener,
-  MediaPlayer.OnCompletionListener, MediaPlayer.OnInfoListener, LifecycleEventListener, MediaController.MediaPlayerControl {
+        MediaPlayer.OnPreparedListener, MediaPlayer.OnErrorListener, MediaPlayer.OnBufferingUpdateListener,
+        MediaPlayer.OnCompletionListener, MediaPlayer.OnInfoListener, LifecycleEventListener, MediaController.MediaPlayerControl {
 
   private ThemedReactContext themedReactContext;
   private RCTEventEmitter eventEmitter;
@@ -287,8 +288,17 @@ public class VideoPlayerView extends ScalableVideoView implements
 
   public void getFrame(float sec) {
     Bitmap bmp = metadataRetriever.getFrameAtTime((long) (sec * 1000000));
+
+    int width = Integer.parseInt(metadataRetriever.extractMetadata(FFmpegMediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH));
+    int height = Integer.parseInt(metadataRetriever.extractMetadata(FFmpegMediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT));
+    int orientation = Integer.parseInt(metadataRetriever.extractMetadata(FFmpegMediaMetadataRetriever.METADATA_KEY_VIDEO_ROTATION));
+
+    Matrix mx = new Matrix();
+    mx.postRotate(orientation - 360);
+    Bitmap normalizedBmp = Bitmap.createBitmap(bmp, 0, 0, width, height, mx, true);
+
     ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-    bmp.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream);
+    normalizedBmp.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream);
     byte[] byteArray = byteArrayOutputStream .toByteArray();
     String encoded = Base64.encodeToString(byteArray, Base64.DEFAULT);
 
@@ -350,6 +360,54 @@ public class VideoPlayerView extends ScalableVideoView implements
       trimVideoListener.onError(e.toString());
       e.printStackTrace();
       Log.d(LOG_TAG, "trimMedia: error -> " + e.toString());
+    }
+  }
+
+  public void compressMedia(ThemedReactContext ctx, ReadableMap options) {
+    OnCompressVideoListener compressVideoListener = new OnCompressVideoListener() {
+      @Override
+      public void onError(String message) {
+        Log.d(LOG_TAG, "Compress onError: " + message);
+        WritableMap event = Arguments.createMap();
+        event.putString(Events.ERROR_TRIM, message);
+        eventEmitter.receiveEvent(getId(), EventsEnum.EVENT_GET_COMPRESSED_SOURCE.toString(), event);
+      }
+
+      @Override
+      public void onCompressStarted() {
+        Log.d(LOG_TAG, "Compress Started");
+      }
+
+      @Override
+      public void onSuccess(String uri) {
+        Log.d(LOG_TAG, "Compress: onSuccess");
+        WritableMap event = Arguments.createMap();
+        event.putString("source", uri.toString());
+        eventEmitter.receiveEvent(getId(), EventsEnum.EVENT_GET_COMPRESSED_SOURCE.toString(), event);
+      }
+
+      @Override
+      public void cancelAction() {
+        Log.d(LOG_TAG, "Compress cancel");
+      }
+    };
+
+    String[] dPath = mediaSource.split("/");
+    StringBuilder builder = new StringBuilder();
+    for (int i = 0; i < dPath.length; ++i) {
+      if (i == dPath.length - 1) {
+        continue;
+      }
+      builder.append(dPath[i]);
+      builder.append(File.separator);
+    }
+
+    try {
+      VideoEdit.startCompress(mediaSource, compressVideoListener, ctx, options);
+    } catch (IOException e) {
+      compressVideoListener.onError(e.toString());
+      e.printStackTrace();
+      Log.d(LOG_TAG, "Error Compressing Video: " + e.toString());
     }
   }
 

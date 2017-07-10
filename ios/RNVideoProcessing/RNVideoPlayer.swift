@@ -33,6 +33,7 @@ class RNVideoPlayer: RCTView {
     var _playerEndTime: CGFloat = 0
     var _replay: Bool = false
     var _rotate: Bool = false
+    var isInitialized = false
     var _resizeMode = AVLayerVideoGravityResizeAspect
     var onChange: RCTBubblingEventBlock?
     
@@ -338,17 +339,20 @@ class RNVideoPlayer: RCTView {
         
         let movieURL = NSURL(string: _moviePathSource as String)
         
-        player = AVPlayer()
-        player.volume = Float(self.playerVolume)
+        if self.player == nil {
+            player = AVPlayer()
+            player.volume = Float(self.playerVolume)
+        }
         playerItem = AVPlayerItem(url: movieURL as! URL)
         player.replaceCurrentItem(with: playerItem)
         
-        playerLayer = AVPlayerLayer(player: player)
-        playerLayer!.frame = filterView.bounds
-        playerLayer!.videoGravity = self._resizeMode
-        playerLayer!.masksToBounds = true
-        playerLayer!.removeFromSuperlayer()
-        filterView.layer.addSublayer(playerLayer!)
+        // MARK - Temporary removing playeLayer, it dublicates video if it's in landscape mode
+        //        playerLayer = AVPlayerLayer(player: player)
+        //        playerLayer!.frame = filterView.bounds
+        //        playerLayer!.videoGravity = self._resizeMode
+        //        playerLayer!.masksToBounds = true
+        //        playerLayer!.removeFromSuperlayer()
+        //        filterView.layer.addSublayer(playerLayer!)
         
         print("CHANGED playerframe \(playerLayer), frameAAA \(playerLayer?.frame)")
         self.setNeedsLayout()
@@ -356,16 +360,22 @@ class RNVideoPlayer: RCTView {
         self._playerEndTime = CGFloat(CMTimeGetSeconds((player.currentItem?.asset.duration)!))
         print("CHANGED playerEndTime \(self._playerEndTime)")
         
+        if self.gpuMovie != nil {
+            gpuMovie.endProcessing()
+        }
         gpuMovie = GPUImageMovie(playerItem: playerItem)
         // gpuMovie.runBenchmark = true
         gpuMovie.playAtActualSpeed = true
         gpuMovie.startProcessing()
         
         gpuMovie.addTarget(self.filterView)
-        self.addSubview(filterView)
+        if !self.isInitialized {
+            self.addSubview(filterView)
+            self.createPlayerObservers()
+        }
         gpuMovie.playAtActualSpeed = true
         
-        self.createPlayerObservers()
+        self.isInitialized = true
     }
     
     override func willMove(toSuperview newSuperview: UIView?) {
