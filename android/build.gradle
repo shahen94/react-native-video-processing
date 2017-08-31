@@ -1,4 +1,3 @@
-
 apply plugin: 'com.android.library'
 
 android {
@@ -19,9 +18,22 @@ android {
   }
 }
 
+configurations.all {
+  resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
+}
+
+
 dependencies {
   compile 'com.facebook.react:react-native:0.20.+'
   compile 'com.yqritc:android-scalablevideoview:1.0.4'
   compile 'com.googlecode.mp4parser:isoparser:1.1.20'
   compile 'com.github.wseemann:FFmpegMediaMetadataRetriever:1.0.14'
+}
+
+allprojects {
+  repositories {
+    mavenLocal()
+    jcenter()
+    maven { url "https://jitpack.io" }
+  }
 }

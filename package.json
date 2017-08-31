@@ -1,6 +1,6 @@
 {
   "name": "react-native-video-processing",
-  "version": "0.14.0",
+  "version": "1.7.1",
   "description": "Native Video processing/editing for React-Native",
   "main": "index.js",
   "scripts": {
@@ -40,8 +40,7 @@
     "babel-preset-react": "6.16.0",
     "babel-preset-react-native": "1.9.0",
     "babel-preset-react-native-stage-0": "1.0.1",
-    "lodash": "^4.16.6",
-    "react": "^15.3.2"
+    "lodash": "^4.16.6"
   },
   "devDependencies": {
     "babel-eslint": "7.1.0",
@@ -55,12 +54,13 @@
     "eslint-plugin-react-native": "1.1.0",
     "jest": "17.0.0",
     "jest-react-native": "17.0.0",
+    "react": "^15.3.2",
     "react-native": "^0.37.0",
     "react-native-create-library": "^1.0.4",
     "react-test-renderer": "15.3.2",
     "semantic-release": "^4.3.5"
   },
-   "peerDependencies": {
+  "peerDependencies": {
     "react-native": ">=0.35"
   }
 }

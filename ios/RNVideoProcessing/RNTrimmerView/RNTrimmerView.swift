@@ -15,9 +15,13 @@ class RNTrimmerView: RCTView, ICGVideoTrimmerDelegate {
     var mThemeColor = UIColor.clear
     var bridge: RCTBridge!
     var onChange: RCTBubblingEventBlock?
+    var onTrackerMove: RCTBubblingEventBlock?
     var _minLength: CGFloat? = nil
     var _maxLength: CGFloat? = nil
+    var _thumbWidth: CGFloat? = nil
     var _trackerColor: UIColor = UIColor.clear
+    var _trackerHandleColor: UIColor = UIColor.clear
+    var _showTrackerHandle = false
     
     var source: NSString? {
         set {
@@ -29,9 +33,43 @@ class RNTrimmerView: RCTView, ICGVideoTrimmerDelegate {
         }
     }
     
+    var showTrackerHandle: NSNumber? {
+        set {
+            if newValue == nil {
+                return
+            }
+            let _nVal = newValue! == 1 ? true : false
+            if _showTrackerHandle != _nVal {
+                print("CHANGED: showTrackerHandle \(newValue!)");
+                _showTrackerHandle = _nVal
+                self.updateView()
+            }
+        }
+        get {
+            return nil
+        }
+    }
+    
+    var trackerHandleColor: NSString? {
+        set {
+            if newValue != nil {
+                let color = NumberFormatter().number(from: newValue! as String)
+                let formattedColor = RCTConvert.uiColor(color)
+                if formattedColor != nil {
+                    print("CHANGED: trackerHandleColor: \(newValue!)")
+                    self._trackerHandleColor = formattedColor!
+                    self.updateView();
+                }
+            }
+        }
+        get {
+            return nil
+        }
+    }
+    
     var height: NSNumber? {
         set {
-            self.rect.size.height = RCTConvert.cgFloat(newValue)
+            self.rect.size.height = RCTConvert.cgFloat(newValue) + 40
             self.updateView()
         }
         get {
@@ -86,6 +124,18 @@ class RNTrimmerView: RCTView, ICGVideoTrimmerDelegate {
         }
     }
     
+    var thumbWidth: NSNumber? {
+        set {
+            if newValue != nil {
+                self._thumbWidth = RCTConvert.cgFloat(newValue!)
+                self.updateView()
+            }
+        }
+        get {
+            return nil
+        }
+    }
+    
     var currentTime: NSNumber? {
         set {
             print("CHANGED: [TrimmerView]: currentTime: \(newValue)")
@@ -105,9 +155,7 @@ class RNTrimmerView: RCTView, ICGVideoTrimmerDelegate {
             if newValue == nil {
                 return
             }
-            if self.trimmerView == nil {
-                return
-            }
+            print("CHANGED: trackerColor \(newValue!)")
             let color = NumberFormatter().number(from: newValue! as String)
             let formattedColor = RCTConvert.uiColor(color)
             if formattedColor != nil {
@@ -126,9 +174,15 @@ class RNTrimmerView: RCTView, ICGVideoTrimmerDelegate {
             trimmerView!.frame = rect
             trimmerView!.themeColor = self.mThemeColor
             trimmerView!.trackerColor = self._trackerColor
+            trimmerView!.trackerHandleColor = self._trackerHandleColor
+            trimmerView!.showTrackerHandle = self._showTrackerHandle
             trimmerView!.maxLength = _maxLength == nil ? CGFloat(self.asset.duration.seconds) : _maxLength!
+            self.frame = CGRect(x: rect.origin.x, y: rect.origin.y, width: rect.size.width, height: rect.size.height + 20)
             if _minLength != nil {
                 trimmerView!.minLength = _minLength!
+            }
+            if _thumbWidth != nil {
+                trimmerView!.thumbWidth = _thumbWidth!
             }
             self.trimmerView!.resetSubviews()
             //      Timer.scheduledTimer(timeInterval: 0.5, target: self, selector: #selector(self.updateTrimmer), userInfo: nil, repeats: false)
@@ -142,7 +196,7 @@ class RNTrimmerView: RCTView, ICGVideoTrimmerDelegate {
     func setSource(source: NSString?) {
         if source != nil {
             let pathToSource = NSURL(string: source! as String)
-            self.asset = AVURLAsset(url: pathToSource as! URL, options: nil)
+            self.asset = AVURLAsset(url: pathToSource! as URL, options: nil)
             
             trimmerView = ICGVideoTrimmerView(frame: rect, asset: self.asset)
             trimmerView!.showsRulerView = false
@@ -172,5 +226,14 @@ class RNTrimmerView: RCTView, ICGVideoTrimmerDelegate {
     
     func trimmerView(_ trimmerView: ICGVideoTrimmerView, didChangeLeftPosition startTime: CGFloat, rightPosition endTime: CGFloat) {
         onTrimmerPositionChange(startTime: startTime, endTime: endTime)
+    }
+    
+    public func trimmerView(_ trimmerView: ICGVideoTrimmerView, currentPosition currentTime: CGFloat) {
+        print("current", currentTime)
+        if onTrackerMove == nil {
+            return
+        }
+        let event = ["currentTime": currentTime]
+        self.onTrackerMove!(event)
     }
 }

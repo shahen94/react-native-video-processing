@@ -25,16 +25,15 @@ package com.shahenlibrary.VideoPlayer;
 
 import android.util.Log;
 
-import com.facebook.react.bridge.Promise;
-import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.ReadableArray;
+import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.common.MapBuilder;
-import com.facebook.react.uimanager.IllegalViewOperationException;
 import com.facebook.react.uimanager.annotations.ReactProp;
 import com.facebook.react.uimanager.SimpleViewManager;
 import com.facebook.react.uimanager.ThemedReactContext;
 import com.shahenlibrary.Events.EventsEnum;
 import com.shahenlibrary.Events.Events;
+import com.yqritc.scalablevideoview.ScalableType;
 
 import java.util.Map;
 
@@ -50,11 +49,14 @@ public class VideoPlayerViewManager extends SimpleViewManager<VideoPlayerView> {
   private final String SET_PROGRESS_DELAY = "progressEventDelay";
   private final String SET_VIDEO_END_TIME = "endTime";
   private final String SET_VIDEO_START_TIME = "startTime";
+  private final String SET_VIDEO_RESIZE_MODE = "resizeMode";
 
   private final int COMMAND_GET_INFO = 1;
   private final int COMMAND_TRIM_MEDIA = 2;
   private final int COMMAND_COMPRESS_MEDIA = 3;
   private final int COMMAND_GET_PREVIEW_IMAGE = 4;
+
+  private ThemedReactContext reactContext;
 
   @Override
   public String getName() {
@@ -63,6 +65,7 @@ public class VideoPlayerViewManager extends SimpleViewManager<VideoPlayerView> {
 
   @Override
   protected VideoPlayerView createViewInstance(ThemedReactContext reactContext) {
+    this.reactContext = reactContext;
     return new VideoPlayerView(reactContext);
   }
 
@@ -88,17 +91,28 @@ public class VideoPlayerViewManager extends SimpleViewManager<VideoPlayerView> {
   public Map<String, Integer> getCommandsMap() {
     Log.d(VideoPlayerViewManager.REACT_PACKAGE, "getCommandsMap");
     return MapBuilder.of(
-      Events.COMPRESS_MEDIA,
-      COMMAND_COMPRESS_MEDIA,
+            Events.COMPRESS_MEDIA,
+            COMMAND_COMPRESS_MEDIA,
 
-      Events.GET_MEDIA_INFO,
-      COMMAND_GET_INFO,
+            Events.GET_MEDIA_INFO,
+            COMMAND_GET_INFO,
 
-      Events.TRIM_MEDIA,
-      COMMAND_TRIM_MEDIA,
+            Events.TRIM_MEDIA,
+            COMMAND_TRIM_MEDIA,
 
-      Events.GET_PREVIEW_IMAGE,
-      COMMAND_GET_PREVIEW_IMAGE
+            Events.GET_PREVIEW_IMAGE,
+            COMMAND_GET_PREVIEW_IMAGE
+    );
+  }
+
+  @Nullable
+  @Override
+  public Map getExportedViewConstants() {
+    return MapBuilder.of(
+            "ScaleNone", Integer.toString(ScalableType.LEFT_TOP.ordinal()),
+            "ScaleToFill", Integer.toString(ScalableType.FIT_XY.ordinal()),
+            "ScaleAspectFit", Integer.toString(ScalableType.FIT_CENTER.ordinal()),
+            "ScaleAspectFill", Integer.toString(ScalableType.CENTER_CROP.ordinal())
     );
   }
 
@@ -121,6 +135,9 @@ public class VideoPlayerViewManager extends SimpleViewManager<VideoPlayerView> {
         Log.d(VideoPlayerViewManager.REACT_PACKAGE, "receiveCommand: Get Preview image for sec: " + sec);
         root.getFrame(sec);
         break;
+      case COMMAND_COMPRESS_MEDIA:
+        ReadableMap options = args.getMap(0);
+        root.compressMedia(this.reactContext, options);
       default:
         Log.d(VideoPlayerViewManager.REACT_PACKAGE, "receiveCommand: Wrong command received");
     }
@@ -175,5 +192,10 @@ public class VideoPlayerViewManager extends SimpleViewManager<VideoPlayerView> {
     int mStart = (int) startTime;
     Log.d(VideoPlayerViewManager.REACT_PACKAGE, "setVideoStartTime: " + String.valueOf(startTime));
     player.setVideoStartAt(mStart);
+  }
+
+  @ReactProp(name = SET_VIDEO_RESIZE_MODE)
+  public void setResizeMode(final VideoPlayerView player, String resizeModeOrdinalString) {
+    player.setResizeMode(ScalableType.values()[Integer.parseInt(resizeModeOrdinalString)]);
   }
 }

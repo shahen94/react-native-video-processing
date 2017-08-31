@@ -33,6 +33,11 @@ NS_ASSUME_NONNULL_BEGIN
 // Customize color for tracker
 @property (assign, nonatomic) UIColor *trackerColor;
 
+// Customize color for tracker handle
+@property (assign, nonatomic) UIColor *trackerHandleColor;
+
+@property (assign, nonatomic) Boolean showTrackerHandle;
+
 // Custom image for the left thumb
 @property (strong, nonatomic, nullable) UIImage *leftThumbImage;
 
@@ -68,6 +73,7 @@ NS_ASSUME_NONNULL_END
 @protocol ICGVideoTrimmerDelegate <NSObject>
 
 - (void)trimmerView:(nonnull ICGVideoTrimmerView *)trimmerView didChangeLeftPosition:(CGFloat)startTime rightPosition:(CGFloat)endTime;
+- (void)trimmerView:(nonnull ICGVideoTrimmerView *)trimmerView currentPosition:(CGFloat)currentTime;
 
 @end
 
