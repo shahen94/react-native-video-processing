@@ -28,21 +28,11 @@ dependencies {
   compile 'com.yqritc:android-scalablevideoview:1.0.4'
   compile 'com.googlecode.mp4parser:isoparser:1.1.20'
   compile 'com.github.wseemann:FFmpegMediaMetadataRetriever:1.0.14'
-  compile 'com.github.kesha-antonov:ffmpeg-android-java:70e2c41aa13099ab274115c1991887d0aa394feb'
 }
 
 allprojects {
   repositories {
     mavenLocal()
     jcenter()
-    maven { url "https://jitpack.io" }
-  }
-}
-
-allprojects {
-  repositories {
-    mavenLocal()
-    jcenter()
-    maven { url "https://jitpack.io" }
   }
 }
