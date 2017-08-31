@@ -543,7 +543,7 @@ public class Trimmer {
 
     try {
       File ffmpegFile = new File(filesDir, FFMPEG_FILE_NAME);
-      if ( !ffmpegFile.exists() || getSha1FromFile(ffmpegFile).equalsIgnoreCase(FFMPEG_SHA1) ) {
+      if ( !(ffmpegFile.exists() && getSha1FromFile(ffmpegFile).equalsIgnoreCase(FFMPEG_SHA1)) ) {
         final FileOutputStream ffmpegStreamToDataDir = new FileOutputStream(ffmpegFile);
         byte[] buffer = new byte[DEFAULT_BUFFER_SIZE];
 
