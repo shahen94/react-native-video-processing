@@ -57,16 +57,26 @@ import java.io.FileOutputStream;
 import java.util.Arrays;
 import java.util.ArrayList;
 
-import com.github.hiteshsondhi88.libffmpeg.FFmpeg;
-import com.github.hiteshsondhi88.libffmpeg.FFmpegExecuteResponseHandler;
-import com.github.hiteshsondhi88.libffmpeg.FFmpegLoadBinaryResponseHandler;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.InputStream;
+import java.io.BufferedInputStream;
+import java.io.FileInputStream;
 
+import java.security.NoSuchAlgorithmException;
+import java.security.MessageDigest;
+import java.util.Formatter;
 
 public class Trimmer {
 
   private static final String LOG_TAG = "RNTrimmerManager";
+  private static final String FFMPEG_FILE_NAME = "ffmpeg";
+  private static final String FFMPEG_SHA1 = "f51256ddb13c2a4d2bb9e22812775751c32cfdf4";
 
-  private static boolean ffmpegLoaded;
+  private static boolean ffmpegLoaded = false;
+  private static final int DEFAULT_BUFFER_SIZE = 4096;
+  private static final int END_OF_FILE = -1;
+
 
   public static void getPreviewImages(String path, Promise promise, ReactApplicationContext ctx) {
     FFmpegMediaMetadataRetriever retriever = new FFmpegMediaMetadataRetriever();
@@ -261,53 +271,23 @@ public class Trimmer {
     }
     cmd.add(tempFile.getPath());
 
-    final String[] cmdToExec = cmd.toArray( new String[0] );
-
-    Log.d(LOG_TAG, Arrays.toString(cmdToExec));
-
-    try {
-      FFmpeg.getInstance(ctx).execute(cmdToExec, new FFmpegExecuteResponseHandler() {
-
-        @Override
-        public void onStart() {
-          Log.d(LOG_TAG, "Compress: Start");
-        }
-
-        @Override
-        public void onProgress(String message) {
-        }
-
-        @Override
-        public void onFailure(String message) {
-          if (cb != null) {
-            cb.onError("compress error: failed. " + message);
-          } else if (promise != null) {
-            promise.reject("compress error: failed.", message);
-          }
-        }
-
-        @Override
-        public void onSuccess(String message) {
-          if (cb != null) {
-            cb.onSuccess("file://" + tempFile.getPath());
-          } else if (promise != null) {
-            WritableMap event = Arguments.createMap();
-            event.putString("source", "file://" + tempFile.getPath());
-            promise.resolve(event);
-          }
-        }
-
-        @Override
-        public void onFinish() {
-          Log.d(LOG_TAG, "Compress: Finished");
-        }
-      });
-    } catch (Exception e) {
+    String error = executeFfmpegCommand(cmd, rctx);
+    if ( error != null ) {
       if (cb != null) {
-        cb.onError("compress error. Command already running" + e.toString());
+        cb.onError("compress error: failed. " + error);
       } else if (promise != null) {
-        promise.reject("compress error. Command already running", e.toString());
+        promise.reject("compress error: failed.", error);
       }
+      return;
+    }
+
+    if (cb != null) {
+      cb.onSuccess("file://" + tempFile.getPath());
+    } else if (promise != null) {
+      WritableMap event = Arguments.createMap();
+      event.putString("source", "file://" + tempFile.getPath());
+      promise.resolve(event);
+      return;
     }
   }
 
@@ -386,6 +366,14 @@ public class Trimmer {
     promise.resolve(event);
   }
 
+  private static BufferedReader getOutputFromProcess(Process p) {
+    return new BufferedReader(new InputStreamReader(p.getInputStream()));
+  }
+
+  private static BufferedReader getErrorFromProcess(Process p) {
+    return new BufferedReader(new InputStreamReader(p.getErrorStream()));
+  }
+
   static void crop(String source, ReadableMap options, final Promise promise, ReactApplicationContext ctx) {
     int cropWidth = (int)( options.getDouble("cropWidth") );
     int cropHeight = (int)( options.getDouble("cropHeight") );
@@ -456,77 +444,148 @@ public class Trimmer {
     // NOTE: OUTPUT FILE
     cmd.add(tempFile.getPath());
 
-    final String[] cmdToExec = cmd.toArray( new String[0] );
+    String error = executeFfmpegCommand(cmd, ctx);
+    if ( error != null ) {
+      promise.reject("Crop error", error);
+      return;
+    }
 
-    Log.d(LOG_TAG, Arrays.toString(cmdToExec));
+    WritableMap event = Arguments.createMap();
+    event.putString("source", "file://" + tempFile.getPath());
+    promise.resolve(event);
+    return;
+  }
 
+  static private String executeFfmpegCommand(ArrayList<String> cmd, ReactApplicationContext ctx) {
     try {
-      FFmpeg.getInstance(ctx).execute(cmdToExec, new FFmpegExecuteResponseHandler() {
+      // NOTE: 3. EXECUTE "ffmpeg" COMMAND
+      String ffmpegInDir = getFfmpegAbsolutePath(ctx);
+      cmd.add(0, ffmpegInDir);
+      Process p = new ProcessBuilder(cmd).start();
 
-        @Override
-        public void onStart() {
-          Log.d(LOG_TAG, "crop: onStart");
+      BufferedReader input = getOutputFromProcess(p);
+      String line = null;
+
+      StringBuilder sInput = new StringBuilder();
+
+      while((line=input.readLine()) != null) {
+          Log.d(LOG_TAG, "processing ffmpeg");
+          System.out.println(sInput);
+          sInput.append(line);
+      }
+      input.close();
+
+      // TODO: DO IT ASYNC
+      int errorCode = p.waitFor();
+      Log.d(LOG_TAG, "ffmpeg processing completed");
+
+      if ( errorCode != 0 ) {
+        BufferedReader error = getErrorFromProcess(p);
+        StringBuilder sError = new StringBuilder();
+
+        Log.d(LOG_TAG, "ffmpeg error code: " + errorCode);
+        while((line=error.readLine()) != null) {
+            System.out.println(sError);
+            sError.append(line);
         }
+        error.close();
 
-        @Override
-        public void onProgress(String message) {
-          Log.d(LOG_TAG, "crop: onProgress");
-        }
+        return sError.toString();
+      }
 
-        @Override
-        public void onFailure(String message) {
-          Log.d(LOG_TAG, "crop: onFailure");
-          promise.reject("Crop error: failed.", message);
-        }
-
-        @Override
-        public void onSuccess(String message) {
-          Log.d(LOG_TAG, "crop: onSuccess");
-          Log.d(LOG_TAG, message);
-
-          WritableMap event = Arguments.createMap();
-          event.putString("source", "file://" + tempFile.getPath());
-          promise.resolve(event);
-        }
-
-        @Override
-        public void onFinish() {
-          Log.d(LOG_TAG, "crop: onFinish");
-        }
-      });
+      return null;
     } catch (Exception e) {
-      promise.reject("Crop error. Command already running", e.toString());
+      return e.toString();
     }
   }
 
-  public static void loadFfmpeg(ReactApplicationContext ctx){
+  private static String getFilesDirAbsolutePath(ReactApplicationContext ctx) {
+    return ctx.getFilesDir().getAbsolutePath();
+  }
+
+  private static String getFfmpegAbsolutePath(ReactApplicationContext ctx) {
+    return getFilesDirAbsolutePath(ctx) + File.separator + FFMPEG_FILE_NAME;
+  }
+
+  public static String getSha1FromFile(final File file) {
+    MessageDigest messageDigest = null;
     try {
-      FFmpeg.getInstance(ctx).loadBinary(new FFmpegLoadBinaryResponseHandler() {
-        @Override
-        public void onStart() {
-          Log.d(LOG_TAG, "load FFMPEG: onStart");
-        }
-
-        @Override
-        public void onSuccess() {
-          Log.d(LOG_TAG, "load FFMPEG: onSuccess");
-          ffmpegLoaded = true;
-        }
-
-        @Override
-        public void onFailure() {
-          ffmpegLoaded = false;
-          Log.d(LOG_TAG, "load FFMPEG: Failed to load ffmpeg");
-        }
-
-        @Override
-        public void onFinish() {
-          Log.d(LOG_TAG, "load FFMPEG: onFinish");
-        }
-      });
-    } catch (Exception e){
-      ffmpegLoaded = false;
-      Log.d("Failed to load ffmpeg", e.toString());
+      messageDigest = MessageDigest.getInstance("SHA1");
+    } catch (NoSuchAlgorithmException e) {
+      Log.d(LOG_TAG, "Failed to load SHA1 Algorithm. " + e.toString());
+      return "";
     }
+
+    try {
+      try (InputStream is = new BufferedInputStream(new FileInputStream(file))) {
+        final byte[] buffer = new byte[1024];
+        for (int read = 0; (read = is.read(buffer)) != -1;) {
+          messageDigest.update(buffer, 0, read);
+        }
+        is.close();
+      }
+    } catch (IOException e) {
+      Log.d(LOG_TAG, "Failed to load SHA1 Algorithm. IOException. " + e.toString());
+      return "";
+    }
+
+    try (Formatter f = new Formatter()) {
+      for (final byte b : messageDigest.digest()) {
+        f.format("%02x", b);
+      }
+      return f.toString();
+    }
+  }
+
+  public static void loadFfmpeg(ReactApplicationContext ctx) {
+    // NOTE: 1. COPY "ffmpeg" FROM ASSETS TO /data/data/com.myapp...
+    String filesDir = getFilesDirAbsolutePath(ctx);
+
+    try {
+      File ffmpegFile = new File(filesDir, FFMPEG_FILE_NAME);
+      if ( !(ffmpegFile.exists() && getSha1FromFile(ffmpegFile).equalsIgnoreCase(FFMPEG_SHA1)) ) {
+        final FileOutputStream ffmpegStreamToDataDir = new FileOutputStream(ffmpegFile);
+        byte[] buffer = new byte[DEFAULT_BUFFER_SIZE];
+
+        int n;
+        InputStream ffmpegInAssets = ctx.getAssets().open("armeabi-v7a" + File.separator + FFMPEG_FILE_NAME);
+        while(END_OF_FILE != (n = ffmpegInAssets.read(buffer))) {
+          ffmpegStreamToDataDir.write(buffer, 0, n);
+        }
+
+        ffmpegStreamToDataDir.flush();
+        ffmpegStreamToDataDir.close();
+
+        ffmpegInAssets.close();
+      }
+    } catch (IOException e) {
+      Log.d(LOG_TAG, "Failed to copy ffmpeg" + e.toString());
+      ffmpegLoaded = false;
+      return;
+    }
+
+    String ffmpegInDir = getFfmpegAbsolutePath(ctx);
+
+    // NOTE: 2. MAKE "ffmpeg" EXECUTABLE
+    String[] cmdlineChmod = { "chmod", "700", ffmpegInDir };
+    // TODO: 1. CHECK PERMISSIONS. 2. DO IT ASYNC
+    Process pChmod = null;
+    try {
+      pChmod = Runtime.getRuntime().exec(cmdlineChmod);
+    } catch (IOException e) {
+      Log.d(LOG_TAG, "Failed to make ffmpeg executable. Error in execution cmd. " + e.toString());
+      ffmpegLoaded = false;
+      return;
+    }
+
+    try {
+      pChmod.waitFor();
+    } catch (InterruptedException e) {
+      Log.d(LOG_TAG, "Failed to make ffmpeg executable. Error in wait cmd. " + e.toString());
+      ffmpegLoaded = false;
+      return;
+    }
+
+    ffmpegLoaded = true;
   }
 }

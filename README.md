@@ -30,15 +30,6 @@ project(':react-native-video-processing').projectDir = new File(rootProject.proj
     compile project(':react-native-video-processing')
 ```
 
-6. Add this add the end of the file `android/app/build.gradle` (need it to download and compile ffmpeg lib):
-```
-allprojects {
-  repositories {
-    maven { url "https://jitpack.io" }
-  }
-}
-```
-
 #### [iOS]
 
 1. In Xcode, click the "Add Files to <your-project-name>".
@@ -173,6 +164,16 @@ export class App extends Component {
 
 ### How to setup Library
 [![Setup](https://img.youtube.com/vi/HRjgeT6NQJM/0.jpg)](https://youtu.be/HRjgeT6NQJM)
+
+For Android:
+
+add these lines
+```
+<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+```
+
+to your AndroidManifest.xml
 
 ## Contributing
 
