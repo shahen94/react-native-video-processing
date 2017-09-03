@@ -62,10 +62,14 @@ import java.io.InputStreamReader;
 import java.io.InputStream;
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
+import android.os.AsyncTask;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import java.security.NoSuchAlgorithmException;
 import java.security.MessageDigest;
 import java.util.Formatter;
+
 
 public class Trimmer {
 
@@ -76,6 +80,99 @@ public class Trimmer {
   private static boolean ffmpegLoaded = false;
   private static final int DEFAULT_BUFFER_SIZE = 4096;
   private static final int END_OF_FILE = -1;
+
+  private static class FfmpegCmdAsyncTaskParams {
+    ArrayList<String> cmd;
+    final String pathToProcessingFile;
+    ReactApplicationContext ctx;
+    final Promise promise;
+    final String errorMessageTitle;
+    final OnCompressVideoListener cb;
+
+    FfmpegCmdAsyncTaskParams(ArrayList<String> cmd, final String pathToProcessingFile, ReactApplicationContext ctx, final Promise promise, final String errorMessageTitle, final OnCompressVideoListener cb) {
+      this.cmd = cmd;
+      this.pathToProcessingFile = pathToProcessingFile;
+      this.ctx = ctx;
+      this.promise = promise;
+      this.errorMessageTitle = errorMessageTitle;
+      this.cb = cb;
+    }
+  }
+
+  private static class FfmpegCmdAsyncTask extends AsyncTask<FfmpegCmdAsyncTaskParams, Void, Void> {
+
+    @Override
+    protected Void doInBackground(FfmpegCmdAsyncTaskParams... params) {
+      ArrayList<String> cmd = params[0].cmd;
+      final String pathToProcessingFile = params[0].pathToProcessingFile;
+      ReactApplicationContext ctx = params[0].ctx;
+      final Promise promise = params[0].promise;
+      final String errorMessageTitle = params[0].errorMessageTitle;
+      final OnCompressVideoListener cb = params[0].cb;
+
+
+      String errorMessageFromCmd = null;
+
+      try {
+        // NOTE: 3. EXECUTE "ffmpeg" COMMAND
+        String ffmpegInDir = getFfmpegAbsolutePath(ctx);
+        cmd.add(0, ffmpegInDir);
+        Process p = new ProcessBuilder(cmd).start();
+
+        BufferedReader input = getOutputFromProcess(p);
+        String line = null;
+
+        StringBuilder sInput = new StringBuilder();
+
+        while((line=input.readLine()) != null) {
+            Log.d(LOG_TAG, "processing ffmpeg");
+            System.out.println(sInput);
+            sInput.append(line);
+        }
+        input.close();
+
+        int errorCode = p.waitFor();
+        Log.d(LOG_TAG, "ffmpeg processing completed");
+
+        if ( errorCode != 0 ) {
+          BufferedReader error = getErrorFromProcess(p);
+          StringBuilder sError = new StringBuilder();
+
+          Log.d(LOG_TAG, "ffmpeg error code: " + errorCode);
+          while((line=error.readLine()) != null) {
+              System.out.println(sError);
+              sError.append(line);
+          }
+          error.close();
+
+          errorMessageFromCmd = sError.toString();
+        }
+      } catch (Exception e) {
+        errorMessageFromCmd = e.toString();
+      }
+
+      if ( errorMessageFromCmd != null ) {
+        String errorMessage = errorMessageTitle + ": failed. " + errorMessageFromCmd;
+        if (cb != null) {
+          cb.onError(errorMessage);
+        } else if (promise != null) {
+          promise.reject(errorMessage);
+        }
+      } else {
+        String filePath = "file://" + pathToProcessingFile;
+        if (cb != null) {
+          cb.onSuccess(filePath);
+        } else if (promise != null) {
+          WritableMap event = Arguments.createMap();
+          event.putString("source", filePath);
+          promise.resolve(event);
+        }
+      }
+
+      return null;
+    }
+
+  }
 
 
   public static void getPreviewImages(String path, Promise promise, ReactApplicationContext ctx) {
@@ -271,24 +368,7 @@ public class Trimmer {
     }
     cmd.add(tempFile.getPath());
 
-    String error = executeFfmpegCommand(cmd, rctx);
-    if ( error != null ) {
-      if (cb != null) {
-        cb.onError("compress error: failed. " + error);
-      } else if (promise != null) {
-        promise.reject("compress error: failed.", error);
-      }
-      return;
-    }
-
-    if (cb != null) {
-      cb.onSuccess("file://" + tempFile.getPath());
-    } else if (promise != null) {
-      WritableMap event = Arguments.createMap();
-      event.putString("source", "file://" + tempFile.getPath());
-      promise.resolve(event);
-      return;
-    }
+    executeFfmpegCommand(cmd, tempFile.getPath(), rctx, promise, "compress error", cb);
   }
 
   static File createTempFile(String extension, final Promise promise, Context ctx) {
@@ -444,59 +524,16 @@ public class Trimmer {
     // NOTE: OUTPUT FILE
     cmd.add(tempFile.getPath());
 
-    String error = executeFfmpegCommand(cmd, ctx);
-    if ( error != null ) {
-      promise.reject("Crop error", error);
-      return;
-    }
-
-    WritableMap event = Arguments.createMap();
-    event.putString("source", "file://" + tempFile.getPath());
-    promise.resolve(event);
-    return;
+    executeFfmpegCommand(cmd, tempFile.getPath(), ctx, promise, "Crop error", null);
   }
 
-  static private String executeFfmpegCommand(ArrayList<String> cmd, ReactApplicationContext ctx) {
-    try {
-      // NOTE: 3. EXECUTE "ffmpeg" COMMAND
-      String ffmpegInDir = getFfmpegAbsolutePath(ctx);
-      cmd.add(0, ffmpegInDir);
-      Process p = new ProcessBuilder(cmd).start();
+  static private Void executeFfmpegCommand(@NonNull ArrayList<String> cmd, @NonNull final String pathToProcessingFile, @NonNull ReactApplicationContext ctx, @NonNull final Promise promise, @NonNull final String errorMessageTitle, @Nullable final OnCompressVideoListener cb) {
+    FfmpegCmdAsyncTaskParams ffmpegCmdAsyncTaskParams = new FfmpegCmdAsyncTaskParams(cmd, pathToProcessingFile, ctx, promise, errorMessageTitle, cb);
 
-      BufferedReader input = getOutputFromProcess(p);
-      String line = null;
+    FfmpegCmdAsyncTask ffmpegCmdAsyncTask = new FfmpegCmdAsyncTask();
+    ffmpegCmdAsyncTask.execute(ffmpegCmdAsyncTaskParams);
 
-      StringBuilder sInput = new StringBuilder();
-
-      while((line=input.readLine()) != null) {
-          Log.d(LOG_TAG, "processing ffmpeg");
-          System.out.println(sInput);
-          sInput.append(line);
-      }
-      input.close();
-
-      // TODO: DO IT ASYNC
-      int errorCode = p.waitFor();
-      Log.d(LOG_TAG, "ffmpeg processing completed");
-
-      if ( errorCode != 0 ) {
-        BufferedReader error = getErrorFromProcess(p);
-        StringBuilder sError = new StringBuilder();
-
-        Log.d(LOG_TAG, "ffmpeg error code: " + errorCode);
-        while((line=error.readLine()) != null) {
-            System.out.println(sError);
-            sError.append(line);
-        }
-        error.close();
-
-        return sError.toString();
-      }
-
-      return null;
-    } catch (Exception e) {
-      return e.toString();
-    }
+    return null;
   }
 
   private static String getFilesDirAbsolutePath(ReactApplicationContext ctx) {
@@ -568,7 +605,7 @@ public class Trimmer {
 
     // NOTE: 2. MAKE "ffmpeg" EXECUTABLE
     String[] cmdlineChmod = { "chmod", "700", ffmpegInDir };
-    // TODO: 1. CHECK PERMISSIONS. 2. DO IT ASYNC
+    // TODO: 1. CHECK PERMISSIONS. 2. DO IT AND CHMOD CMD ASYNC
     Process pChmod = null;
     try {
       pChmod = Runtime.getRuntime().exec(cmdlineChmod);
