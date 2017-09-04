@@ -175,6 +175,74 @@ public class Trimmer {
   }
 
 
+  private static class LoadFfmpegAsyncTaskParams {
+    ReactApplicationContext ctx;
+
+    LoadFfmpegAsyncTaskParams(ReactApplicationContext ctx) {
+      this.ctx = ctx;
+    }
+  }
+
+  private static class LoadFfmpegAsyncTask extends AsyncTask<LoadFfmpegAsyncTaskParams, Void, Void> {
+
+    @Override
+    protected Void doInBackground(LoadFfmpegAsyncTaskParams... params) {
+      ReactApplicationContext ctx = params[0].ctx;
+
+      // NOTE: 1. COPY "ffmpeg" FROM ASSETS TO /data/data/com.myapp...
+      String filesDir = getFilesDirAbsolutePath(ctx);
+
+      try {
+        File ffmpegFile = new File(filesDir, FFMPEG_FILE_NAME);
+        if ( !(ffmpegFile.exists() && getSha1FromFile(ffmpegFile).equalsIgnoreCase(FFMPEG_SHA1)) ) {
+          final FileOutputStream ffmpegStreamToDataDir = new FileOutputStream(ffmpegFile);
+          byte[] buffer = new byte[DEFAULT_BUFFER_SIZE];
+
+          int n;
+          InputStream ffmpegInAssets = ctx.getAssets().open("armeabi-v7a" + File.separator + FFMPEG_FILE_NAME);
+          while(END_OF_FILE != (n = ffmpegInAssets.read(buffer))) {
+            ffmpegStreamToDataDir.write(buffer, 0, n);
+          }
+
+          ffmpegStreamToDataDir.flush();
+          ffmpegStreamToDataDir.close();
+
+          ffmpegInAssets.close();
+        }
+      } catch (IOException e) {
+        Log.d(LOG_TAG, "Failed to copy ffmpeg" + e.toString());
+        ffmpegLoaded = false;
+        return null;
+      }
+
+      String ffmpegInDir = getFfmpegAbsolutePath(ctx);
+
+      // NOTE: 2. MAKE "ffmpeg" EXECUTABLE
+      String[] cmdlineChmod = { "chmod", "700", ffmpegInDir };
+      // TODO: 1. CHECK PERMISSIONS
+      Process pChmod = null;
+      try {
+        pChmod = Runtime.getRuntime().exec(cmdlineChmod);
+      } catch (IOException e) {
+        Log.d(LOG_TAG, "Failed to make ffmpeg executable. Error in execution cmd. " + e.toString());
+        ffmpegLoaded = false;
+        return null;
+      }
+
+      try {
+        pChmod.waitFor();
+      } catch (InterruptedException e) {
+        Log.d(LOG_TAG, "Failed to make ffmpeg executable. Error in wait cmd. " + e.toString());
+        ffmpegLoaded = false;
+        return null;
+      }
+
+      ffmpegLoaded = true;
+      return null;
+    }
+  }
+
+
   public static void getPreviewImages(String path, Promise promise, ReactApplicationContext ctx) {
     FFmpegMediaMetadataRetriever retriever = new FFmpegMediaMetadataRetriever();
     if (VideoEdit.shouldUseURI(path)) {
@@ -575,54 +643,13 @@ public class Trimmer {
   }
 
   public static void loadFfmpeg(ReactApplicationContext ctx) {
-    // NOTE: 1. COPY "ffmpeg" FROM ASSETS TO /data/data/com.myapp...
-    String filesDir = getFilesDirAbsolutePath(ctx);
+    LoadFfmpegAsyncTaskParams loadFfmpegAsyncTaskParams = new LoadFfmpegAsyncTaskParams(ctx);
 
-    try {
-      File ffmpegFile = new File(filesDir, FFMPEG_FILE_NAME);
-      if ( !(ffmpegFile.exists() && getSha1FromFile(ffmpegFile).equalsIgnoreCase(FFMPEG_SHA1)) ) {
-        final FileOutputStream ffmpegStreamToDataDir = new FileOutputStream(ffmpegFile);
-        byte[] buffer = new byte[DEFAULT_BUFFER_SIZE];
+    LoadFfmpegAsyncTask loadFfmpegAsyncTask = new LoadFfmpegAsyncTask();
+    loadFfmpegAsyncTask.execute(loadFfmpegAsyncTaskParams);
 
-        int n;
-        InputStream ffmpegInAssets = ctx.getAssets().open("armeabi-v7a" + File.separator + FFMPEG_FILE_NAME);
-        while(END_OF_FILE != (n = ffmpegInAssets.read(buffer))) {
-          ffmpegStreamToDataDir.write(buffer, 0, n);
-        }
+    // TODO: EXPOSE TO JS "isFfmpegLoaded" AND "isFfmpegLoading"
 
-        ffmpegStreamToDataDir.flush();
-        ffmpegStreamToDataDir.close();
-
-        ffmpegInAssets.close();
-      }
-    } catch (IOException e) {
-      Log.d(LOG_TAG, "Failed to copy ffmpeg" + e.toString());
-      ffmpegLoaded = false;
-      return;
-    }
-
-    String ffmpegInDir = getFfmpegAbsolutePath(ctx);
-
-    // NOTE: 2. MAKE "ffmpeg" EXECUTABLE
-    String[] cmdlineChmod = { "chmod", "700", ffmpegInDir };
-    // TODO: 1. CHECK PERMISSIONS. 2. DO IT AND CHMOD CMD ASYNC
-    Process pChmod = null;
-    try {
-      pChmod = Runtime.getRuntime().exec(cmdlineChmod);
-    } catch (IOException e) {
-      Log.d(LOG_TAG, "Failed to make ffmpeg executable. Error in execution cmd. " + e.toString());
-      ffmpegLoaded = false;
-      return;
-    }
-
-    try {
-      pChmod.waitFor();
-    } catch (InterruptedException e) {
-      Log.d(LOG_TAG, "Failed to make ffmpeg executable. Error in wait cmd. " + e.toString());
-      ffmpegLoaded = false;
-      return;
-    }
-
-    ffmpegLoaded = true;
+    return;
   }
 }
