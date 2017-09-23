@@ -562,15 +562,21 @@ public class Trimmer {
     ArrayList<String> cmd = new ArrayList<String>();
     cmd.add("-y"); // NOTE: OVERWRITE OUTPUT FILE
 
+    // NOTE: INPUT FILE
+    cmd.add("-i");
+    cmd.add(source);
+
+    // NOTE: PLACE ARGUMENTS FOR FFMPEG IN THIS ORDER:
+    // 1. "-i" (INPUT FILE)
+    // 2. "-ss" (START TIME)
+    // 3. "-to" (END TIME) or "-t" (TRIM TIME)
+    // OTHERWISE WE WILL LOSE ACCURACY AND WILL GET WRONG CLIPPED VIDEO
+
     String startTime = options.getString("startTime");
     if ( !startTime.equals(null) && !startTime.equals("") ) {
       cmd.add("-ss");
       cmd.add(startTime);
     }
-
-    // NOTE: INPUT FILE
-    cmd.add("-i");
-    cmd.add(source);
 
     String endTime = options.getString("endTime");
     if ( !endTime.equals(null) && !endTime.equals("") ) {
