@@ -58,7 +58,8 @@
     "react-native": "^0.38.0",
     "react-native-create-library": "^1.0.4",
     "react-test-renderer": "16.0.0",
-    "semantic-release": "^4.3.5"
+    "semantic-release": "^4.3.5",
+    "prop-types": "^15.6.0"
   },
   "peerDependencies": {
     "react-native": ">=0.35"
