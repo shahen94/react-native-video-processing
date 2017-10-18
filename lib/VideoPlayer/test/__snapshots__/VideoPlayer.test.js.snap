@@ -1,4 +1,5 @@
 exports[`VideoPlayer Should render correctly 1`] = `
 <VideoPlayer
-  source="somePath" />
+  source="somePath"
+/>
 `;
