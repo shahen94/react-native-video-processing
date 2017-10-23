@@ -423,7 +423,7 @@ public class Trimmer {
     cmd.add("libx264");
     if (width != null && height != null) {
       cmd.add("-vf");
-      cmd.add("scale=" + Double.toString(width) + ":" + Double.toString(height));
+      cmd.add("scale=" + width.intValue() + ":" + height.intValue());
     }
 
     cmd.add("-preset");
