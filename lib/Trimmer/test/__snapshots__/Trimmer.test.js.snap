@@ -1,8 +1,11 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
 exports[`[Trimmer] should be render correctly 1`] = `
 <View
   height={300}
   onChange={[Function]}
   source="someSourceGoeshere"
   themeColor="blue"
-  width={300} />
+  width={300}
+/>
 `;
