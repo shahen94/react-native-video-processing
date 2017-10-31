@@ -32,7 +32,7 @@
     "url": "https://github.com/shahen94/react-native-video-processing/issues"
   },
   "jest": {
-    "preset": "jest-react-native",
+    "preset": "react-native",
     "testPathIgnorePatterns": [
       "/node_modules/"
     ],
