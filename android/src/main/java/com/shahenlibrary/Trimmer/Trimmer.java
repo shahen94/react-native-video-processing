@@ -338,62 +338,44 @@ public class Trimmer {
     mmr.release();
   }
 
-  static void trim(ReadableMap options, final Promise promise) {
-    double startMs = options.getDouble("startTime");
-    double endMs = options.getDouble("endTime");
-    String mediaSource = options.getString("source");
+  static void trim(ReadableMap options, final Promise promise, ReactApplicationContext ctx) {
+    String source = options.getString("source");
+    String startTime = options.getString("startTime");
+    String endTime = options.getString("endTime");
 
-    OnTrimVideoListener trimVideoListener = new OnTrimVideoListener() {
-      @Override
-      public void onError(String message) {
-        Log.d(LOG_TAG, "Trimmed onError: " + message);
-        WritableMap event = Arguments.createMap();
-        event.putString(Events.ERROR_TRIM, message);
+    final File tempFile = createTempFile("mp4", promise, ctx);
 
-        promise.reject("trim error", message);
-      }
+    ArrayList<String> cmd = new ArrayList<String>();
+    cmd.add("-y"); // NOTE: OVERWRITE OUTPUT FILE
 
-      @Override
-      public void onTrimStarted() {
-        Log.d(LOG_TAG, "Trimmed onTrimStarted");
-      }
+    // NOTE: INPUT FILE
+    cmd.add("-i");
+    cmd.add(source);
 
-      @Override
-      public void getResult(Uri uri) {
-        Log.d(LOG_TAG, "getResult: " + uri.toString());
-        WritableMap event = Arguments.createMap();
-        event.putString("source", uri.toString());
-        promise.resolve(event);
-      }
+    // NOTE: PLACE ARGUMENTS FOR FFMPEG IN THIS ORDER:
+    // 1. "-i" (INPUT FILE)
+    // 2. "-ss" (START TIME)
+    // 3. "-to" (END TIME) or "-t" (TRIM TIME)
+    // OTHERWISE WE WILL LOSE ACCURACY AND WILL GET WRONG CLIPPED VIDEO
 
-      @Override
-      public void cancelAction() {
-        Log.d(LOG_TAG, "Trimmed cancelAction");
-      }
-    };
-    Log.d(LOG_TAG, "trimMedia at : startAt -> " + startMs + " : endAt -> " + endMs);
-    File mediaFile = new File(mediaSource.replace("file:///", "/"));
-    long startTrimFromPos = (long) startMs * 1000;
-    long endTrimFromPos = (long) endMs * 1000;
-    String[] dPath = mediaSource.split("/");
-    StringBuilder builder = new StringBuilder();
-    for (int i = 0; i < dPath.length; ++i) {
-      if (i == dPath.length - 1) {
-        continue;
-      }
-      builder.append(dPath[i]);
-      builder.append(File.separator);
-    }
-    String path = builder.toString().replace("file:///", "/");
+    cmd.add("-ss");
+    cmd.add(startTime);
 
-    Log.d(LOG_TAG, "trimMedia: " + mediaFile.toString() + " isExists: " + mediaFile.exists());
-    try {
-      VideoEdit.startTrim(mediaFile, path, startTrimFromPos, endTrimFromPos, trimVideoListener);
-    } catch (IOException e) {
-      trimVideoListener.onError(e.toString());
-      e.printStackTrace();
-      Log.d(LOG_TAG, "trimMedia: error -> " + e.toString());
-    }
+    cmd.add("-to");
+    cmd.add(endTime);
+
+    cmd.add("-preset");
+    cmd.add("ultrafast");
+    // NOTE: DO NOT CONVERT AUDIO TO SAVE TIME
+    cmd.add("-c:a");
+    cmd.add("copy");
+    // NOTE: FLAG TO CONVER "AAC" AUDIO CODEC
+    cmd.add("-strict");
+    cmd.add("-2");
+    // NOTE: OUTPUT FILE
+    cmd.add(tempFile.getPath());
+
+    executeFfmpegCommand(cmd, tempFile.getPath(), ctx, promise, "Trim error", null);
   }
 
   public static void compress(String source, ReadableMap options, final Promise promise, final OnCompressVideoListener cb, ThemedReactContext tctx, ReactApplicationContext rctx) {

@@ -66,7 +66,7 @@ public class TrimmerManager extends ReactContextBaseJavaModule {
   @ReactMethod
   public void trim(ReadableMap options, Promise promise) {
     Log.d(REACT_PACKAGE, options.toString());
-    Trimmer.trim(options, promise);
+    Trimmer.trim(options, promise, reactContext);
   }
 
   @ReactMethod
