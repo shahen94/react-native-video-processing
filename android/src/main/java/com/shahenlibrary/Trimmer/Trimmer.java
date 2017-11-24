@@ -192,6 +192,7 @@ public class Trimmer {
       // NOTE: 1. COPY "ffmpeg" FROM ASSETS TO /data/data/com.myapp...
       String filesDir = getFilesDirAbsolutePath(ctx);
 
+      // TODO: MAKE SURE THAT WHEN WE UPDATE FFMPEG AND USER UPDATES APP IT WILL LOAD NEW FFMPEG (IT MUST OVERWRITE OLD FFMPEG)
       try {
         File ffmpegFile = new File(filesDir, FFMPEG_FILE_NAME);
         if ( !(ffmpegFile.exists() && getSha1FromFile(ffmpegFile).equalsIgnoreCase(FFMPEG_SHA1)) ) {
@@ -378,8 +379,30 @@ public class Trimmer {
     executeFfmpegCommand(cmd, tempFile.getPath(), ctx, promise, "Trim error", null);
   }
 
-  public static void compress(String source, ReadableMap options, final Promise promise, final OnCompressVideoListener cb, ThemedReactContext tctx, ReactApplicationContext rctx) {
-    Context ctx = tctx != null ? tctx : rctx;
+  private static ReadableMap formatWidthAndHeightForFfmpeg(int width, int height, int availableVideoWidth, int availableVideoHeight) {
+    // NOTE: WIDTH/HEIGHT FOR FFMpeg NEED TO BE DEVIDED BY 2.
+    // OR YOU WILL SEE BLANK WHITE LINES FROM LEFT/RIGHT (FOR CROP), OR CRASH FOR OTHER COMMANDS
+    while( width % 2 > 0 && width < availableVideoWidth ) {
+      width += 1;
+    }
+    while( width % 2 > 0 && width > 0 ) {
+      width -= 1;
+    }
+    while( height % 2 > 0 && height < availableVideoHeight ) {
+      height += 1;
+    }
+    while( height % 2 > 0 && height > 0 ) {
+      height -= 1;
+    }
+
+    WritableMap sizes = Arguments.createMap();
+    sizes.putInt("width", width);
+    sizes.putInt("height", height);
+    return sizes;
+  }
+
+  private static ReadableMap getVideoWidthAndHeight(String source, Context ctx) {
+    Log.d(LOG_TAG, "getVideoWidthAndHeight: " + source);
 
     FFmpegMediaMetadataRetriever retriever = new FFmpegMediaMetadataRetriever();
     if (VideoEdit.shouldUseURI(source)) {
@@ -387,10 +410,43 @@ public class Trimmer {
     } else {
       retriever.setDataSource(source);
     }
+
+    int width = Integer.parseInt(retriever.extractMetadata(FFmpegMediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH));
+    int height = Integer.parseInt(retriever.extractMetadata(FFmpegMediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT));
     retriever.release();
+
+    Log.d(LOG_TAG, "getVideoWidthAndHeight: " + Integer.toString(width));
+    Log.d(LOG_TAG, "getVideoWidthAndHeight: " + Integer.toString(height));
+
+    WritableMap sizes = Arguments.createMap();
+    sizes.putInt("width", width);
+    sizes.putInt("height", height);
+    return sizes;
+  }
+
+  public static void compress(String source, ReadableMap options, final Promise promise, final OnCompressVideoListener cb, ThemedReactContext tctx, ReactApplicationContext rctx) {
     Log.d(LOG_TAG, "OPTIONS: " + options.toString());
-    Double width = options.hasKey("width") ? options.getDouble("width") : null;
-    Double height = options.hasKey("height") ? options.getDouble("height") : null;
+
+    Context ctx = tctx != null ? tctx : rctx;
+
+    ReadableMap videoSizes = getVideoWidthAndHeight(source, ctx);
+    int videoWidth = videoSizes.getInt("width");
+    int videoHeight = videoSizes.getInt("height");
+
+    int width = options.hasKey("width") ? (int)( options.getDouble("width") ) : 0;
+    int height = options.hasKey("height") ? (int)( options.getDouble("height") ) : 0;
+
+    if ( width != 0 && height != 0 && videoWidth != 0 && videoHeight != 0 ) {
+      ReadableMap sizes = formatWidthAndHeightForFfmpeg(
+        width,
+        height,
+        videoWidth,
+        videoHeight
+      );
+      width = sizes.getInt("width");
+      height = sizes.getInt("height");
+    }
+
     Double minimumBitrate = options.hasKey("minimumBitrate") ? options.getDouble("minimumBitrate") : null;
     Double bitrateMultiplier = options.hasKey("bitrateMultiplier") ? options.getDouble("bitrateMultiplier") : null;
     Boolean removeAudio = options.hasKey("removeAudio") ? options.getBoolean("removeAudio") : false;
@@ -403,9 +459,9 @@ public class Trimmer {
     cmd.add(source);
     cmd.add("-c:v");
     cmd.add("libx264");
-    if (width != null && height != null) {
+    if ( width != 0 && height != 0 ) {
       cmd.add("-vf");
-      cmd.add("scale=" + width.intValue() + ":" + height.intValue());
+      cmd.add("scale=" + Integer.toString(width) + ":" + Integer.toString(height));
     }
 
     cmd.add("-preset");
@@ -510,30 +566,19 @@ public class Trimmer {
     int cropOffsetX = (int)( options.getDouble("cropOffsetX") );
     int cropOffsetY = (int)( options.getDouble("cropOffsetY") );
 
-    FFmpegMediaMetadataRetriever retriever = new FFmpegMediaMetadataRetriever();
-    if (VideoEdit.shouldUseURI(source)) {
-      retriever.setDataSource(ctx, Uri.parse(source));
-    } else {
-      retriever.setDataSource(source);
-    }
+    ReadableMap videoSizes = getVideoWidthAndHeight(source, ctx);
+    int videoWidth = videoSizes.getInt("width");
+    int videoHeight = videoSizes.getInt("height");
 
-    int videoWidth = Integer.parseInt(retriever.extractMetadata(FFmpegMediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH));
-    int videoHeight = Integer.parseInt(retriever.extractMetadata(FFmpegMediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT));
-    retriever.release();
-
-    // NOTE: FFMpeg CROP NEED TO BE DEVIDED BY 2. OR YOU WILL SEE BLANK WHITE LINES FROM LEFT/RIGHT
-    while( cropWidth % 2 > 0 && cropWidth < videoWidth ) {
-      cropWidth += 1;
-    }
-    while( cropWidth % 2 > 0 && cropWidth > 0 ) {
-      cropWidth -= 1;
-    }
-    while( cropHeight % 2 > 0 && cropHeight < videoHeight ) {
-      cropHeight += 1;
-    }
-    while( cropHeight % 2 > 0 && cropHeight > 0 ) {
-      cropHeight -= 1;
-    }
+    ReadableMap sizes = formatWidthAndHeightForFfmpeg(
+      cropWidth,
+      cropHeight,
+      // NOTE: MUST CHECK AGAINST "CROPPABLE" WIDTH/HEIGHT. NOT FULL WIDTH/HEIGHT
+      videoWidth - cropOffsetX,
+      videoHeight - cropOffsetY
+    );
+    cropWidth = sizes.getInt("width");
+    cropHeight = sizes.getInt("height");
 
     // TODO: 1) ADD METHOD TO CHECK "IS FFMPEG LOADED".
     // 2) CHECK IT HERE
