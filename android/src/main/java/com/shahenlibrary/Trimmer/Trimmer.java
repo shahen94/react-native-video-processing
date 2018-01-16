@@ -401,27 +401,31 @@ public class Trimmer {
     return sizes;
   }
 
-  private static ReadableMap getVideoWidthAndHeight(String source, Context ctx) {
-    Log.d(LOG_TAG, "getVideoWidthAndHeight: " + source);
+  private static ReadableMap getVideoRequiredMetadata(String source, Context ctx) {
+    Log.d(LOG_TAG, "getVideoRequiredMetadata: " + source);
 
-    FFmpegMediaMetadataRetriever retriever = new FFmpegMediaMetadataRetriever();
+    // FFmpegMediaMetadataRetriever retriever = new FFmpegMediaMetadataRetriever();
+    MediaMetadataRetriever retriever = new MediaMetadataRetriever();
     if (VideoEdit.shouldUseURI(source)) {
       retriever.setDataSource(ctx, Uri.parse(source));
     } else {
       retriever.setDataSource(source);
     }
 
-    int width = Integer.parseInt(retriever.extractMetadata(FFmpegMediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH));
-    int height = Integer.parseInt(retriever.extractMetadata(FFmpegMediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT));
+    int width = Integer.parseInt(retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH));
+    int height = Integer.parseInt(retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT));
+    int bitrate = Integer.parseInt(retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_BITRATE));
     retriever.release();
 
-    Log.d(LOG_TAG, "getVideoWidthAndHeight: " + Integer.toString(width));
-    Log.d(LOG_TAG, "getVideoWidthAndHeight: " + Integer.toString(height));
+    Log.d(LOG_TAG, "getVideoRequiredMetadata: " + Integer.toString(width));
+    Log.d(LOG_TAG, "getVideoRequiredMetadata: " + Integer.toString(height));
+    Log.d(LOG_TAG, "getVideoRequiredMetadata: " + Integer.toString(bitrate));
 
-    WritableMap sizes = Arguments.createMap();
-    sizes.putInt("width", width);
-    sizes.putInt("height", height);
-    return sizes;
+    WritableMap videoMetadata = Arguments.createMap();
+    videoMetadata.putInt("width", width);
+    videoMetadata.putInt("height", height);
+    videoMetadata.putInt("bitrate", bitrate);
+    return videoMetadata;
   }
 
   public static void compress(String source, ReadableMap options, final Promise promise, final OnCompressVideoListener cb, ThemedReactContext tctx, ReactApplicationContext rctx) {
@@ -429,9 +433,10 @@ public class Trimmer {
 
     Context ctx = tctx != null ? tctx : rctx;
 
-    ReadableMap videoSizes = getVideoWidthAndHeight(source, ctx);
-    int videoWidth = videoSizes.getInt("width");
-    int videoHeight = videoSizes.getInt("height");
+    ReadableMap videoMetadata = getVideoRequiredMetadata(source, ctx);
+    int videoWidth = videoMetadata.getInt("width");
+    int videoHeight = videoMetadata.getInt("height");
+    int videoBitrate = videoMetadata.getInt("bitrate");
 
     int width = options.hasKey("width") ? (int)( options.getDouble("width") ) : 0;
     int height = options.hasKey("height") ? (int)( options.getDouble("height") ) : 0;
@@ -448,8 +453,21 @@ public class Trimmer {
     }
 
     Double minimumBitrate = options.hasKey("minimumBitrate") ? options.getDouble("minimumBitrate") : null;
-    Double bitrateMultiplier = options.hasKey("bitrateMultiplier") ? options.getDouble("bitrateMultiplier") : null;
+    Double bitrateMultiplier = options.hasKey("bitrateMultiplier") ? options.getDouble("bitrateMultiplier") : 1.0;
     Boolean removeAudio = options.hasKey("removeAudio") ? options.getBoolean("removeAudio") : false;
+
+    Double averageBitrate = videoBitrate / bitrateMultiplier;
+
+    if (minimumBitrate != null) {
+      if (averageBitrate < minimumBitrate) {
+        averageBitrate = minimumBitrate;
+      }
+      if (videoBitrate < minimumBitrate) {
+        averageBitrate = videoBitrate * 1.0;
+      }
+    }
+
+    Log.d(LOG_TAG, "getVideoRequiredMetadata: averageBitrate - " + Double.toString(averageBitrate));
 
     final File tempFile = createTempFile("mp4", promise, ctx);
 
@@ -459,6 +477,10 @@ public class Trimmer {
     cmd.add(source);
     cmd.add("-c:v");
     cmd.add("libx264");
+    cmd.add("-b:v");
+    cmd.add(Double.toString(averageBitrate/1000)+"K");
+    cmd.add("-bufsize");
+    cmd.add(Double.toString(averageBitrate/2000)+"K");
     if ( width != 0 && height != 0 ) {
       cmd.add("-vf");
       cmd.add("scale=" + Integer.toString(width) + ":" + Integer.toString(height));
@@ -566,7 +588,7 @@ public class Trimmer {
     int cropOffsetX = (int)( options.getDouble("cropOffsetX") );
     int cropOffsetY = (int)( options.getDouble("cropOffsetY") );
 
-    ReadableMap videoSizes = getVideoWidthAndHeight(source, ctx);
+    ReadableMap videoSizes = getVideoRequiredMetadata(source, ctx);
     int videoWidth = videoSizes.getInt("width");
     int videoHeight = videoSizes.getInt("height");
 
