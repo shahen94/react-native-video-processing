@@ -78,10 +78,10 @@ class App extends Component {
         const options = {
             width: 720,
             height: 1280,
-            bitrateMultiplier: 3, // iOS only
+            bitrateMultiplier: 3,
             saveToCameraRoll: true, // default is false, iOS only
             saveWithCurrentDate: true, // default is false, iOS only
-            minimumBitrate: 300000, // iOS only
+            minimumBitrate: 300000,
             removeAudio: true, // default is false
         };
         this.videoPlayerRef.compress(options)
