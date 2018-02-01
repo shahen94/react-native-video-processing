@@ -12,4 +12,6 @@ public class Events {
     public static final String ERROR_TRIM = "error";
     public static final String ORIENTATION = "orientation";
     public static final String SIZE = "size";
+    public static final String FRAMERATE = "frameRate";
+    public static final String BITRATE = "bitrate";
 }

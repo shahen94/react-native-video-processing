@@ -370,6 +370,8 @@ class RNVideoTrimmer: NSObject {
         "height": isPortrait ? naturalSize.width : naturalSize.height
       ]
       assetInfo["size"] = size
+      assetInfo["frameRate"] = Int(round(track.nominalFrameRate))
+      assetInfo["bitrate"] = Int(round(track.estimatedDataRate))
     }
     callback( [NSNull(), assetInfo] )
   }
