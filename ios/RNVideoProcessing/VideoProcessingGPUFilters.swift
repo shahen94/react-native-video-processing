@@ -3,7 +3,6 @@
 //  vpTest
 //
 //  Created by Shahen Hovhannisyan on 11/16/16.
-//  Copyright © 2016 Facebook. All rights reserved.
 //
 
 import Foundation
