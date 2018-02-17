@@ -89,6 +89,12 @@ public class TrimmerManager extends ReactContextBaseJavaModule {
   }
 
   @ReactMethod
+  public void reverse(String path, ReadableMap options, Promise promise) {
+    Log.d(REACT_PACKAGE, "reverse video: " + options.toString());
+    Trimmer.reverse(path, options, promise, reactContext);
+  }
+
+  @ReactMethod
   private void loadFfmpeg() {
     Trimmer.loadFfmpeg(reactContext);
   }
