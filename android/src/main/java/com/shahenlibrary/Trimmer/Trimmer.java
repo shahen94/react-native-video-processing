@@ -654,6 +654,35 @@ public class Trimmer {
     executeFfmpegCommand(cmd, tempFile.getPath(), ctx, promise, "Crop error", null);
   }
 
+  static void reverse(String source, ReadableMap options, final Promise promise, ReactApplicationContext ctx) {
+
+    final File tempFile = createTempFile("mp4", promise, ctx);
+
+    ArrayList<String> cmd = new ArrayList<String>();
+    cmd.add("-y"); // NOTE: OVERWRITE OUTPUT FILE
+
+    // NOTE: INPUT FILE
+    cmd.add("-i");
+    cmd.add(source);
+
+    // NOTE: DO THE REVERSAL
+    cmd.add("-vf");
+    cmd.add("reverse");
+
+    cmd.add("-preset");
+    cmd.add("ultrafast");
+    // NOTE: DO NOT CONVERT AUDIO TO SAVE TIME
+    cmd.add("-c:a");
+    cmd.add("copy");
+    // NOTE: FLAG TO CONVER "AAC" AUDIO CODEC
+    cmd.add("-strict");
+    cmd.add("-2");
+    // NOTE: OUTPUT FILE
+    cmd.add(tempFile.getPath());
+
+    executeFfmpegCommand(cmd, tempFile.getPath(), ctx, promise, "Reverse error", null);
+  }
+
   static private Void executeFfmpegCommand(@NonNull ArrayList<String> cmd, @NonNull final String pathToProcessingFile, @NonNull ReactApplicationContext ctx, @NonNull final Promise promise, @NonNull final String errorMessageTitle, @Nullable final OnCompressVideoListener cb) {
     FfmpegCmdAsyncTaskParams ffmpegCmdAsyncTaskParams = new FfmpegCmdAsyncTaskParams(cmd, pathToProcessingFile, ctx, promise, errorMessageTitle, cb);
 
