@@ -1,7 +1,7 @@
-//
-//  RNVideoTrimmer.swift
-//  RNVideoProcessing
-//
+/*
+ * Credit to whydna and yayoc
+ * https://github.com/whydna/Reverse-AVAsset-Efficient
+ */
 
 import Foundation
 import AVFoundation
