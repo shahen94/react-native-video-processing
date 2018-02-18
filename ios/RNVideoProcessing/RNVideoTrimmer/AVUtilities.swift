@@ -285,13 +285,7 @@ class RNVideoTrimmer: NSObject {
     print("RNVideoTrimmer passed quality: \(quality). useQuality: \(useQuality)")
     
     AVUtilities.reverse(asset, outputURL: outputURL, completion: { [unowned self] (asset: AVAsset) in
-      guard let exportSession = AVAssetExportSession(asset: asset, presetName: useQuality)
-        else {
-          callback(["Error creating AVAssetExportSession", NSNull()])
-          return
-      }
-      
-      callback( [NSNull(), outputURL.absoluteString] )
+          callback( [NSNull(), outputURL.absoluteString] )
     })
   }
 
