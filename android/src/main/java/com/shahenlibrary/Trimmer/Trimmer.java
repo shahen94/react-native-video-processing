@@ -654,7 +654,7 @@ public class Trimmer {
     executeFfmpegCommand(cmd, tempFile.getPath(), ctx, promise, "Crop error", null);
   }
 
-  static void reverse(String source, ReadableMap options, final Promise promise, ReactApplicationContext ctx) {
+  static void boomerang(String source, ReadableMap options, final Promise promise, ReactApplicationContext ctx) {
 
     final File tempFile = createTempFile("mp4", promise, ctx);
 
@@ -671,6 +671,35 @@ public class Trimmer {
 
     cmd.add("-map");
     cmd.add("[v]");
+
+    cmd.add("-preset");
+    cmd.add("ultrafast");
+    // NOTE: DO NOT CONVERT AUDIO TO SAVE TIME
+    cmd.add("-c:a");
+    cmd.add("copy");
+    // NOTE: FLAG TO CONVER "AAC" AUDIO CODEC
+    cmd.add("-strict");
+    cmd.add("-2");
+    // NOTE: OUTPUT FILE
+    cmd.add(tempFile.getPath());
+
+    executeFfmpegCommand(cmd, tempFile.getPath(), ctx, promise, "Boomerang error", null);
+  }
+
+  static void reverse(String source, ReadableMap options, final Promise promise, ReactApplicationContext ctx) {
+
+    final File tempFile = createTempFile("mp4", promise, ctx);
+
+    ArrayList<String> cmd = new ArrayList<String>();
+    cmd.add("-y"); // NOTE: OVERWRITE OUTPUT FILE
+
+    // NOTE: INPUT FILE
+    cmd.add("-i");
+    cmd.add(source);
+
+    // NOTE: DO THE REVERSAL (credit: https://video.stackexchange.com/a/17739)
+    cmd.add("-vf");
+    cmd.add("reverse");
 
     cmd.add("-preset");
     cmd.add("ultrafast");
