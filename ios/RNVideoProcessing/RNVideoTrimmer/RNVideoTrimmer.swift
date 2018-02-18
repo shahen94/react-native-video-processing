@@ -297,6 +297,7 @@ class RNVideoTrimmer: NSObject {
       
       let secondAsset = reversedAsset
       
+      // Credit: https://www.raywenderlich.com/94404/play-record-merge-videos-ios-swift
       do {
         try track.insertTimeRange(CMTimeRangeMake(kCMTimeZero, firstAsset.duration), of: firstAsset.tracks(withMediaType: AVMediaTypeVideo)[0], at: kCMTimeZero)
       } catch _ {
