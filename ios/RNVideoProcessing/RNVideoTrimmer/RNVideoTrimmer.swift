@@ -301,13 +301,15 @@ class RNVideoTrimmer: NSObject {
       do {
         try track.insertTimeRange(CMTimeRangeMake(kCMTimeZero, firstAsset.duration), of: firstAsset.tracks(withMediaType: AVMediaTypeVideo)[0], at: kCMTimeZero)
       } catch _ {
-        print("Failed to load 1st track")
+        callback( ["Failed: Could not load 1st track", NSNull()] )
+        return
       }
       
       do {
         try track.insertTimeRange(CMTimeRangeMake(kCMTimeZero, secondAsset.duration), of: secondAsset.tracks(withMediaType: AVMediaTypeVideo)[0], at: mixComposition.duration)
       } catch _ {
-        print("Failed to load 2nd track")
+        callback( ["Failed: Could not load 2nd track", NSNull()] )
+        return
       }
       
       
