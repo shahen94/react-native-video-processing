@@ -654,7 +654,7 @@ public class Trimmer {
     executeFfmpegCommand(cmd, tempFile.getPath(), ctx, promise, "Crop error", null);
   }
 
-  static void boomerang(String source, ReadableMap options, final Promise promise, ReactApplicationContext ctx) {
+  static void boomerang(String source, final Promise promise, ReactApplicationContext ctx) {
 
     final File tempFile = createTempFile("mp4", promise, ctx);
 
@@ -686,7 +686,7 @@ public class Trimmer {
     executeFfmpegCommand(cmd, tempFile.getPath(), ctx, promise, "Boomerang error", null);
   }
 
-  static void reverse(String source, ReadableMap options, final Promise promise, ReactApplicationContext ctx) {
+  static void reverse(String source, final Promise promise, ReactApplicationContext ctx) {
 
     final File tempFile = createTempFile("mp4", promise, ctx);
 
