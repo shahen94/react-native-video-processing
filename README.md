@@ -152,6 +152,12 @@ export class App extends Component {
     ProcessingManager.compress(source, options) // like VideoPlayer compress options
               .then((data) => console.log(data));
 
+    ProcessingManager.reverse(source) // reverses the source video 
+              .then((data) => console.log(data)); // returns the new file source
+
+    ProcessingManager.boomerang(source) // creates a "boomerang" of the surce video (plays forward then plays backwards)
+              .then((data) => console.log(data)); // returns the new file source
+
     const maximumSize = { width: 100, height: 200 };
     ProcessingManager.getPreviewForSecond(source, forSecond, maximumSize)
       .then((data) => console.log(data))

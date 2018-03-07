@@ -89,6 +89,18 @@ public class TrimmerManager extends ReactContextBaseJavaModule {
   }
 
   @ReactMethod
+  public void boomerang(String path, Promise promise) {
+    Log.d(REACT_PACKAGE, "boomerang video: " + path);
+    Trimmer.boomerang(path, promise, reactContext);
+  }
+
+  @ReactMethod
+  public void reverse(String path, Promise promise) {
+    Log.d(REACT_PACKAGE, "reverse video: " + path);
+    Trimmer.reverse(path, promise, reactContext);
+  }
+
+  @ReactMethod
   private void loadFfmpeg() {
     Trimmer.loadFfmpeg(reactContext);
   }
