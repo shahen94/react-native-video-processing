@@ -218,4 +218,22 @@ public class VideoEdit {
       return mFormatter.format("%02d:%02d", minutes, seconds).toString();
     }
   }
+
+  public static Integer getIntFromString(String string) {
+    int value;
+    //check if int
+    try {
+      value = Integer.parseInt(string);
+    } catch(Exception intException){
+      //not int
+      //check if float
+      try {
+        value = (int) Math.round(Float.parseFloat(string));
+      } catch(Exception floatException){
+        //not float
+        return null;
+      }
+    }
+    return value;
+  }
 }
