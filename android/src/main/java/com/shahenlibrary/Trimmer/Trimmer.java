@@ -541,8 +541,8 @@ public class Trimmer {
   static void getPreviewImageAtPosition(String source, double sec, String format, final Promise promise, ReactApplicationContext ctx) {
     Bitmap bmp = null;
     int orientation = 0;
+    FFmpegMediaMetadataRetriever metadataRetriever = new FFmpegMediaMetadataRetriever();
     try {
-      FFmpegMediaMetadataRetriever metadataRetriever = new FFmpegMediaMetadataRetriever();
       FFmpegMediaMetadataRetriever.IN_PREFERRED_CONFIG = Bitmap.Config.ARGB_8888;
       metadataRetriever.setDataSource(source);
 
