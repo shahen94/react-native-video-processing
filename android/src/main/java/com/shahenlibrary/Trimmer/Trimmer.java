@@ -246,111 +246,115 @@ public class Trimmer {
 
   public static void getPreviewImages(String path, Promise promise, ReactApplicationContext ctx) {
     FFmpegMediaMetadataRetriever retriever = new FFmpegMediaMetadataRetriever();
-    if (VideoEdit.shouldUseURI(path)) {
-      retriever.setDataSource(ctx, Uri.parse(path));
-    } else {
-      retriever.setDataSource(path);
-    }
-
-    WritableArray images = Arguments.createArray();
-    int duration = Integer.parseInt(retriever.extractMetadata(FFmpegMediaMetadataRetriever.METADATA_KEY_DURATION));
-    int width = Integer.parseInt(retriever.extractMetadata(FFmpegMediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH));
-    int height = Integer.parseInt(retriever.extractMetadata(FFmpegMediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT));
-    int orientation = Integer.parseInt(retriever.extractMetadata(FFmpegMediaMetadataRetriever.METADATA_KEY_VIDEO_ROTATION));
-
-    float aspectRatio = width / height;
-
-    int resizeWidth = 200;
-    int resizeHeight = Math.round(resizeWidth / aspectRatio);
-
-    float scaleWidth = ((float) resizeWidth) / width;
-    float scaleHeight = ((float) resizeHeight) / height;
-
-    Log.d(TrimmerManager.REACT_PACKAGE, "getPreviewImages: \n\tduration: " + duration +
-            "\n\twidth: " + width +
-            "\n\theight: " + height +
-            "\n\torientation: " + orientation +
-            "\n\taspectRatio: " + aspectRatio +
-            "\n\tresizeWidth: " + resizeWidth +
-            "\n\tresizeHeight: " + resizeHeight
-    );
-
-    Matrix mx = new Matrix();
-
-    mx.postScale(scaleWidth, scaleHeight);
-    mx.postRotate(orientation - 360);
-
-    for (int i = 0; i < duration; i += duration / 10) {
-      Bitmap frame = retriever.getFrameAtTime(i * 1000);
-
-      if(frame == null) {
-        continue;
+    try {
+      if (VideoEdit.shouldUseURI(path)) {
+        retriever.setDataSource(ctx, Uri.parse(path));
+      } else {
+        retriever.setDataSource(path);
       }
-      Bitmap currBmp = Bitmap.createScaledBitmap(frame, resizeWidth, resizeHeight, false);
 
-      Bitmap normalizedBmp = Bitmap.createBitmap(currBmp, 0, 0, resizeWidth, resizeHeight, mx, true);
-      ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-      normalizedBmp.compress(Bitmap.CompressFormat.PNG, 90, byteArrayOutputStream);
-      byte[] byteArray = byteArrayOutputStream .toByteArray();
-      String encoded = "data:image/png;base64," + Base64.encodeToString(byteArray, Base64.DEFAULT);
-      images.pushString(encoded);
+      WritableArray images = Arguments.createArray();
+      int duration = Integer.parseInt(retriever.extractMetadata(FFmpegMediaMetadataRetriever.METADATA_KEY_DURATION));
+      int width = Integer.parseInt(retriever.extractMetadata(FFmpegMediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH));
+      int height = Integer.parseInt(retriever.extractMetadata(FFmpegMediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT));
+      int orientation = Integer.parseInt(retriever.extractMetadata(FFmpegMediaMetadataRetriever.METADATA_KEY_VIDEO_ROTATION));
+
+      float aspectRatio = width / height;
+
+      int resizeWidth = 200;
+      int resizeHeight = Math.round(resizeWidth / aspectRatio);
+
+      float scaleWidth = ((float) resizeWidth) / width;
+      float scaleHeight = ((float) resizeHeight) / height;
+
+      Log.d(TrimmerManager.REACT_PACKAGE, "getPreviewImages: \n\tduration: " + duration +
+              "\n\twidth: " + width +
+              "\n\theight: " + height +
+              "\n\torientation: " + orientation +
+              "\n\taspectRatio: " + aspectRatio +
+              "\n\tresizeWidth: " + resizeWidth +
+              "\n\tresizeHeight: " + resizeHeight
+      );
+
+      Matrix mx = new Matrix();
+
+      mx.postScale(scaleWidth, scaleHeight);
+      mx.postRotate(orientation - 360);
+
+      for (int i = 0; i < duration; i += duration / 10) {
+        Bitmap frame = retriever.getFrameAtTime(i * 1000);
+
+        if (frame == null) {
+          continue;
+        }
+        Bitmap currBmp = Bitmap.createScaledBitmap(frame, resizeWidth, resizeHeight, false);
+
+        Bitmap normalizedBmp = Bitmap.createBitmap(currBmp, 0, 0, resizeWidth, resizeHeight, mx, true);
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        normalizedBmp.compress(Bitmap.CompressFormat.PNG, 90, byteArrayOutputStream);
+        byte[] byteArray = byteArrayOutputStream.toByteArray();
+        String encoded = "data:image/png;base64," + Base64.encodeToString(byteArray, Base64.DEFAULT);
+        images.pushString(encoded);
+      }
+
+      WritableMap event = Arguments.createMap();
+
+      event.putArray("images", images);
+
+      promise.resolve(event);
+    } finally {
+      retriever.release();
     }
-
-    WritableMap event = Arguments.createMap();
-
-    event.putArray("images", images);
-
-    promise.resolve(event);
-    retriever.release();
   }
 
   @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
   public static void getVideoInfo(String path, Promise promise, ReactApplicationContext ctx) {
     FFmpegMediaMetadataRetriever mmr = new FFmpegMediaMetadataRetriever();
+    try {
+      if (VideoEdit.shouldUseURI(path)) {
+        mmr.setDataSource(ctx, Uri.parse(path));
+      } else {
+        mmr.setDataSource(path);
+      }
 
-    if (VideoEdit.shouldUseURI(path)) {
-      mmr.setDataSource(ctx, Uri.parse(path));
-    } else {
-      mmr.setDataSource(path);
+      int duration = Integer.parseInt(mmr.extractMetadata(FFmpegMediaMetadataRetriever.METADATA_KEY_DURATION));
+      int width = Integer.parseInt(mmr.extractMetadata(FFmpegMediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH));
+      int height = Integer.parseInt(mmr.extractMetadata(FFmpegMediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT));
+      int orientation = Integer.parseInt(mmr.extractMetadata(FFmpegMediaMetadataRetriever.METADATA_KEY_VIDEO_ROTATION));
+      // METADATA_KEY_FRAMERATE returns a float or int or might not exist
+      Integer frameRate = VideoEdit.getIntFromString(mmr.extractMetadata(FFmpegMediaMetadataRetriever.METADATA_KEY_FRAMERATE));
+      // METADATA_KEY_VARIANT_BITRATE returns a int or might not exist
+      Integer bitrate = VideoEdit.getIntFromString(mmr.extractMetadata(FFmpegMediaMetadataRetriever.METADATA_KEY_VARIANT_BITRATE));
+      if (orientation == 90 || orientation == 270) {
+        width = width + height;
+        height = width - height;
+        width = width - height;
+      }
+
+      WritableMap event = Arguments.createMap();
+      WritableMap size = Arguments.createMap();
+
+      size.putInt(Events.WIDTH, width);
+      size.putInt(Events.HEIGHT, height);
+
+      event.putMap(Events.SIZE, size);
+      event.putInt(Events.DURATION, duration / 1000);
+      event.putInt(Events.ORIENTATION, orientation);
+      if (frameRate != null) {
+        event.putInt(Events.FRAMERATE, frameRate);
+      } else {
+        event.putNull(Events.FRAMERATE);
+      }
+      if (bitrate != null) {
+        event.putInt(Events.BITRATE, bitrate);
+      } else {
+        event.putNull(Events.BITRATE);
+      }
+
+      promise.resolve(event);
+    } finally {
+      mmr.release();
     }
-
-    int duration = Integer.parseInt(mmr.extractMetadata(FFmpegMediaMetadataRetriever.METADATA_KEY_DURATION));
-    int width = Integer.parseInt(mmr.extractMetadata(FFmpegMediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH));
-    int height = Integer.parseInt(mmr.extractMetadata(FFmpegMediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT));
-    int orientation = Integer.parseInt(mmr.extractMetadata(FFmpegMediaMetadataRetriever.METADATA_KEY_VIDEO_ROTATION));
-    // METADATA_KEY_FRAMERATE returns a float or int or might not exist
-    Integer frameRate = VideoEdit.getIntFromString(mmr.extractMetadata(FFmpegMediaMetadataRetriever.METADATA_KEY_FRAMERATE));
-    // METADATA_KEY_VARIANT_BITRATE returns a int or might not exist
-    Integer bitrate = VideoEdit.getIntFromString(mmr.extractMetadata(FFmpegMediaMetadataRetriever.METADATA_KEY_VARIANT_BITRATE));
-    if (orientation == 90 || orientation == 270) {
-      width = width + height;
-      height = width - height;
-      width = width - height;
-    }
-
-    WritableMap event = Arguments.createMap();
-    WritableMap size = Arguments.createMap();
-
-    size.putInt(Events.WIDTH, width);
-    size.putInt(Events.HEIGHT, height);
-
-    event.putMap(Events.SIZE, size);
-    event.putInt(Events.DURATION, duration / 1000);
-    event.putInt(Events.ORIENTATION, orientation);
-    if (frameRate != null) {
-      event.putInt(Events.FRAMERATE, frameRate);
-    } else {
-      event.putNull(Events.FRAMERATE);
-    }
-    if (bitrate != null) {
-      event.putInt(Events.BITRATE, bitrate);
-    } else {
-      event.putNull(Events.BITRATE);
-    }
-
-    promise.resolve(event);
-
-    mmr.release();
   }
 
   static void trim(ReadableMap options, final Promise promise, ReactApplicationContext ctx) {
@@ -417,29 +421,30 @@ public class Trimmer {
 
   private static ReadableMap getVideoRequiredMetadata(String source, Context ctx) {
     Log.d(LOG_TAG, "getVideoRequiredMetadata: " + source);
-
-    // FFmpegMediaMetadataRetriever retriever = new FFmpegMediaMetadataRetriever();
     MediaMetadataRetriever retriever = new MediaMetadataRetriever();
-    if (VideoEdit.shouldUseURI(source)) {
-      retriever.setDataSource(ctx, Uri.parse(source));
-    } else {
-      retriever.setDataSource(source);
+    try {
+      if (VideoEdit.shouldUseURI(source)) {
+        retriever.setDataSource(ctx, Uri.parse(source));
+      } else {
+        retriever.setDataSource(source);
+      }
+
+      int width = Integer.parseInt(retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH));
+      int height = Integer.parseInt(retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT));
+      int bitrate = Integer.parseInt(retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_BITRATE));
+
+      Log.d(LOG_TAG, "getVideoRequiredMetadata: " + Integer.toString(width));
+      Log.d(LOG_TAG, "getVideoRequiredMetadata: " + Integer.toString(height));
+      Log.d(LOG_TAG, "getVideoRequiredMetadata: " + Integer.toString(bitrate));
+
+      WritableMap videoMetadata = Arguments.createMap();
+      videoMetadata.putInt("width", width);
+      videoMetadata.putInt("height", height);
+      videoMetadata.putInt("bitrate", bitrate);
+      return videoMetadata;
+    } finally {
+      retriever.release();
     }
-
-    int width = Integer.parseInt(retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH));
-    int height = Integer.parseInt(retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT));
-    int bitrate = Integer.parseInt(retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_BITRATE));
-    retriever.release();
-
-    Log.d(LOG_TAG, "getVideoRequiredMetadata: " + Integer.toString(width));
-    Log.d(LOG_TAG, "getVideoRequiredMetadata: " + Integer.toString(height));
-    Log.d(LOG_TAG, "getVideoRequiredMetadata: " + Integer.toString(bitrate));
-
-    WritableMap videoMetadata = Arguments.createMap();
-    videoMetadata.putInt("width", width);
-    videoMetadata.putInt("height", height);
-    videoMetadata.putInt("bitrate", bitrate);
-    return videoMetadata;
   }
 
   public static void compress(String source, ReadableMap options, final Promise promise, final OnCompressVideoListener cb, ThemedReactContext tctx, ReactApplicationContext rctx) {
@@ -534,15 +539,24 @@ public class Trimmer {
   }
 
   static void getPreviewImageAtPosition(String source, double sec, String format, final Promise promise, ReactApplicationContext ctx) {
-    FFmpegMediaMetadataRetriever metadataRetriever = new FFmpegMediaMetadataRetriever();
-    FFmpegMediaMetadataRetriever.IN_PREFERRED_CONFIG = Bitmap.Config.ARGB_8888;
-    metadataRetriever.setDataSource(source);
+    Bitmap bmp = null;
+    int orientation = 0;
+    try {
+      FFmpegMediaMetadataRetriever metadataRetriever = new FFmpegMediaMetadataRetriever();
+      FFmpegMediaMetadataRetriever.IN_PREFERRED_CONFIG = Bitmap.Config.ARGB_8888;
+      metadataRetriever.setDataSource(source);
 
-    Bitmap bmp = metadataRetriever.getFrameAtTime((long) (sec * 1000000));
+      bmp = metadataRetriever.getFrameAtTime((long) (sec * 1000000));
+      if(bmp == null){
+        promise.reject("Failed to get preview at requested position.");
+        return;
+      }
 
-    // NOTE: FIX ROTATED BITMAP
-    int orientation = Integer.parseInt( metadataRetriever.extractMetadata(FFmpegMediaMetadataRetriever.METADATA_KEY_VIDEO_ROTATION) );
-    metadataRetriever.release();
+      // NOTE: FIX ROTATED BITMAP
+      orientation = Integer.parseInt(metadataRetriever.extractMetadata(FFmpegMediaMetadataRetriever.METADATA_KEY_VIDEO_ROTATION));
+    } finally {
+      metadataRetriever.release();
+    }
 
     if ( orientation != 0 ) {
       Matrix matrix = new Matrix();
