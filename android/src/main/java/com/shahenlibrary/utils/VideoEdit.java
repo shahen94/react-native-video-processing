@@ -81,7 +81,7 @@ public class VideoEdit {
   }
 
   public static void startTrim(@NonNull File src, @NonNull String dst, long startMs, long endMs, @NonNull OnTrimVideoListener callback) throws IOException {
-    final String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(new Date());
+    final String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss_SSSS", Locale.US).format(new Date());
     final String fileName = "MP4_" + timeStamp + ".mp4";
     final String filePath = dst + fileName;
 
