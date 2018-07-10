@@ -34,6 +34,7 @@ import android.os.Build;
 import android.util.Base64;
 import android.util.Log;
 
+import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
@@ -737,6 +738,37 @@ public class Trimmer {
     cmd.add(tempFile.getPath());
 
     executeFfmpegCommand(cmd, tempFile.getPath(), ctx, promise, "Reverse error", null);
+  }
+
+  static void merge(ReadableArray videoFiles, String concatCmd, final Promise promise, ReactApplicationContext ctx) {
+    final File tempFile = createTempFile("mp4", promise, ctx);
+
+    Log.d(LOG_TAG, "Merging in progress.");
+
+    ArrayList<String> cmd = new ArrayList<String>();
+    cmd.add("-y"); // NOTE: OVERWRITE OUTPUT FILE
+
+    for (int i = 0; i < videoFiles.size(); i++) {
+      cmd.add("-i");
+      cmd.add(videoFiles.getString(i));
+    }
+
+    cmd.add("-filter_complex");
+    cmd.add(concatCmd);
+
+    cmd.add("-map");
+    cmd.add("[v]");
+
+    cmd.add("-preset");
+    cmd.add("ultrafast");
+
+    // NOTE: DO NOT CONVERT AUDIO TO SAVE TIME
+    cmd.add("-c:a");
+
+    cmd.add("copy");
+    cmd.add(tempFile.getPath());
+
+    executeFfmpegCommand(cmd, tempFile.getPath(), ctx, promise, "Merge error", null);
   }
 
   static private Void executeFfmpegCommand(@NonNull ArrayList<String> cmd, @NonNull final String pathToProcessingFile, @NonNull ReactApplicationContext ctx, @NonNull final Promise promise, @NonNull final String errorMessageTitle, @Nullable final OnCompressVideoListener cb) {
