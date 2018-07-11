@@ -174,8 +174,15 @@ class RNVideoTrimmer: NSObject {
 
   @objc func trim(_ source: String, options: NSDictionary, callback: @escaping RCTResponseSenderBlock) {
 
-      var sTime = options.object(forKey: "startTime") as? Float
-      var eTime = options.object(forKey: "endTime") as? Float
+      var sTime:Float?
+      var eTime:Float?
+      if let num = options.object(forKey: "startTime") as? NSNumber {
+          sTime = num.floatValue
+      }
+      if let num = options.object(forKey: "endTime") as? NSNumber {
+          eTime = num.floatValue
+      }
+
       let quality = ((options.object(forKey: "quality") as? String) != nil) ? options.object(forKey: "quality") as! String : ""
       let saveToCameraRoll = options.object(forKey: "saveToCameraRoll") as? Bool ?? false
       let saveWithCurrentDate = options.object(forKey: "saveWithCurrentDate") as? Bool ?? false
@@ -252,25 +259,25 @@ class RNVideoTrimmer: NSObject {
           }
       }
   }
-  
+
   @objc func boomerang(_ source: String, options: NSDictionary, callback: @escaping RCTResponseSenderBlock) {
-    
+
     let quality = ""
-    
+
     let manager = FileManager.default
     guard let documentDirectory = try? manager.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
       else {
         callback(["Error creating FileManager", NSNull()])
         return
     }
-    
+
     let sourceURL = getSourceURL(source: source)
     let firstAsset = AVAsset(url: sourceURL as URL)
-    
+
     let mixComposition = AVMutableComposition()
     let track = mixComposition.addMutableTrack(withMediaType: AVMediaTypeVideo, preferredTrackID: Int32(kCMPersistentTrackID_Invalid))
 
-    
+
     var outputURL = documentDirectory.appendingPathComponent("output")
     var finalURL = documentDirectory.appendingPathComponent("output")
     do {
@@ -283,20 +290,20 @@ class RNVideoTrimmer: NSObject {
       callback([error.localizedDescription, NSNull()])
       print(error)
     }
-    
+
     //Remove existing file
     _ = try? manager.removeItem(at: outputURL)
     _ = try? manager.removeItem(at: finalURL)
-    
+
     let useQuality = getQualityForAsset(quality: quality, asset: firstAsset)
-    
+
 //    print("RNVideoTrimmer passed quality: \(quality). useQuality: \(useQuality)")
-    
+
     AVUtilities.reverse(firstAsset, outputURL: outputURL, completion: { [unowned self] (reversedAsset: AVAsset) in
-      
-      
+
+
       let secondAsset = reversedAsset
-      
+
       // Credit: https://www.raywenderlich.com/94404/play-record-merge-videos-ios-swift
       do {
         try track.insertTimeRange(CMTimeRangeMake(kCMTimeZero, firstAsset.duration), of: firstAsset.tracks(withMediaType: AVMediaTypeVideo)[0], at: kCMTimeZero)
@@ -304,15 +311,15 @@ class RNVideoTrimmer: NSObject {
         callback( ["Failed: Could not load 1st track", NSNull()] )
         return
       }
-      
+
       do {
         try track.insertTimeRange(CMTimeRangeMake(kCMTimeZero, secondAsset.duration), of: secondAsset.tracks(withMediaType: AVMediaTypeVideo)[0], at: mixComposition.duration)
       } catch _ {
         callback( ["Failed: Could not load 2nd track", NSNull()] )
         return
       }
-      
-      
+
+
       guard let exportSession = AVAssetExportSession(asset: mixComposition, presetName: useQuality) else {
         callback(["Error creating AVAssetExportSession", NSNull()])
         return
@@ -323,40 +330,40 @@ class RNVideoTrimmer: NSObject {
       let startTime = CMTime(seconds: Double(0), preferredTimescale: 1000)
       let endTime = CMTime(seconds: mixComposition.duration.seconds, preferredTimescale: 1000)
       let timeRange = CMTimeRange(start: startTime, end: endTime)
-      
+
       exportSession.timeRange = timeRange
-      
+
       exportSession.exportAsynchronously{
         switch exportSession.status {
         case .completed:
           callback( [NSNull(), finalURL.absoluteString] )
-          
+
         case .failed:
           callback( ["Failed: \(exportSession.error)", NSNull()] )
-          
+
         case .cancelled:
           callback( ["Cancelled: \(exportSession.error)", NSNull()] )
-          
+
         default: break
         }
       }
     })
   }
-  
+
   @objc func reverse(_ source: String, options: NSDictionary, callback: @escaping RCTResponseSenderBlock) {
-    
+
     let quality = ""
-    
+
     let manager = FileManager.default
     guard let documentDirectory = try? manager.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
       else {
         callback(["Error creating FileManager", NSNull()])
         return
     }
-    
+
     let sourceURL = getSourceURL(source: source)
     let asset = AVAsset(url: sourceURL as URL)
-    
+
     var outputURL = documentDirectory.appendingPathComponent("output")
     do {
       try manager.createDirectory(at: outputURL, withIntermediateDirectories: true, attributes: nil)
@@ -366,14 +373,14 @@ class RNVideoTrimmer: NSObject {
       callback([error.localizedDescription, NSNull()])
       print(error)
     }
-    
+
     //Remove existing file
     _ = try? manager.removeItem(at: outputURL)
-    
+
     let useQuality = getQualityForAsset(quality: quality, asset: asset)
-    
+
     print("RNVideoTrimmer passed quality: \(quality). useQuality: \(useQuality)")
-    
+
     AVUtilities.reverse(asset, outputURL: outputURL, completion: { [unowned self] (asset: AVAsset) in
       callback( [NSNull(), outputURL.absoluteString] )
     })
