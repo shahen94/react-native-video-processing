@@ -649,14 +649,14 @@ public class Trimmer {
     // 3. "-to" (END TIME) or "-t" (TRIM TIME)
     // OTHERWISE WE WILL LOSE ACCURACY AND WILL GET WRONG CLIPPED VIDEO
 
-    String startTime = options.getString("startTime");
-    if ( !startTime.equals(null) && !startTime.equals("") ) {
+    String startTime = options.hasKey("startTime") ? options.getString("startTime") : null;
+    if ( startTime != null ) {
       cmd.add("-ss");
       cmd.add(startTime);
     }
 
-    String endTime = options.getString("endTime");
-    if ( !endTime.equals(null) && !endTime.equals("") ) {
+    String endTime = options.hasKey("endTime") ? options.getString("endTime") : null;
+    if ( endTime != null ) {
       cmd.add("-to");
       cmd.add(endTime);
     }
