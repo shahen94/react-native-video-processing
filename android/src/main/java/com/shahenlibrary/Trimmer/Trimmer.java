@@ -743,7 +743,7 @@ public class Trimmer {
     FfmpegCmdAsyncTaskParams ffmpegCmdAsyncTaskParams = new FfmpegCmdAsyncTaskParams(cmd, pathToProcessingFile, ctx, promise, errorMessageTitle, cb);
 
     FfmpegCmdAsyncTask ffmpegCmdAsyncTask = new FfmpegCmdAsyncTask();
-    ffmpegCmdAsyncTask.execute(ffmpegCmdAsyncTaskParams);
+    ffmpegCmdAsyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR ,ffmpegCmdAsyncTaskParams);
 
     return null;
   }
@@ -790,7 +790,7 @@ public class Trimmer {
     LoadFfmpegAsyncTaskParams loadFfmpegAsyncTaskParams = new LoadFfmpegAsyncTaskParams(ctx);
 
     LoadFfmpegAsyncTask loadFfmpegAsyncTask = new LoadFfmpegAsyncTask();
-    loadFfmpegAsyncTask.execute(loadFfmpegAsyncTaskParams);
+    loadFfmpegAsyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, loadFfmpegAsyncTaskParams);
 
     // TODO: EXPOSE TO JS "isFfmpegLoaded" AND "isFfmpegLoading"
 
