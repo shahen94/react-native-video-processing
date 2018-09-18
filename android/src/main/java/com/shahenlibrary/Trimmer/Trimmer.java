@@ -85,12 +85,12 @@ public class Trimmer {
   private static class FfmpegCmdAsyncTaskParams {
     ArrayList<String> cmd;
     final String pathToProcessingFile;
-    ReactApplicationContext ctx;
+    Context ctx;
     final Promise promise;
     final String errorMessageTitle;
     final OnCompressVideoListener cb;
 
-    FfmpegCmdAsyncTaskParams(ArrayList<String> cmd, final String pathToProcessingFile, ReactApplicationContext ctx, final Promise promise, final String errorMessageTitle, final OnCompressVideoListener cb) {
+    FfmpegCmdAsyncTaskParams(ArrayList<String> cmd, final String pathToProcessingFile, Context ctx, final Promise promise, final String errorMessageTitle, final OnCompressVideoListener cb) {
       this.cmd = cmd;
       this.pathToProcessingFile = pathToProcessingFile;
       this.ctx = ctx;
@@ -106,7 +106,7 @@ public class Trimmer {
     protected Void doInBackground(FfmpegCmdAsyncTaskParams... params) {
       ArrayList<String> cmd = params[0].cmd;
       final String pathToProcessingFile = params[0].pathToProcessingFile;
-      ReactApplicationContext ctx = params[0].ctx;
+      Context ctx = params[0].ctx;
       final Promise promise = params[0].promise;
       final String errorMessageTitle = params[0].errorMessageTitle;
       final OnCompressVideoListener cb = params[0].cb;
@@ -177,9 +177,9 @@ public class Trimmer {
 
 
   private static class LoadFfmpegAsyncTaskParams {
-    ReactApplicationContext ctx;
+    Context ctx;
 
-    LoadFfmpegAsyncTaskParams(ReactApplicationContext ctx) {
+    LoadFfmpegAsyncTaskParams(Context ctx) {
       this.ctx = ctx;
     }
   }
@@ -188,7 +188,7 @@ public class Trimmer {
 
     @Override
     protected Void doInBackground(LoadFfmpegAsyncTaskParams... params) {
-      ReactApplicationContext ctx = params[0].ctx;
+      Context ctx = params[0].ctx;
 
       // NOTE: 1. COPY "ffmpeg" FROM ASSETS TO /data/data/com.myapp...
       String filesDir = getFilesDirAbsolutePath(ctx);
@@ -516,7 +516,7 @@ public class Trimmer {
     }
     cmd.add(tempFile.getPath());
 
-    executeFfmpegCommand(cmd, tempFile.getPath(), rctx, promise, "compress error", cb);
+    executeFfmpegCommand(cmd, tempFile.getPath(), ctx, promise, "compress error", cb);
   }
 
   static File createTempFile(String extension, final Promise promise, Context ctx) {
@@ -650,14 +650,14 @@ public class Trimmer {
     // 3. "-to" (END TIME) or "-t" (TRIM TIME)
     // OTHERWISE WE WILL LOSE ACCURACY AND WILL GET WRONG CLIPPED VIDEO
 
-    String startTime = options.getString("startTime");
-    if ( !startTime.equals(null) && !startTime.equals("") ) {
+    String startTime = options.hasKey("startTime") ? options.getString("startTime") : null;
+    if ( startTime != null ) {
       cmd.add("-ss");
       cmd.add(startTime);
     }
 
-    String endTime = options.getString("endTime");
-    if ( !endTime.equals(null) && !endTime.equals("") ) {
+    String endTime = options.hasKey("endTime") ? options.getString("endTime") : null;
+    if ( endTime != null ) {
       cmd.add("-to");
       cmd.add(endTime);
     }
@@ -771,20 +771,20 @@ public class Trimmer {
     executeFfmpegCommand(cmd, tempFile.getPath(), ctx, promise, "Merge error", null);
   }
 
-  static private Void executeFfmpegCommand(@NonNull ArrayList<String> cmd, @NonNull final String pathToProcessingFile, @NonNull ReactApplicationContext ctx, @NonNull final Promise promise, @NonNull final String errorMessageTitle, @Nullable final OnCompressVideoListener cb) {
+  static private Void executeFfmpegCommand(@NonNull ArrayList<String> cmd, @NonNull final String pathToProcessingFile, @NonNull Context ctx, @NonNull final Promise promise, @NonNull final String errorMessageTitle, @Nullable final OnCompressVideoListener cb) {
     FfmpegCmdAsyncTaskParams ffmpegCmdAsyncTaskParams = new FfmpegCmdAsyncTaskParams(cmd, pathToProcessingFile, ctx, promise, errorMessageTitle, cb);
 
     FfmpegCmdAsyncTask ffmpegCmdAsyncTask = new FfmpegCmdAsyncTask();
-    ffmpegCmdAsyncTask.execute(ffmpegCmdAsyncTaskParams);
+    ffmpegCmdAsyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR ,ffmpegCmdAsyncTaskParams);
 
     return null;
   }
 
-  private static String getFilesDirAbsolutePath(ReactApplicationContext ctx) {
+  private static String getFilesDirAbsolutePath(Context ctx) {
     return ctx.getFilesDir().getAbsolutePath();
   }
 
-  private static String getFfmpegAbsolutePath(ReactApplicationContext ctx) {
+  private static String getFfmpegAbsolutePath(Context ctx) {
     return getFilesDirAbsolutePath(ctx) + File.separator + FFMPEG_FILE_NAME;
   }
 
@@ -822,7 +822,7 @@ public class Trimmer {
     LoadFfmpegAsyncTaskParams loadFfmpegAsyncTaskParams = new LoadFfmpegAsyncTaskParams(ctx);
 
     LoadFfmpegAsyncTask loadFfmpegAsyncTask = new LoadFfmpegAsyncTask();
-    loadFfmpegAsyncTask.execute(loadFfmpegAsyncTaskParams);
+    loadFfmpegAsyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, loadFfmpegAsyncTaskParams);
 
     // TODO: EXPOSE TO JS "isFfmpegLoaded" AND "isFfmpegLoading"
 

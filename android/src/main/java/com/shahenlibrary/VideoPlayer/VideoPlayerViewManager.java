@@ -120,7 +120,7 @@ public class VideoPlayerViewManager extends SimpleViewManager<VideoPlayerView> {
   public void receiveCommand(VideoPlayerView root, int commandId, @Nullable ReadableArray args) {
     assert args != null;
     Log.d(VideoPlayerViewManager.REACT_PACKAGE, "receiveCommand: " + args.toString());
-    Log.d(VideoPlayerViewManager.REACT_PACKAGE, "receiveCommand: commandId" + String.valueOf(commandId));
+    Log.d(VideoPlayerViewManager.REACT_PACKAGE, "receiveCommand: commandId " + String.valueOf(commandId));
     switch (commandId) {
       case COMMAND_GET_INFO:
         root.sendMediaInfo();
@@ -138,6 +138,7 @@ public class VideoPlayerViewManager extends SimpleViewManager<VideoPlayerView> {
       case COMMAND_COMPRESS_MEDIA:
         ReadableMap options = args.getMap(0);
         root.compressMedia(this.reactContext, options);
+        break;
       default:
         Log.d(VideoPlayerViewManager.REACT_PACKAGE, "receiveCommand: Wrong command received");
     }
