@@ -1,6 +1,9 @@
 # MacOS temporary files
 .DS_Store
 
+# Webstorm
+.idea
+
 # Logs
 logs
 *.log
