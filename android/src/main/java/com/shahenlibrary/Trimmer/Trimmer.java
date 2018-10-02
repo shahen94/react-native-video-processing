@@ -260,7 +260,7 @@ public class Trimmer {
       int height = Integer.parseInt(retriever.extractMetadata(FFmpegMediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT));
       int orientation = Integer.parseInt(retriever.extractMetadata(FFmpegMediaMetadataRetriever.METADATA_KEY_VIDEO_ROTATION));
 
-      float aspectRatio = width / height;
+      float aspectRatio = (float)width / (float)height;
 
       int resizeWidth = 200;
       int resizeHeight = Math.round(resizeWidth / aspectRatio);
