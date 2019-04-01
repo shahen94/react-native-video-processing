@@ -6,8 +6,9 @@
 #import <Foundation/Foundation.h>
 
 #import "React/RCTBridgeModule.h"
+#import "RCTSwiftBridgeModule.h"
 
-@interface RCT_EXTERN_MODULE(RNVideoTrimmer, NSObject)
+@interface RCT_EXTERN_SWIFT_MODULE(RNVideoTrimmer, NSObject)
 
 RCT_EXTERN_METHOD(getAssetInfo:(NSString *)source callback:(RCTResponseSenderBlock)callback);
 RCT_EXTERN_METHOD(trim:(NSString *)source options:(NSDictionary *)options callback:(RCTResponseSenderBlock)callback);

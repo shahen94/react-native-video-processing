@@ -72,6 +72,7 @@
 		24F466A01DD9EBC40012172B /* OpenGLES.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGLES.framework; path = System/Library/Frameworks/OpenGLES.framework; sourceTree = SDKROOT; };
 		24FFDD141DDC799E006040F9 /* MobileCoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MobileCoreServices.framework; path = System/Library/Frameworks/MobileCoreServices.framework; sourceTree = SDKROOT; };
 		B429F6142251F40500062EA7 /* AVUtilities.swift */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 2; lastKnownFileType = sourcecode.swift; path = AVUtilities.swift; sourceTree = "<group>"; tabWidth = 2; };
+		B429F7102252496D00062EA7 /* RCTSwiftBridgeModule.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RCTSwiftBridgeModule.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -103,6 +104,7 @@
 			children = (
 				246271B21DDEF8AA003781DB /* RNVideoProcessing-Bridging-Header.h */,
 				246271CD1DDEF8C6003781DB /* RNVideoProcessing.h */,
+				B429F7102252496D00062EA7 /* RCTSwiftBridgeModule.h */,
 				246271B31DDEF8AA003781DB /* RNVideoProcessingBridge.m */,
 				246271B11DDEF8AA003781DB /* RNVideoPlayer.swift */,
 				246271B41DDEF8AA003781DB /* RNVideoProcessingManager.swift */,
