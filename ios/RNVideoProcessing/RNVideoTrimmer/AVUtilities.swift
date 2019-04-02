@@ -19,7 +19,7 @@ class AVUtilities {
       return
     }
     
-    guard let videoTrack = original.tracks(withMediaType: AVMediaTypeVideo).last else {
+    guard let videoTrack = original.tracks(withMediaType: .video).last else {
       print("could not retrieve the video track.")
       return
     }
@@ -41,7 +41,7 @@ class AVUtilities {
     
     let writer: AVAssetWriter
     do {
-      writer = try AVAssetWriter(outputURL: outputURL, fileType: AVFileTypeQuickTimeMovie)
+      writer = try AVAssetWriter(outputURL: outputURL, fileType: .mov)
     } catch let error {
       fatalError(error.localizedDescription)
     }
@@ -54,7 +54,7 @@ class AVUtilities {
       AVVideoCompressionPropertiesKey: videoCompositionProps
       ] as [String : Any]
     
-    let writerInput = AVAssetWriterInput(mediaType: AVMediaTypeVideo, outputSettings: writerOutputSettings)
+    let writerInput = AVAssetWriterInput(mediaType: .video, outputSettings: writerOutputSettings)
     writerInput.expectsMediaDataInRealTime = false
     writerInput.transform = videoTrack.preferredTransform
     
@@ -79,5 +79,3 @@ class AVUtilities {
     }
   }
 }
-
-

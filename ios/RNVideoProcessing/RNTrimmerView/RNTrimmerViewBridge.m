@@ -7,8 +7,9 @@
 
 #import "React/RCTBridgeModule.h"
 #import "React/RCTViewManager.h"
+#import "RCTSwiftBridgeModule.h"
 
-@interface RCT_EXTERN_MODULE(RNTrimmerViewManager, RCTViewManager)
+@interface RCT_EXTERN_SWIFT_MODULE(RNTrimmerViewManager, RCTViewManager)
 
 RCT_EXPORT_VIEW_PROPERTY(source, NSString)
 RCT_EXPORT_VIEW_PROPERTY(width, NSNumber)
