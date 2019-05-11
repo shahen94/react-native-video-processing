@@ -109,8 +109,8 @@ public class VideoEdit {
     List<Track> tracks = movie.getTracks();
     movie.setTracks(new LinkedList<Track>());
 
-    double startTime1 = startMs / 1000;
-    double endTime1 = endMs / 1000;
+    double startTime1 = startMs / 1000.0;
+    double endTime1 = endMs / 1000.0;
 
     boolean timeCorrected = false;
 
@@ -184,6 +184,9 @@ public class VideoEdit {
       long delta = track.getSampleDurations()[i];
 
       if (Arrays.binarySearch(track.getSyncSamples(), currentSample + 1) >= 0) {
+        if(currentTime <= cutHere && currentTime + 1 > cutHere) {
+          currentTime = cutHere;
+        }
         timeOfSyncSamples[Arrays.binarySearch(track.getSyncSamples(), currentSample + 1)] = currentTime;
       }
       currentTime += (double) delta / (double) track.getTrackMetaData().getTimescale();

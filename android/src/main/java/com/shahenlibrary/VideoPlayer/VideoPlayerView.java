@@ -340,8 +340,8 @@ public class VideoPlayerView extends ScalableVideoView implements
 
     Log.d(LOG_TAG, "trimMedia at : startAt -> " + startMs + " : endAt -> " + endMs);
     File mediaFile = new File(mediaSource.replace("file:///", "/"));
-    long startTrimFromPos = (long) startMs * 1000;
-    long endTrimFromPos = (long) endMs * 1000;
+    long startTrimFromPos = (long) (startMs * 1000);
+    long endTrimFromPos = (long) (endMs * 1000);
     String[] dPath = mediaSource.split("/");
     StringBuilder builder = new StringBuilder();
     for (int i = 0; i < dPath.length; ++i) {
