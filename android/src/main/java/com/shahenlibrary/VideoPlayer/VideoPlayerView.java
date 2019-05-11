@@ -226,8 +226,8 @@ public class VideoPlayerView extends ScalableVideoView implements
     mMediaPlayer.setVolume(mVolume, mVolume);
   }
 
-  public void setVideoEndAt(int endAt) {
-    videoEndAt = endAt * 1000;
+  public void setVideoEndAt(float endAt) {
+    videoEndAt = (int) (endAt * 1000);
     if (mMediaPlayer == null) {
       return;
     }
@@ -254,8 +254,8 @@ public class VideoPlayerView extends ScalableVideoView implements
     metadataRetriever = null;
   }
 
-  public void setVideoStartAt(int startAt) {
-    videoStartAt = startAt * 1000;
+  public void setVideoStartAt(float startAt) {
+    videoStartAt = (int) (startAt * 1000);
     if (mMediaPlayer == null) {
       return;
     }

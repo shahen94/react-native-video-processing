@@ -183,14 +183,14 @@ public class VideoPlayerViewManager extends SimpleViewManager<VideoPlayerView> {
 
   @ReactProp(name = SET_VIDEO_END_TIME)
   public void setVideoEndTime(final VideoPlayerView player, float endTime) {
-    int mEnd = (int) endTime;
+    float mEnd = (float) endTime;
     Log.d(VideoPlayerViewManager.REACT_PACKAGE, "setVideoEndTime: " + String.valueOf(endTime));
     player.setVideoEndAt(mEnd);
   }
 
   @ReactProp(name = SET_VIDEO_START_TIME)
   public void setVideoStartTime(final VideoPlayerView player, float startTime) {
-    int mStart = (int) startTime;
+    float mStart = (float) startTime;
     Log.d(VideoPlayerViewManager.REACT_PACKAGE, "setVideoStartTime: " + String.valueOf(startTime));
     player.setVideoStartAt(mStart);
   }
