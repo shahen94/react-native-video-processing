@@ -195,7 +195,7 @@ public class VideoEdit {
     }
     double previous = 0;
     for (double timeOfSyncSample : timeOfSyncSamples) {
-      if (timeOfSyncSample > cutHere) {
+      if (timeOfSyncSample >= cutHere) {
         if (next) {
           return timeOfSyncSample;
         } else {
