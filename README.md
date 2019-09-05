@@ -181,6 +181,13 @@ add these lines
 
 to your AndroidManifest.xml
 
+##
+If this project was helpful to you, please <html>
+ <a href="https://www.buymeacoffee.com/FnENSxi" target="_blank"><img src="https://bmc-cdn.nyc3.digitaloceanspaces.com/BMC-button-images/custom_images/yellow_img.png" alt="Buy Me A Coffee" style="height: auto !important;width: auto !important;" ></a>
+ </html>
+
+
+
 ## Contributing
 
 1. Please follow the eslint style guide.
