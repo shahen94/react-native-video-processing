@@ -607,11 +607,7 @@ public class Trimmer {
   public static void getTrimmerPreviewImagest(String source, double startTime, double endTime, int step, String format, final Promise promise, ReactApplicationContext ctx) {
     FFmpegMediaMetadataRetriever retriever = new FFmpegMediaMetadataRetriever();
     try {
-      if (VideoEdit.shouldUseURI(path)) {
-        retriever.setDataSource(ctx, Uri.parse(path));
-      } else {
-        retriever.setDataSource(path);
-      }
+      metadataRetriever.setDataSource(source);
 
       WritableArray images = Arguments.createArray();
       int duration = Integer.parseInt(retriever.extractMetadata(FFmpegMediaMetadataRetriever.METADATA_KEY_DURATION));
