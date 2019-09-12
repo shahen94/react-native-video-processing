@@ -604,7 +604,7 @@ public class Trimmer {
   }
 
 
-  public static void getTrimmerPreviewImagest(String source, double startTime, double endTime, int step, String format, final Promise promise, ReactApplicationContext ctx) {
+  static void getTrimmerPreviewImagest(String source, double startTime, double endTime, int step, String format, final Promise promise, ReactApplicationContext ctx) {
     FFmpegMediaMetadataRetriever retriever = new FFmpegMediaMetadataRetriever();
     try {
       metadataRetriever.setDataSource(source);
