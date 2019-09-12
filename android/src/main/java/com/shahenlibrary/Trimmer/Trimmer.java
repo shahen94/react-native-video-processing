@@ -637,8 +637,8 @@ public class Trimmer {
       mx.postScale(scaleWidth, scaleHeight);
       mx.postRotate(orientation - 360);
 
-      for (int i = (int) startTime; i < (int) endTime; i += step) {
-        Bitmap frame = retriever.getFrameAtTime(i * 1000);
+      for (int i = (int) startTime; i < (int) endTime; i += step ) {
+        Bitmap frame = retriever.getFrameAtTime(i * 1000000);
 
         if (frame == null) {
           continue;
