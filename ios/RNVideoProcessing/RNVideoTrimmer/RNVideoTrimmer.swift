@@ -582,8 +582,9 @@ class RNVideoTrimmer: NSObject {
     imageGenerator.appliesPreferredTrackTransform = true
 
     do {
-      let returnData = [];
-      for (Float second = startTime, i < endTime; i+=step) {
+      let returnData = Array<>;
+      
+      for second in stride(from: startTime, to: endTime; by: step) {
         let timestamp = CMTime(seconds: Double(second), preferredTimescale: 600)
         let imageRef = try imageGenerator.copyCGImage(at: timestamp, actualTime: nil)
         let image = UIImage(cgImage: imageRef)
