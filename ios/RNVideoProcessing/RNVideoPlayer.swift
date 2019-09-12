@@ -38,6 +38,42 @@ class RNVideoPlayer: RCTView {
     var onChange: RCTBubblingEventBlock?
     
     let LOG_KEY: String = "VIDEO_PROCESSING"
+
+
+    @objc func setSource(_ val: NSString) {
+        source = val
+    }
+    @objc func setCurrentTime(_ val: NSNumber) {
+        currentTime = val
+    }
+    @objc func setStartTime(_ val: NSNumber) {
+        startTime = val
+    }
+    @objc func setEndTime(_ val: NSNumber) {
+        endTime = val
+    }
+    @objc func setPlayerWidth(_ val: NSNumber) {
+        playerWidth = val
+    }
+    @objc func setPlayerHeight(_ val: NSNumber) {
+        playerHeight = val
+    }
+    @objc func setPlay(_ val: NSNumber) {
+        play = val
+    }
+    @objc func setReplay(_ val: NSNumber) {
+        replay = val
+    }
+    @objc func setRotate(_ val: NSNumber) {
+        rotate = val
+    }
+    @objc func setVolume(_ val: NSNumber) {
+        volume = val
+    }
+    @objc func setResizeMode(_ val: NSString) {
+        resizeMode = val
+    }
+
     
     // props
     var playerHeight: NSNumber? {

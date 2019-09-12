@@ -22,6 +22,42 @@ class RNTrimmerView: RCTView, ICGVideoTrimmerDelegate {
     var _trackerColor: UIColor = UIColor.clear
     var _trackerHandleColor: UIColor = UIColor.clear
     var _showTrackerHandle = false
+
+
+    @objc func setSource(_ val: NSString) {
+      source = val
+    }
+    @objc func setWidth(_ val: NSNumber) {
+      width = val
+    }
+    @objc func setHeight(_ val: NSNumber) {
+      height = val
+    }
+    @objc func setThemeColor(_ val: NSString) {
+      themeColor = val
+    }
+    @objc func setMinLength(_ val: NSNumber) {
+      minLength = val
+    }
+    @objc func setMaxLength(_ val: NSNumber) {
+      maxLength = val
+    }
+    @objc func setCurrentTime(_ val: NSNumber) {
+      currentTime = val
+    }
+    @objc func setTrackerColor(_ val: NSString) {
+      trackerColor = val
+    }
+    @objc func setThumbWidth(_ val: NSNumber) {
+      thumbWidth = val
+    }
+    @objc func setShowTrackerHandle(_ val: NSNumber) {
+      showTrackerHandle = val
+    }
+    @objc func setTrackerHandleColor(_ val: NSString) {
+      trackerHandleColor = val
+    }
+
     
     var source: NSString? {
         set {
