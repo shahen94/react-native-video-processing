@@ -603,6 +603,74 @@ public class Trimmer {
     promise.resolve(event);
   }
 
+
+  public static void getTrimmerPreviewImagest(String source, double startTime, double endTime, int step, String format, final Promise promise, ReactApplicationContext ctx) {
+    FFmpegMediaMetadataRetriever retriever = new FFmpegMediaMetadataRetriever();
+    try {
+      if (VideoEdit.shouldUseURI(path)) {
+        retriever.setDataSource(ctx, Uri.parse(path));
+      } else {
+        retriever.setDataSource(path);
+      }
+
+      WritableArray images = Arguments.createArray();
+      int duration = Integer.parseInt(retriever.extractMetadata(FFmpegMediaMetadataRetriever.METADATA_KEY_DURATION));
+      int width = Integer.parseInt(retriever.extractMetadata(FFmpegMediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH));
+      int height = Integer.parseInt(retriever.extractMetadata(FFmpegMediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT));
+      int orientation = Integer.parseInt(retriever.extractMetadata(FFmpegMediaMetadataRetriever.METADATA_KEY_VIDEO_ROTATION));
+
+      float aspectRatio = (float)width / (float)height;
+
+      int resizeWidth = 200;
+      int resizeHeight = Math.round(resizeWidth / aspectRatio);
+
+      float scaleWidth = ((float) resizeWidth) / width;
+      float scaleHeight = ((float) resizeHeight) / height;
+
+      Log.d(TrimmerManager.REACT_PACKAGE, "getPreviewImages: \n\tduration: " + duration +
+              "\n\twidth: " + width +
+              "\n\theight: " + height +
+              "\n\torientation: " + orientation +
+              "\n\taspectRatio: " + aspectRatio +
+              "\n\tresizeWidth: " + resizeWidth +
+              "\n\tresizeHeight: " + resizeHeight
+      );
+
+      Matrix mx = new Matrix();
+
+      mx.postScale(scaleWidth, scaleHeight);
+      mx.postRotate(orientation - 360);
+
+      for (int i = startTime; i < endTime; i += step) {
+        Bitmap frame = retriever.getFrameAtTime(i * 1000);
+
+        if (frame == null) {
+          continue;
+        }
+        Bitmap currBmp = Bitmap.createScaledBitmap(frame, resizeWidth, resizeHeight, false);
+
+        Bitmap normalizedBmp = Bitmap.createBitmap(currBmp, 0, 0, resizeWidth, resizeHeight, mx, true);
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        normalizedBmp.compress(Bitmap.CompressFormat.PNG, 90, byteArrayOutputStream);
+        byte[] byteArray = byteArrayOutputStream.toByteArray();
+        String encoded = "data:image/png;base64," + Base64.encodeToString(byteArray, Base64.DEFAULT);
+        images.pushString(encoded);
+      }
+
+      WritableMap event = Arguments.createMap();
+
+      event.putArray("images", images);
+
+      promise.resolve(event);
+    } finally {
+      retriever.release();
+    }
+  }
+
+
+
+
+
   private static BufferedReader getOutputFromProcess(Process p) {
     return new BufferedReader(new InputStreamReader(p.getInputStream()));
   }

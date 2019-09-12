@@ -85,6 +85,16 @@ public class TrimmerManager extends ReactContextBaseJavaModule {
   }
 
   @ReactMethod
+  public void getTrimmerPreviewImages(ReadableMap options, Promise promise) {
+    String source = options.getString("source");
+    double startTime = options.hasKey("startTime") ? options.getDouble("startTime") : 0;
+    double endTime = options.hasKey("endTime") ? options.getDouble("endTime") : 0;
+    double step = options.hasKey("step") ? options.getInt("step") : 0;
+    String format = options.hasKey("format") ? options.getString("format") : null;
+    Trimmer.getTrimmerPreviewImages(source, startTime, endTime, step, format, promise, reactContext);
+  }
+
+  @ReactMethod
   public void crop(String path, ReadableMap options, Promise promise) {
     Trimmer.crop(path, options, promise, reactContext);
   }
