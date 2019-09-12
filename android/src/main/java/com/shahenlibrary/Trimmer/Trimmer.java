@@ -604,10 +604,10 @@ public class Trimmer {
   }
 
 
-  static void getTrimmerPreviewImagest(String source, double startTime, double endTime, int step, String format, final Promise promise, ReactApplicationContext ctx) {
+  static void getTrimmerPreviewImages(String source, double startTime, double endTime, int step, String format, final Promise promise, ReactApplicationContext ctx) {
     FFmpegMediaMetadataRetriever retriever = new FFmpegMediaMetadataRetriever();
     try {
-      metadataRetriever.setDataSource(source);
+      retriever.setDataSource(source);
 
       WritableArray images = Arguments.createArray();
       int duration = Integer.parseInt(retriever.extractMetadata(FFmpegMediaMetadataRetriever.METADATA_KEY_DURATION));
@@ -649,7 +649,7 @@ public class Trimmer {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         normalizedBmp.compress(Bitmap.CompressFormat.PNG, 90, byteArrayOutputStream);
         byte[] byteArray = byteArrayOutputStream.toByteArray();
-        String encoded = "data:image/png;base64," + Base64.encodeToString(byteArray, Base64.DEFAULT);
+        String encoded = Base64.encodeToString(byteArray, Base64.DEFAULT);
         images.pushString(encoded);
       }
 
