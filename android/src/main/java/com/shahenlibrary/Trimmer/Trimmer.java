@@ -603,10 +603,10 @@ public class Trimmer {
     promise.resolve(event);
   }
 
-
   static void getTrimmerPreviewImages(String source, double startTime, double endTime, int step, String format, final Promise promise, ReactApplicationContext ctx) {
     FFmpegMediaMetadataRetriever retriever = new FFmpegMediaMetadataRetriever();
     try {
+      FFmpegMediaMetadataRetriever.IN_PREFERRED_CONFIG = Bitmap.Config.ARGB_8888;
       retriever.setDataSource(source);
 
       WritableArray images = Arguments.createArray();
@@ -617,8 +617,8 @@ public class Trimmer {
 
       float aspectRatio = (float)width / (float)height;
 
-      int resizeWidth = 200;
-      int resizeHeight = Math.round(resizeWidth / aspectRatio);
+      int resizeHeight = 100
+      int resizeWidth = Math.round(resizeHeight * aspectRatio);
 
       float scaleWidth = ((float) resizeWidth) / width;
       float scaleHeight = ((float) resizeHeight) / height;
@@ -638,20 +638,18 @@ public class Trimmer {
       mx.postRotate(orientation - 360);
 
       for (int i = (int) startTime; i < (int) endTime; i += step ) {
-        Bitmap frame = retriever.getFrameAtTime(i * 1000000);
+        Bitmap frame = retriever.getScaledFrameAtTime((long) i * 1000000, resizeWidth, resizeHeight);
 
         if (frame == null) {
           continue;
         }
-        Bitmap currBmp = Bitmap.createScaledBitmap(frame, resizeWidth, resizeHeight, false);
-
-        Bitmap normalizedBmp = Bitmap.createBitmap(currBmp, 0, 0, resizeWidth, resizeHeight, mx, true);
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        normalizedBmp.compress(Bitmap.CompressFormat.PNG, 90, byteArrayOutputStream);
+        frame.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream);
         byte[] byteArray = byteArrayOutputStream.toByteArray();
         String encoded = Base64.encodeToString(byteArray, Base64.DEFAULT);
         images.pushString(encoded);
       }
+
 
       WritableMap event = Arguments.createMap();
 
@@ -662,10 +660,6 @@ public class Trimmer {
       retriever.release();
     }
   }
-
-
-
-
 
   private static BufferedReader getOutputFromProcess(Process p) {
     return new BufferedReader(new InputStreamReader(p.getInputStream()));
