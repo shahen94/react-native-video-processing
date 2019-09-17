@@ -21,6 +21,9 @@ enum QUALITY_ENUM: String {
 
 @objc(RNVideoTrimmer)
 class RNVideoTrimmer: NSObject {
+  @objc class func requiresMainQueueSetup() -> Bool {
+    return true
+  }
 
   @objc func getVideoOrientationFromAsset(asset : AVAsset) -> UIImage.Orientation {
     let videoTrack: AVAssetTrack? = asset.tracks(withMediaType: .video)[0]
