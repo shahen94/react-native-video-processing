@@ -28,10 +28,11 @@ configurations.all {
 
 
 dependencies {
-  compile 'com.facebook.react:react-native:+'
-  compile 'com.yqritc:android-scalablevideoview:1.0.4'
-  compile 'com.googlecode.mp4parser:isoparser:1.1.20'
-  compile 'com.github.wseemann:FFmpegMediaMetadataRetriever:1.0.14'
+  implementation 'com.facebook.react:react-native:+'
+  implementation 'com.yqritc:android-scalablevideoview:1.0.4'
+  implementation 'com.googlecode.mp4parser:isoparser:1.1.20'
+  implementation 'com.github.wseemann:FFmpegMediaMetadataRetriever:1.0.14'
+  // implementation "com.google.android.gms:play-services-gcm:12.+"
 }
 
 allprojects {
