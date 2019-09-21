@@ -11,33 +11,67 @@ import GPUImage
 @objc(RNVideoPlayer)
 class RNVideoPlayer: RCTView {
     
-    let processingFilters: VideoProcessingGPUFilters = VideoProcessingGPUFilters()
-    
-    var playerVolume: NSNumber = 0
-    var player: AVPlayer! = nil
-    var playerLayer: AVPlayerLayer?
-    
-    var playerCurrentTimeObserver: Any! = nil
-    var playerItem: AVPlayerItem! = nil
-    var gpuMovie: GPUImageMovie! = nil
-    
-    var phantomGpuMovie: GPUImageMovie! = nil
-    var phantomFilterView: GPUImageView = GPUImageView()
-    
-    let filterView: GPUImageView = GPUImageView()
-    
-    var _playerHeight: CGFloat = UIScreen.main.bounds.width * 4 / 3
-    var _playerWidth: CGFloat = UIScreen.main.bounds.width
-    var _moviePathSource: NSString = ""
-    var _playerStartTime: CGFloat = 0
-    var _playerEndTime: CGFloat = 0
-    var _replay: Bool = false
-    var _rotate: Bool = false
-    var isInitialized = false
-    var _resizeMode = AVLayerVideoGravity.resizeAspect
-    var onChange: RCTBubblingEventBlock?
-    
-    let LOG_KEY: String = "VIDEO_PROCESSING"
+  let processingFilters: VideoProcessingGPUFilters = VideoProcessingGPUFilters()
+  
+  var playerVolume: NSNumber = 0
+  var player: AVPlayer! = nil
+  var playerLayer: AVPlayerLayer?
+  
+  var playerCurrentTimeObserver: Any! = nil
+  var playerItem: AVPlayerItem! = nil
+  var gpuMovie: GPUImageMovie! = nil
+  
+  var phantomGpuMovie: GPUImageMovie! = nil
+  var phantomFilterView: GPUImageView = GPUImageView()
+  
+  let filterView: GPUImageView = GPUImageView()
+  
+  var _playerHeight: CGFloat = UIScreen.main.bounds.width * 4 / 3
+  var _playerWidth: CGFloat = UIScreen.main.bounds.width
+  var _moviePathSource: NSString = ""
+  var _playerStartTime: CGFloat = 0
+  var _playerEndTime: CGFloat = 0
+  var _replay: Bool = false
+  var _rotate: Bool = false
+  var isInitialized = false
+  var _resizeMode = AVLayerVideoGravity.resizeAspect
+  @objc var onChange: RCTBubblingEventBlock?
+  
+  let LOG_KEY: String = "VIDEO_PROCESSING"
+  
+  @objc func setSource(_ val: NSString) {
+    source = val
+  }
+  @objc func setCurrentTime(_ val: NSNumber) {
+    currentTime = val
+  }
+  @objc func setStartTime(_ val: NSNumber) {
+    startTime = val
+  }
+  @objc func setEndTime(_ val: NSNumber) {
+    endTime = val
+  }
+  @objc func setPlayerWidth(_ val: NSNumber) {
+    playerWidth = val
+  }
+  @objc func setPlayerHeight(_ val: NSNumber) {
+    playerHeight = val
+  }
+  @objc func setPlay(_ val: NSNumber) {
+    play = val
+  }
+  @objc func setReplay(_ val: NSNumber) {
+    replay = val
+  }
+  @objc func setRotate(_ val: NSNumber) {
+    rotate = val
+  }
+  @objc func setVolume(_ val: NSNumber) {
+    volume = val
+  }
+  @objc func setResizeMode(_ val: NSString) {
+    resizeMode = val
+  }
     
     // props
     var playerHeight: NSNumber? {
