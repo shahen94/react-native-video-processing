@@ -23,7 +23,7 @@
  */
 package com.shahenlibrary.Trimmer;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 import android.util.Log;
 
 import com.facebook.react.bridge.ReadableArray;
@@ -82,6 +82,16 @@ public class TrimmerManager extends ReactContextBaseJavaModule {
     double sec = options.hasKey("second") ? options.getDouble("second") : 0;
     String format = options.hasKey("format") ? options.getString("format") : null;
     Trimmer.getPreviewImageAtPosition(source, sec, format, promise, reactContext);
+  }
+
+  @ReactMethod
+  public void getTrimmerPreviewImages(ReadableMap options, Promise promise) {
+    String source = options.getString("source");
+    double startTime = options.hasKey("startTime") ? options.getDouble("startTime") : 0;
+    double endTime = options.hasKey("endTime") ? options.getDouble("endTime") : 0;
+    int step = options.hasKey("step") ? options.getInt("step") : 0;
+    String format = options.hasKey("format") ? options.getString("format") : null;
+    Trimmer.getTrimmerPreviewImages(source, startTime, endTime, step, format, promise, reactContext);
   }
 
   @ReactMethod
