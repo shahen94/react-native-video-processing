@@ -6,55 +6,77 @@
 ```sh
 npm install react-native-video-processing --save
 ```
-### You can check test just running
+```sh
+yarn add react-native-video-processing
+```
+### You can check test by running
 `$ npm test` or `$ yarn test`
 
-### Manual installation
+### Installation
+**Note: For RN 0.4x use 1.0 version, for RN 0.3x use 0.16**
 
-**Note: For RN 0.4x use 1.0 version, For RN 0.3x use  0.16**
 #### [Android]
-1. Open up `android/app/src/main/java/[...]/MainApplication.java`
+- Open up `android/app/src/main/java/[...]/MainApplication.java`
 
-2. Add `import com.shahenlibrary.RNVideoProcessingPackage;` to the imports at the top of the file
+- Add `import com.shahenlibrary.RNVideoProcessingPackage;` to the imports at the top of the file
 
-3. Add new  `new RNVideoProcessingPackage()`  to the list returned by the getPackages() method
+- Add new  `new RNVideoProcessingPackage()`  to the list returned by the getPackages() method
 
-4. Append the following lines to `android/settings.gradle`:
+- Append the following lines to `android/settings.gradle`:
 ```
 include ':react-native-video-processing'
 project(':react-native-video-processing').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-video-processing/android')
 ```
 
-5. Insert the following lines inside the dependencies block in `android/app/build.gradle`:
+- Insert the following lines inside the dependencies block in `android/app/build.gradle`:
 ```
     compile project(':react-native-video-processing')
 ```
 
+- Add the following lines to `AndroidManifest.xml`:
+```
+   <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+   <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+```
+
 #### [iOS]
 
-1. In Xcode, click the "Add Files to <your-project-name>".
-2. Go to `node_modules` ➜ `react-native-video-processing/ios` and add `RNVideoProcessing` directory.
-3. Make sure `RNVideoProcessing` is "under" the "top-level".
-4. Add `GPUImage.xcodeproj` from `node_modules/react-native-video-processing/ios/GPUImage/framework` directory to your project and make sure it is "under" the "top-level":
+1. In Xcode, right click your Xcode project and create `New Group` called `RNVideoProcessing`.
 
-    ![Project Structure](readme_assets/project-structure.png)
+2. Go to `node_modules/react-native-video-processing/ios/RNVideoProcessing` and drag the `.swift` files under the group you just created. Press `Create folder references` option if not pressed.
 
-5. In XCode, in the project navigator, select your project.
+3. Repeat steps 1 & 2 for the subdirectories `RNVideoTrimmer`, `RNTrimmerView`, and `ICGVideoTrimmer` and all the files underneath them. Make sure you keep the folders hierarchy the same.
 
-   Add
-    - CoreMedia
-    - CoreVideo
-    - OpenGLES
-    - AVFoundation
-    - QuartzCore
-    - GPUImage
-    - MobileCoreServices
+4. Go to `node_modules/react-native-video-processing/ios/GPUImage/framework` and drag `GPUImage.xcodeproj` to your project's root directory in Xcode.
 
-    to your project's `Build Phases` ➜ `Link Binary With Libraries`.
-6. Import `RNVideoProcessing.h` into your `project_name-bridging-header.h`.
-7. Clean and Run your project.
+   ![Project Structure](readme_assets/project-structure.png)
 
-## Usage
+5. Under your project's `Build Phases`, make sure the `.swift` files you added appear under `Compile Sources`.
+
+6. Under your project's `General` tab, add the following frameworks to  `Linked Frameworks and Libraries` :
+  
+  - CoreMedia
+  - CoreVideo
+  - OpenGLES
+  - AVFoundation
+  - QuartzCore
+  - MobileCoreServices
+  - GPUImage
+
+7. Add `GPUImage.frameworkiOS` to `Embedded Binaries`.
+
+8. Navigate to your project's bridging header file  *<ProjectName-Bridging-Header.h>* and add `#import RNVideoProcessing.h`.
+
+9.  Clean and run your project.
+
+*Check the following video for more setup reference.*
+
+[![Setup](https://img.youtube.com/vi/HRjgeT6NQJM/0.jpg)](https://youtu.be/HRjgeT6NQJM)
+
+
+
+## Example Usage
+
 ```javascript
 import React, { Component } from 'react';
 import { View } from 'react-native';
@@ -135,7 +157,7 @@ class App extends Component {
     }
 }
 ```
-or you can use ProcessingManager without mounting VideoPlayer component
+Or you can use `ProcessingManager` without mounting `VideoPlayer` component:
 ```javascript
 import React, { Component } from 'react';
 import { View } from 'react-native';
@@ -167,19 +189,6 @@ export class App extends Component {
   }
 }
 ```
-
-### How to setup Library
-[![Setup](https://img.youtube.com/vi/HRjgeT6NQJM/0.jpg)](https://youtu.be/HRjgeT6NQJM)
-
-For Android:
-
-add these lines
-```
-<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
-```
-
-to your AndroidManifest.xml
 
 ##
 If this project was helpful to you, please <html>
