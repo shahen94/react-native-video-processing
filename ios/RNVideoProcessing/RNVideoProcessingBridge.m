@@ -23,5 +23,6 @@ RCT_EXPORT_VIEW_PROPERTY(rotate, NSNumber)
 RCT_EXPORT_VIEW_PROPERTY(volume, NSNumber)
 RCT_EXPORT_VIEW_PROPERTY(resizeMode, NSString)
 RCT_EXPORT_VIEW_PROPERTY(onChange, RCTBubblingEventBlock)
+RCT_EXPORT_VIEW_PROPERTY(cameraType, NSString)
 
 @end
