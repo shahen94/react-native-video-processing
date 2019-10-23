@@ -64,8 +64,8 @@ import java.io.InputStream;
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import android.os.AsyncTask;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import java.security.NoSuchAlgorithmException;
 import java.security.MessageDigest;
@@ -387,11 +387,13 @@ public class Trimmer {
     cmd.add("-preset");
     cmd.add("ultrafast");
     // NOTE: DO NOT CONVERT AUDIO TO SAVE TIME
+    cmd.add("-c:v");
+    cmd.add("copy");
     cmd.add("-c:a");
     cmd.add("copy");
     // NOTE: FLAG TO CONVER "AAC" AUDIO CODEC
-    cmd.add("-strict");
-    cmd.add("-2");
+    // cmd.add("-strict");
+    // cmd.add("-2");
     // NOTE: OUTPUT FILE
     cmd.add(tempFile.getPath());
 
@@ -601,6 +603,64 @@ public class Trimmer {
     }
 
     promise.resolve(event);
+  }
+
+  static void getTrimmerPreviewImages(String source, double startTime, double endTime, int step, String format, final Promise promise, ReactApplicationContext ctx) {
+    FFmpegMediaMetadataRetriever retriever = new FFmpegMediaMetadataRetriever();
+    try {
+      FFmpegMediaMetadataRetriever.IN_PREFERRED_CONFIG = Bitmap.Config.ARGB_8888;
+      retriever.setDataSource(source);
+
+      WritableArray images = Arguments.createArray();
+      int duration = Integer.parseInt(retriever.extractMetadata(FFmpegMediaMetadataRetriever.METADATA_KEY_DURATION));
+      int width = Integer.parseInt(retriever.extractMetadata(FFmpegMediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH));
+      int height = Integer.parseInt(retriever.extractMetadata(FFmpegMediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT));
+      int orientation = Integer.parseInt(retriever.extractMetadata(FFmpegMediaMetadataRetriever.METADATA_KEY_VIDEO_ROTATION));
+
+      float aspectRatio = (float)width / (float)height;
+
+      int resizeHeight = 100;
+      int resizeWidth = Math.round(resizeHeight * aspectRatio);
+
+      float scaleWidth = ((float) resizeWidth) / width;
+      float scaleHeight = ((float) resizeHeight) / height;
+
+      Log.d(TrimmerManager.REACT_PACKAGE, "getPreviewImages: \n\tduration: " + duration +
+              "\n\twidth: " + width +
+              "\n\theight: " + height +
+              "\n\torientation: " + orientation +
+              "\n\taspectRatio: " + aspectRatio +
+              "\n\tresizeWidth: " + resizeWidth +
+              "\n\tresizeHeight: " + resizeHeight
+      );
+
+      Matrix mx = new Matrix();
+
+      mx.postScale(scaleWidth, scaleHeight);
+      mx.postRotate(orientation - 360);
+
+      for (int i = (int) startTime; i < (int) endTime; i += step ) {
+        Bitmap frame = retriever.getScaledFrameAtTime((long) i * 1000000, resizeWidth, resizeHeight);
+
+        if (frame == null) {
+          continue;
+        }
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        frame.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream);
+        byte[] byteArray = byteArrayOutputStream.toByteArray();
+        String encoded = Base64.encodeToString(byteArray, Base64.DEFAULT);
+        images.pushString(encoded);
+      }
+
+
+      WritableMap event = Arguments.createMap();
+
+      event.putArray("images", images);
+
+      promise.resolve(event);
+    } finally {
+      retriever.release();
+    }
   }
 
   private static BufferedReader getOutputFromProcess(Process p) {

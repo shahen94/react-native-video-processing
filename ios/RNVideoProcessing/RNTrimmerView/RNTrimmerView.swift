@@ -9,19 +9,53 @@ import AVKit
 @objc(RNTrimmerView)
 class RNTrimmerView: RCTView, ICGVideoTrimmerDelegate {
     
-    var trimmerView: ICGVideoTrimmerView?
-    var asset: AVAsset!
-    var rect: CGRect = CGRect.zero
-    var mThemeColor = UIColor.clear
-    var bridge: RCTBridge!
-    var onChange: RCTBubblingEventBlock?
-    var onTrackerMove: RCTBubblingEventBlock?
-    var _minLength: CGFloat? = nil
-    var _maxLength: CGFloat? = nil
-    var _thumbWidth: CGFloat? = nil
-    var _trackerColor: UIColor = UIColor.clear
-    var _trackerHandleColor: UIColor = UIColor.clear
-    var _showTrackerHandle = false
+  var trimmerView: ICGVideoTrimmerView?
+  var asset: AVAsset!
+  var rect: CGRect = CGRect.zero
+  var mThemeColor = UIColor.clear
+  var bridge: RCTBridge!
+  @objc var onChange: RCTBubblingEventBlock?
+  @objc var onTrackerMove: RCTBubblingEventBlock?
+  var _minLength: CGFloat? = nil
+  var _maxLength: CGFloat? = nil
+  var _thumbWidth: CGFloat? = nil
+  var _trackerColor: UIColor = UIColor.clear
+  var _trackerHandleColor: UIColor = UIColor.clear
+  var _showTrackerHandle = false
+  
+  @objc func setSource(_ val: NSString) {
+    source = val
+  }
+  @objc func setWidth(_ val: NSNumber) {
+    width = val
+  }
+  @objc func setHeight(_ val: NSNumber) {
+    height = val
+  }
+  @objc func setThemeColor(_ val: NSString) {
+    themeColor = val
+  }
+  @objc func setMinLength(_ val: NSNumber) {
+    minLength = val
+  }
+  @objc func setMaxLength(_ val: NSNumber) {
+    maxLength = val
+  }
+  @objc func setCurrentTime(_ val: NSNumber) {
+    currentTime = val
+  }
+  @objc func setTrackerColor(_ val: NSString) {
+    trackerColor = val
+  }
+  @objc func setThumbWidth(_ val: NSNumber) {
+    thumbWidth = val
+  }
+  @objc func setShowTrackerHandle(_ val: NSNumber) {
+    showTrackerHandle = val
+  }
+  @objc func setTrackerHandleColor(_ val: NSString) {
+    trackerHandleColor = val
+  }
     
     var source: NSString? {
         set {
