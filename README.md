@@ -73,7 +73,16 @@ project(':react-native-video-processing').projectDir = new File(rootProject.proj
 
 [![Setup](https://img.youtube.com/vi/HRjgeT6NQJM/0.jpg)](https://youtu.be/HRjgeT6NQJM)
 
-
+## Update ffmpeg binaries
+1. Clone [mobile-ffmpeg](https://github.com/tanersener/mobile-ffmpeg)
+2. Setup project, see [Prerequisites](https://github.com/tanersener/mobile-ffmpeg#51-prerequisites) in README.
+3. Modify `build/android-ffmpeg.sh` so it generates binaries ([more info](https://github.com/tanersener/mobile-ffmpeg/issues/30#issuecomment-425964213))
+    1. Delete --disable-programs line
+    2. Change --disable-static line to --enable-static
+    3. Delete --enable-shared line
+4. Compile binaries: `./android.sh --lts --disable-arm-v7a-neon --enable-x264 --enable-gpl --speed`. The command might finish with `failed`. That's okay because we modified the build script. Make sure every build outputs: `ffmpeg: ok`.
+5. Find `ffmpeg` binaries in `prebuilt/[android-arm|android-arm64|android-x86|android-x86_64]/ffmpeg/bin/ffmpeg`
+6. Copy and rename binaries to `android/src/main/jniLibs/[armeabi-v7a|arm64-v8a|x86|x86_64]/libffmpeg.so`. Make sure you rename the binaries from `ffmpeg` to `libffmpeg.so`!
 
 ## Example Usage
 
@@ -194,8 +203,6 @@ export class App extends Component {
 If this project was helpful to you, please <html>
  <a href="https://www.buymeacoffee.com/FnENSxi" target="_blank"><img src="https://bmc-cdn.nyc3.digitaloceanspaces.com/BMC-button-images/custom_images/yellow_img.png" alt="Buy Me A Coffee" style="height: auto !important;width: auto !important;" ></a>
  </html>
-
-
 
 ## Contributing
 
