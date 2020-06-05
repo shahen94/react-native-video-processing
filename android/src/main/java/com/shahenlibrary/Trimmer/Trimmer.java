@@ -75,10 +75,8 @@ import java.util.Formatter;
 public class Trimmer {
 
   private static final String LOG_TAG = "RNTrimmerManager";
-  private static final String FFMPEG_FILE_NAME = "ffmpeg";
-  private static final String FFMPEG_SHA1 = "77ae380db4bf56d011eca9ef9f20d397c0467aec";
+  private static final String FFMPEG_FILE_NAME = "libffmpeg.so";
 
-  private static boolean ffmpegLoaded = false;
   private static final int DEFAULT_BUFFER_SIZE = 4096;
   private static final int END_OF_FILE = -1;
 
@@ -174,76 +172,6 @@ public class Trimmer {
     }
 
   }
-
-
-  private static class LoadFfmpegAsyncTaskParams {
-    Context ctx;
-
-    LoadFfmpegAsyncTaskParams(Context ctx) {
-      this.ctx = ctx;
-    }
-  }
-
-  private static class LoadFfmpegAsyncTask extends AsyncTask<LoadFfmpegAsyncTaskParams, Void, Void> {
-
-    @Override
-    protected Void doInBackground(LoadFfmpegAsyncTaskParams... params) {
-      Context ctx = params[0].ctx;
-
-      // NOTE: 1. COPY "ffmpeg" FROM ASSETS TO /data/data/com.myapp...
-      String filesDir = getFilesDirAbsolutePath(ctx);
-
-      // TODO: MAKE SURE THAT WHEN WE UPDATE FFMPEG AND USER UPDATES APP IT WILL LOAD NEW FFMPEG (IT MUST OVERWRITE OLD FFMPEG)
-      try {
-        File ffmpegFile = new File(filesDir, FFMPEG_FILE_NAME);
-        if ( !(ffmpegFile.exists() && getSha1FromFile(ffmpegFile).equalsIgnoreCase(FFMPEG_SHA1)) ) {
-          final FileOutputStream ffmpegStreamToDataDir = new FileOutputStream(ffmpegFile);
-          byte[] buffer = new byte[DEFAULT_BUFFER_SIZE];
-
-          int n;
-          InputStream ffmpegInAssets = ctx.getAssets().open("armeabi-v7a" + File.separator + FFMPEG_FILE_NAME);
-          while(END_OF_FILE != (n = ffmpegInAssets.read(buffer))) {
-            ffmpegStreamToDataDir.write(buffer, 0, n);
-          }
-
-          ffmpegStreamToDataDir.flush();
-          ffmpegStreamToDataDir.close();
-
-          ffmpegInAssets.close();
-        }
-      } catch (IOException e) {
-        Log.d(LOG_TAG, "Failed to copy ffmpeg" + e.toString());
-        ffmpegLoaded = false;
-        return null;
-      }
-
-      String ffmpegInDir = getFfmpegAbsolutePath(ctx);
-
-      // NOTE: 2. MAKE "ffmpeg" EXECUTABLE
-      String[] cmdlineChmod = { "chmod", "700", ffmpegInDir };
-      // TODO: 1. CHECK PERMISSIONS
-      Process pChmod = null;
-      try {
-        pChmod = Runtime.getRuntime().exec(cmdlineChmod);
-      } catch (IOException e) {
-        Log.d(LOG_TAG, "Failed to make ffmpeg executable. Error in execution cmd. " + e.toString());
-        ffmpegLoaded = false;
-        return null;
-      }
-
-      try {
-        pChmod.waitFor();
-      } catch (InterruptedException e) {
-        Log.d(LOG_TAG, "Failed to make ffmpeg executable. Error in wait cmd. " + e.toString());
-        ffmpegLoaded = false;
-        return null;
-      }
-
-      ffmpegLoaded = true;
-      return null;
-    }
-  }
-
 
   public static void getPreviewImages(String path, Promise promise, ReactApplicationContext ctx) {
     FFmpegMediaMetadataRetriever retriever = new FFmpegMediaMetadataRetriever();
@@ -840,12 +768,9 @@ public class Trimmer {
     return null;
   }
 
-  private static String getFilesDirAbsolutePath(Context ctx) {
-    return ctx.getFilesDir().getAbsolutePath();
-  }
-
   private static String getFfmpegAbsolutePath(Context ctx) {
-    return getFilesDirAbsolutePath(ctx) + File.separator + FFMPEG_FILE_NAME;
+    File folder = new File(ctx.getApplicationInfo().nativeLibraryDir);
+    return new File(folder, FFMPEG_FILE_NAME).getAbsolutePath();
   }
 
   public static String getSha1FromFile(final File file) {
@@ -876,16 +801,5 @@ public class Trimmer {
       }
       return f.toString();
     }
-  }
-
-  public static void loadFfmpeg(ReactApplicationContext ctx) {
-    LoadFfmpegAsyncTaskParams loadFfmpegAsyncTaskParams = new LoadFfmpegAsyncTaskParams(ctx);
-
-    LoadFfmpegAsyncTask loadFfmpegAsyncTask = new LoadFfmpegAsyncTask();
-    loadFfmpegAsyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, loadFfmpegAsyncTaskParams);
-
-    // TODO: EXPOSE TO JS "isFfmpegLoaded" AND "isFfmpegLoading"
-
-    return;
   }
 }
