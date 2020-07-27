@@ -218,6 +218,31 @@ class RNVideoTrimmer: NSObject {
         let timeRange = CMTimeRange(start: startTime, end: endTime)
 
         let composition = AVMutableComposition()
+        let track = composition.addMutableTrack(withMediaType: .video, preferredTrackID: Int32(kCMPersistentTrackID_Invalid))
+        let videoOrientation = self.getVideoOrientationFromAsset(asset: asset)
+
+        if ( videoOrientation == .up  ) {
+          var transforms: CGAffineTransform?
+          transforms = track?.preferredTransform
+          transforms = CGAffineTransform(rotationAngle: 0)
+          transforms = transforms?.concatenating(CGAffineTransform(rotationAngle: CGFloat(90.0 * .pi / 180)))
+          track?.preferredTransform = transforms!
+        }
+        else if ( videoOrientation == .down ) {
+          var transforms: CGAffineTransform?
+          transforms = track?.preferredTransform
+          transforms = CGAffineTransform(rotationAngle: 0)
+          transforms = transforms?.concatenating(CGAffineTransform(rotationAngle: CGFloat(270.0 * .pi / 180)))
+          track?.preferredTransform = transforms!
+        }
+        else if ( videoOrientation == .left ) {
+          var transforms: CGAffineTransform?
+          transforms = track?.preferredTransform
+          transforms = CGAffineTransform(rotationAngle: 0)
+          transforms = transforms?.concatenating(CGAffineTransform(rotationAngle: CGFloat(180.0 * .pi / 180)))
+          track?.preferredTransform = transforms!
+        }
+
         do {
           try composition.insertTimeRange(timeRange, of: asset, at: CMTime.zero)
         } catch {
