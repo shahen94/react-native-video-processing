@@ -65,7 +65,7 @@ project(':react-native-video-processing').projectDir = new File(rootProject.proj
 
 7. Add `GPUImage.frameworkiOS` to `Embedded Binaries`.
 
-8. Navigate to your project's bridging header file  *<ProjectName-Bridging-Header.h>* and add `#import RNVideoProcessing.h`.
+8. Navigate to your project's bridging header file  *<ProjectName-Bridging-Header.h>* and add `#import "RNVideoProcessing.h"`.
 
 9.  Clean and run your project.
 
