@@ -288,7 +288,7 @@ class RNVideoTrimmer: NSObject {
 
 
 
-        exportSession.timeRange = timeRange
+       // exportSession.timeRange = timeRange
         exportSession.exportAsynchronously{
             switch exportSession.status {
             case .completed:
@@ -391,7 +391,7 @@ class RNVideoTrimmer: NSObject {
       let endTime = CMTime(seconds: mixComposition.duration.seconds, preferredTimescale: 1000)
       let timeRange = CMTimeRange(start: startTime, end: endTime)
 
-      exportSession.timeRange = timeRange
+     // exportSession.timeRange = timeRange
 
       exportSession.exportAsynchronously{
         switch exportSession.status {
