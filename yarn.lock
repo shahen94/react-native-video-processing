@@ -7093,8 +7093,8 @@ normalize-path@^2.1.1:
     remove-trailing-separator "^1.0.1"
 
 normalize-url@^5.0.0:
-  version "5.3.0"
-  resolved "https://registry.yarnpkg.com/normalize-url/-/normalize-url-5.3.0.tgz#8959b3cdaa295b61592c1f245dded34b117618dd"
+  version "5.3.1"
+  resolved "https://registry.yarnpkg.com/normalize-url/-/normalize-url-5.3.1.tgz#c8485c0f5ba2f9c17a6d2907b56117ae5967f882"
 
 npm-audit-report@^1.3.3:
   version "1.3.3"
