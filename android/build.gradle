@@ -29,7 +29,7 @@ configurations.all {
 
 dependencies {
   implementation 'com.facebook.react:react-native:+'
-  implementation 'com.yqritc:android-scalablevideoview:1.0.4'
+  implementation 'com.github.Kobidl:Android-ScalableVideoView:v1.0.4-rc1'
   implementation 'com.googlecode.mp4parser:isoparser:1.1.20'
   implementation 'com.github.wseemann:FFmpegMediaMetadataRetriever:1.0.14'
   // implementation "com.google.android.gms:play-services-gcm:12.+"
@@ -38,6 +38,7 @@ dependencies {
 allprojects {
   repositories {
     mavenLocal()
-    jcenter()
+    mavenCentral()
+    maven { url 'https://jitpack.io' }
   }
 }
